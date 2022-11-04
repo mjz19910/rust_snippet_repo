@@ -1033,42 +1033,42 @@ fn execute_code(runtime: &mut Runtime, clazz: &ParsedClass, code: &[u8]) {
         if let Opcode::invokevirtual = opcode {
             let index = parse_u2_vec(&mut index, &code);
             let methodref = clazz.cp_as_ref(index);
-            if let &ConstantInfo::MethodRef {
+            let &ConstantInfo::MethodRef {
                 class_index,
                 name_and_type_index,
-            } = methodref
-            {
-                let name_of_class = get_name_of_class(clazz, class_index);
-                let name_of_member = get_name_of_member(clazz, name_and_type_index);
-                if name_of_class == "java/io/PrintStream" && name_of_member == "println" {
-                    let n = stack.len();
-                    if stack.len() < 2 {
-                        panic!("RuntimeError({name_of_class}/{name_of_member} expects 2 arguments, but provided {n})");
-                    }
-                    let obj = &stack[stack.len() - 2];
-                    let dsc = mem::discriminant(obj);
-                    if mem::discriminant(&JavaValue::FakePrintStream) != dsc {
-                        panic!("Unsupported stream type {dsc:?}");
-                    };
-                    let arg = stack[stack.len() - 1].clone();
-                    if let JavaValue::String { value } = arg {
-                        println!("{}", value);
-                    } else if let JavaValue::Integer { value } = arg {
-                        println!("{}", value);
-                    } else if let JavaValue::Double { value } = arg {
-                        println!("{:?}", value);
-                    } else if let JavaValue::Float { value } = arg {
-                        println!("{:?}", value);
-                    } else if let JavaValue::Long { value } = arg {
-                        println!("{}", value);
-                    } else {
-                        panic!("Support for {arg:?} is not implemented");
-                    }
+            } = methodref else {
+                panic!();
+            };
+            let name_of_class = get_name_of_class(clazz, class_index);
+            let name_of_member = get_name_of_member(clazz, name_and_type_index);
+            if name_of_class == "java/io/PrintStream" && name_of_member == "println" {
+                let n = stack.len();
+                if stack.len() < 2 {
+                    panic!("RuntimeError({name_of_class}/{name_of_member} expects 2 arguments, but provided {n})");
+                }
+                let obj = &stack[stack.len() - 2];
+                let dsc = mem::discriminant(obj);
+                if mem::discriminant(&JavaValue::FakePrintStream) != dsc {
+                    panic!("Unsupported stream type {dsc:?}");
+                };
+                let arg = stack[stack.len() - 1].clone();
+                if let JavaValue::String { value } = arg {
+                    println!("{}", value);
+                } else if let JavaValue::Integer { value } = arg {
+                    println!("{}", value);
+                } else if let JavaValue::Double { value } = arg {
+                    println!("{:?}", value);
+                } else if let JavaValue::Float { value } = arg {
+                    println!("{:?}", value);
+                } else if let JavaValue::Long { value } = arg {
+                    println!("{}", value);
                 } else {
-                    panic!("Unknown method {name_of_class}/{name_of_member} in invokevirtual instruction");
+                    panic!("Support for {arg:?} is not implemented");
                 }
             } else {
-                panic!()
+                panic!(
+                    "Unknown method {name_of_class}/{name_of_member} in invokevirtual instruction"
+                );
             }
         } else if let Opcode::getstatic = opcode {
             let index = parse_u2_vec(&mut index, &code);
@@ -1171,28 +1171,27 @@ fn execute_code(runtime: &mut Runtime, clazz: &ParsedClass, code: &[u8]) {
         } else if let Opcode::invokespecial = opcode {
             let pool_index = parse_u2_vec(&mut index, &code);
             let pool_item = clazz.cp_as_ref(pool_index);
-            if let &ConstantInfo::MethodRef {
+            let &ConstantInfo::MethodRef {
                 class_index,
                 name_and_type_index,
-            } = pool_item
-            {
-                if let Some((x, y)) = None::<(u16, u16)> {
-                    println!(
-                        "invokespecial: MethodRef {{ class: {:?}, name_and_type: {:?} }}",
-                        ConstantPrint::new(clazz, x).class().unwrap(),
-                        ConstantPrint::new(clazz, y).name_and_type().unwrap()
-                    );
-                }
-                let name_of_class = get_name_of_class(clazz, class_index);
-                let name_of_member = get_name_of_member(clazz, name_and_type_index);
-                if name_of_class == "java/lang/Object" && name_of_member == "<init>" {
-                    // Skip <init> for java/lang/Object
-                    continue;
-                } else {
-                    panic!("Unsupported member {name_of_class}/{name_of_member} in invokespecial instruction");
-                }
+            } = pool_item else {
+                panic!();
+            };
+            if let Some((x, y)) = None::<(u16, u16)> {
+                println!(
+                    "invokespecial: MethodRef {{ class: {:?}, name_and_type: {:?} }}",
+                    ConstantPrint::new(clazz, x).class().unwrap(),
+                    ConstantPrint::new(clazz, y).name_and_type().unwrap()
+                );
             }
-            panic!();
+            let name_of_class = get_name_of_class(clazz, class_index);
+            let name_of_member = get_name_of_member(clazz, name_and_type_index);
+            if name_of_class == "java/lang/Object" && name_of_member == "<init>" {
+                // Skip <init> for java/lang/Object
+                continue;
+            } else {
+                panic!("Unsupported member {name_of_class}/{name_of_member} in invokespecial instruction");
+            }
         } else {
             panic!("Unknown opcode {:?}", opcode);
         }
