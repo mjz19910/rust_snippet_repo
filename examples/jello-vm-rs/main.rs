@@ -1003,10 +1003,10 @@ pub enum Opcode {
 
 fn get_cp_string(clazz: &ParsedClass, string_index: u16) -> String {
     let pool_item = clazz.cp(string_index);
-    let Some(ConstantInfo::Utf8 { value: bytes }) = pool_item else {
+    let Some(ConstantInfo::Utf8 { value }) = pool_item else {
         panic!("get_pool_string not utf8");
     };
-    return bytes.into();
+    return value.into();
 }
 
 struct Runtime {
