@@ -515,10 +515,10 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> ConstantInfo {
                 (bits & 0x7fffff) | 0x800000
             };
             let mantissa: f32 = FromPrimitive::from_u32(mantissa).unwrap();
-            let pow2 = 2.0_f64.powf((exponent - 150).into());
-            let pow2: f32 = FromPrimitive::from_f64(pow2).unwrap();
+            let exponent = 2.0_f64.powf((exponent - 150).into());
+            let exponent: f32 = FromPrimitive::from_f64(exponent).unwrap();
             ConstantInfo::Float {
-                value: sign * mantissa * pow2,
+                value: sign * mantissa * exponent,
             }
         }
         Constant::Long => {
