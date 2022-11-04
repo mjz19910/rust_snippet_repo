@@ -5,5 +5,8 @@ public class print_double {
 		System.out.println(0d);
 		System.out.println(1d);
 		System.out.println(2d);
+		System.out.println(3d);
+		System.out.println(16d);
+		System.out.println(100d);
 	}
 }
