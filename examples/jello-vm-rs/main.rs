@@ -1020,8 +1020,184 @@ struct Runtime {
     stack: Vec<JavaValue>,
 }
 
-fn execute_code(runtime: &mut Runtime, clazz: &ParsedClass, code: &[u8]) {
+fn execute_instruction(
+    runtime: &mut Runtime,
+    opcode: &Opcode,
+    index: &mut usize,
+    code: &[u8],
+    clazz: &ParsedClass,
+) {
     let stack = &mut runtime.stack;
+    if let Opcode::invokevirtual = opcode {
+        let index = parse_u2_vec(index, code);
+        let methodref = clazz.cp_as_ref(index);
+        let &ConstantInfo::MethodRef {
+            class_index,
+            name_and_type_index,
+        } = methodref else {
+            panic!();
+        };
+        let name_of_class = get_name_of_class(clazz, class_index);
+        let name_of_member = get_name_of_member(clazz, name_and_type_index);
+        if name_of_class == "java/io/PrintStream" && name_of_member == "println" {
+            let n = stack.len();
+            if stack.len() < 2 {
+                panic!("RuntimeError({name_of_class}/{name_of_member} expects 2 arguments, but provided {n})");
+            }
+            let obj = &stack[stack.len() - 2];
+            let dsc = mem::discriminant(obj);
+            if mem::discriminant(&JavaValue::FakePrintStream) != dsc {
+                panic!("Unsupported stream type {dsc:?}");
+            };
+            let arg = stack[stack.len() - 1].clone();
+            if let JavaValue::String { value } = arg {
+                println!("{}", value);
+            } else if let JavaValue::Integer { value } = arg {
+                println!("{}", value);
+            } else if let JavaValue::Double { value } = arg {
+                println!("{:?}", value);
+            } else if let JavaValue::Float { value } = arg {
+                println!("{:?}", value);
+            } else if let JavaValue::Long { value } = arg {
+                println!("{}", value);
+            } else {
+                panic!("Support for {arg:?} is not implemented");
+            }
+        } else {
+            panic!("Unknown method {name_of_class}/{name_of_member} in invokevirtual instruction");
+        }
+    } else if let Opcode::getstatic = opcode {
+        let index = parse_u2_vec(index, &code);
+        let fieldref = clazz.cp_as_ref(index);
+        if let &ConstantInfo::FieldRef {
+            class_index,
+            name_and_type_index,
+        } = fieldref
+        {
+            let name_of_class = get_name_of_class(clazz, class_index);
+            let name_of_member = get_name_of_member(clazz, name_and_type_index);
+            if name_of_class == "java/lang/System" && name_of_member == "out" {
+                stack.push(JavaValue::FakePrintStream);
+                return;
+            } else {
+                panic!(
+                    "Unsupported member {name_of_class}/{name_of_member} in getstatic instruction"
+                );
+            }
+        }
+        panic!();
+    } else if let Opcode::ldc = opcode {
+        let index = parse_u1_vec(index, &code);
+        let pool_item = clazz.cp_as_ref(index.into());
+        let value = if let &ConstantInfo::String { string_index } = pool_item {
+            let string_index = string_index.into();
+            let value = get_cp_string(clazz, string_index);
+            JavaValue::String { value }
+        } else if let &ConstantInfo::Float { bytes } = pool_item {
+            JavaValue::Float { value: bytes }
+        } else if let &ConstantInfo::Integer { bytes } = pool_item {
+            JavaValue::Integer { value: bytes }
+        } else {
+            panic!("ldc: value={:?}", pool_item);
+        };
+        stack.push(value);
+    } else if let Opcode::ldc2_w = opcode {
+        let pool_index = parse_u2_vec(index, &code);
+        let pool_item = clazz.cp_as_ref(pool_index);
+        if let &ConstantInfo::Double { value } = pool_item {
+            stack.push(JavaValue::Double { value });
+        } else if let &ConstantInfo::Long { value } = pool_item {
+            stack.push(JavaValue::Long { value });
+        } else {
+            panic!("ldc2_w: value={:?}", pool_item);
+        }
+    } else
+    // int push
+    if let Opcode::bipush = opcode {
+        let byte = parse_u1_vec(index, &code);
+        stack.push(JavaValue::Integer { value: byte.into() });
+    } else
+    // double
+    if let Opcode::dconst_0 = opcode {
+        stack.push(JavaValue::Double { value: 0.0 });
+    } else if let Opcode::dconst_1 = opcode {
+        stack.push(JavaValue::Double { value: 1.0 });
+    } else
+    // float
+    if let Opcode::fconst_0 = opcode {
+        stack.push(JavaValue::Float { value: 0.0 });
+    } else if let Opcode::fconst_1 = opcode {
+        stack.push(JavaValue::Float { value: 1.0 });
+    } else if let Opcode::fconst_2 = opcode {
+        stack.push(JavaValue::Float { value: 2.0 });
+    } else
+    // Return
+    if let Opcode::return_ = opcode {
+        return;
+    } else
+    // int
+    if let Opcode::iconst_m1 = opcode {
+        stack.push(JavaValue::Integer { value: -1 });
+    } else if let Opcode::iconst_0 = opcode {
+        stack.push(JavaValue::Integer { value: 0 });
+    } else if let Opcode::iconst_1 = opcode {
+        stack.push(JavaValue::Integer { value: 1 });
+    } else if let Opcode::iconst_2 = opcode {
+        stack.push(JavaValue::Integer { value: 2 });
+    } else if let Opcode::iconst_3 = opcode {
+        stack.push(JavaValue::Integer { value: 3 });
+    } else if let Opcode::iconst_4 = opcode {
+        stack.push(JavaValue::Integer { value: 4 });
+    } else if let Opcode::iconst_5 = opcode {
+        stack.push(JavaValue::Integer { value: 5 });
+    } else
+    // nop
+    if let Opcode::nop = opcode {
+    } else
+    // sipush
+    if let Opcode::sipush = opcode {
+        let byte = parse_u2_vec(index, &code) as i16;
+        stack.push(JavaValue::Integer { value: byte.into() });
+    } else
+    // long
+    if let Opcode::lconst_0 = opcode {
+        stack.push(JavaValue::Long { value: 0 });
+    } else if let Opcode::lconst_1 = opcode {
+        stack.push(JavaValue::Long { value: 1 });
+    } else if let Opcode::aload_0 = opcode {
+        stack.push(runtime.local_variable_array[0].clone());
+    } else if let Opcode::invokespecial = opcode {
+        let pool_index = parse_u2_vec(index, &code);
+        let pool_item = clazz.cp_as_ref(pool_index);
+        let &ConstantInfo::MethodRef {
+            class_index,
+            name_and_type_index,
+        } = pool_item else {
+            panic!();
+        };
+        if let Some((x, y)) = None::<(u16, u16)> {
+            println!(
+                "invokespecial: MethodRef {{ class: {:?}, name_and_type: {:?} }}",
+                ConstantPrint::new(clazz, x).class().unwrap(),
+                ConstantPrint::new(clazz, y).name_and_type().unwrap()
+            );
+        }
+        let name_of_class = get_name_of_class(clazz, class_index);
+        let name_of_member = get_name_of_member(clazz, name_and_type_index);
+        if name_of_class == "java/lang/Object" && name_of_member == "<init>" {
+            // Skip <init> for java/lang/Object
+            return;
+        } else {
+            panic!(
+                "Unsupported member {name_of_class}/{name_of_member} in invokespecial instruction"
+            );
+        }
+    } else {
+        panic!("Unknown opcode {:?}", opcode);
+    }
+}
+
+fn execute_code(runtime: &mut Runtime, clazz: &ParsedClass, code: &[u8]) {
     let mut index = 0;
     while index < code.len() {
         let raw_opcode = parse_u1_vec(&mut index, &code);
@@ -1030,171 +1206,7 @@ fn execute_code(runtime: &mut Runtime, clazz: &ParsedClass, code: &[u8]) {
             println!("opcode: {:?} = {:x}", opt_opcode, raw_opcode)
         };
         let opcode = opt_opcode.unwrap();
-        if let Opcode::invokevirtual = opcode {
-            let index = parse_u2_vec(&mut index, &code);
-            let methodref = clazz.cp_as_ref(index);
-            let &ConstantInfo::MethodRef {
-                class_index,
-                name_and_type_index,
-            } = methodref else {
-                panic!();
-            };
-            let name_of_class = get_name_of_class(clazz, class_index);
-            let name_of_member = get_name_of_member(clazz, name_and_type_index);
-            if name_of_class == "java/io/PrintStream" && name_of_member == "println" {
-                let n = stack.len();
-                if stack.len() < 2 {
-                    panic!("RuntimeError({name_of_class}/{name_of_member} expects 2 arguments, but provided {n})");
-                }
-                let obj = &stack[stack.len() - 2];
-                let dsc = mem::discriminant(obj);
-                if mem::discriminant(&JavaValue::FakePrintStream) != dsc {
-                    panic!("Unsupported stream type {dsc:?}");
-                };
-                let arg = stack[stack.len() - 1].clone();
-                if let JavaValue::String { value } = arg {
-                    println!("{}", value);
-                } else if let JavaValue::Integer { value } = arg {
-                    println!("{}", value);
-                } else if let JavaValue::Double { value } = arg {
-                    println!("{:?}", value);
-                } else if let JavaValue::Float { value } = arg {
-                    println!("{:?}", value);
-                } else if let JavaValue::Long { value } = arg {
-                    println!("{}", value);
-                } else {
-                    panic!("Support for {arg:?} is not implemented");
-                }
-            } else {
-                panic!(
-                    "Unknown method {name_of_class}/{name_of_member} in invokevirtual instruction"
-                );
-            }
-        } else if let Opcode::getstatic = opcode {
-            let index = parse_u2_vec(&mut index, &code);
-            let fieldref = clazz.cp_as_ref(index);
-            if let &ConstantInfo::FieldRef {
-                class_index,
-                name_and_type_index,
-            } = fieldref
-            {
-                let name_of_class = get_name_of_class(clazz, class_index);
-                let name_of_member = get_name_of_member(clazz, name_and_type_index);
-                if name_of_class == "java/lang/System" && name_of_member == "out" {
-                    stack.push(JavaValue::FakePrintStream);
-                    continue;
-                } else {
-                    panic!("Unsupported member {name_of_class}/{name_of_member} in getstatic instruction");
-                }
-            }
-            panic!();
-        } else if let Opcode::ldc = opcode {
-            let index = parse_u1_vec(&mut index, &code);
-            let pool_item = clazz.cp_as_ref(index.into());
-            let value = if let &ConstantInfo::String { string_index } = pool_item {
-                let string_index = string_index.into();
-                let value = get_cp_string(clazz, string_index);
-                JavaValue::String { value }
-            } else if let &ConstantInfo::Float { bytes } = pool_item {
-                JavaValue::Float { value: bytes }
-            } else if let &ConstantInfo::Integer { bytes } = pool_item {
-                JavaValue::Integer { value: bytes }
-            } else {
-                panic!("ldc: value={:?}", pool_item);
-            };
-            stack.push(value);
-        } else if let Opcode::ldc2_w = opcode {
-            let pool_index = parse_u2_vec(&mut index, &code);
-            let pool_item = clazz.cp_as_ref(pool_index);
-            if let &ConstantInfo::Double { value } = pool_item {
-                stack.push(JavaValue::Double { value });
-            } else if let &ConstantInfo::Long { value } = pool_item {
-                stack.push(JavaValue::Long { value });
-            } else {
-                panic!("ldc2_w: value={:?}", pool_item);
-            }
-        } else
-        // int push
-        if let Opcode::bipush = opcode {
-            let byte = parse_u1_vec(&mut index, &code);
-            stack.push(JavaValue::Integer { value: byte.into() });
-        } else
-        // double
-        if let Opcode::dconst_0 = opcode {
-            stack.push(JavaValue::Double { value: 0.0 });
-        } else if let Opcode::dconst_1 = opcode {
-            stack.push(JavaValue::Double { value: 1.0 });
-        } else
-        // float
-        if let Opcode::fconst_0 = opcode {
-            stack.push(JavaValue::Float { value: 0.0 });
-        } else if let Opcode::fconst_1 = opcode {
-            stack.push(JavaValue::Float { value: 1.0 });
-        } else if let Opcode::fconst_2 = opcode {
-            stack.push(JavaValue::Float { value: 2.0 });
-        } else
-        // Return
-        if let Opcode::return_ = opcode {
-            return;
-        } else
-        // int
-        if let Opcode::iconst_m1 = opcode {
-            stack.push(JavaValue::Integer { value: -1 });
-        } else if let Opcode::iconst_0 = opcode {
-            stack.push(JavaValue::Integer { value: 0 });
-        } else if let Opcode::iconst_1 = opcode {
-            stack.push(JavaValue::Integer { value: 1 });
-        } else if let Opcode::iconst_2 = opcode {
-            stack.push(JavaValue::Integer { value: 2 });
-        } else if let Opcode::iconst_3 = opcode {
-            stack.push(JavaValue::Integer { value: 3 });
-        } else if let Opcode::iconst_4 = opcode {
-            stack.push(JavaValue::Integer { value: 4 });
-        } else if let Opcode::iconst_5 = opcode {
-            stack.push(JavaValue::Integer { value: 5 });
-        } else
-        // nop
-        if let Opcode::nop = opcode {
-        } else
-        // sipush
-        if let Opcode::sipush = opcode {
-            let byte = parse_u2_vec(&mut index, &code) as i16;
-            stack.push(JavaValue::Integer { value: byte.into() });
-        } else
-        // long
-        if let Opcode::lconst_0 = opcode {
-            stack.push(JavaValue::Long { value: 0 });
-        } else if let Opcode::lconst_1 = opcode {
-            stack.push(JavaValue::Long { value: 1 });
-        } else if let Opcode::aload_0 = opcode {
-            stack.push(runtime.local_variable_array[0].clone());
-        } else if let Opcode::invokespecial = opcode {
-            let pool_index = parse_u2_vec(&mut index, &code);
-            let pool_item = clazz.cp_as_ref(pool_index);
-            let &ConstantInfo::MethodRef {
-                class_index,
-                name_and_type_index,
-            } = pool_item else {
-                panic!();
-            };
-            if let Some((x, y)) = None::<(u16, u16)> {
-                println!(
-                    "invokespecial: MethodRef {{ class: {:?}, name_and_type: {:?} }}",
-                    ConstantPrint::new(clazz, x).class().unwrap(),
-                    ConstantPrint::new(clazz, y).name_and_type().unwrap()
-                );
-            }
-            let name_of_class = get_name_of_class(clazz, class_index);
-            let name_of_member = get_name_of_member(clazz, name_and_type_index);
-            if name_of_class == "java/lang/Object" && name_of_member == "<init>" {
-                // Skip <init> for java/lang/Object
-                continue;
-            } else {
-                panic!("Unsupported member {name_of_class}/{name_of_member} in invokespecial instruction");
-            }
-        } else {
-            panic!("Unknown opcode {:?}", opcode);
-        }
+        execute_instruction(runtime, &opcode, &mut index, code, &clazz);
     }
 }
 
