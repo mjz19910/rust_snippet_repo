@@ -1020,6 +1020,22 @@ struct Runtime {
     stack: Vec<JavaValue>,
 }
 
+fn java_intrinsic_println_value(value: &JavaValue) {
+    if let JavaValue::String { value } = value {
+        println!("{}", value);
+    } else if let JavaValue::Integer { value } = value {
+        println!("{}", value);
+    } else if let JavaValue::Double { value } = value {
+        println!("{:?}", value);
+    } else if let JavaValue::Float { value } = value {
+        println!("{:?}", value);
+    } else if let JavaValue::Long { value } = value {
+        println!("{}", value);
+    } else {
+        panic!("intrinsic println not implemented for type {value:?}");
+    }
+}
+
 fn execute_instruction(
     runtime: &mut Runtime,
     opcode: &Opcode,
@@ -1051,20 +1067,7 @@ fn execute_instruction(
         if mem::discriminant(&JavaValue::FakePrintStream) != dsc {
             panic!("Unsupported stream type {dsc:?}");
         };
-        let arg = stack[stack.len() - 1].clone();
-        if let JavaValue::String { value } = arg {
-            println!("{}", value);
-        } else if let JavaValue::Integer { value } = arg {
-            println!("{}", value);
-        } else if let JavaValue::Double { value } = arg {
-            println!("{:?}", value);
-        } else if let JavaValue::Float { value } = arg {
-            println!("{:?}", value);
-        } else if let JavaValue::Long { value } = arg {
-            println!("{}", value);
-        } else {
-            panic!("Support for {arg:?} is not implemented");
-        }
+        java_intrinsic_println_value(&stack[stack.len() - 1]);
     } else if let Opcode::getstatic = opcode {
         let index = parse_u2_vec(index, &code);
         let fieldref = clazz.cp_as_ref(index);
