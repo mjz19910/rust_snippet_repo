@@ -1055,8 +1055,8 @@ fn execute_instruction(
         };
         let name_of_class = get_name_of_class(clazz, class_index);
         let name_of_member = get_name_of_member(clazz, name_and_type_index);
-        let false = (name_of_class == "java/io/PrintStream" && name_of_member == "println") else {
-            panic!("Unknown method {name_of_class}/{name_of_member} in invokevirtual instruction");
+        let true = (name_of_class == "java/io/PrintStream" && name_of_member == "println") else {
+            panic!("Unknown method {name_of_member} in class {name_of_class} in invokevirtual instruction");
         };
         let n = stack.len();
         if stack.len() < 2 {
