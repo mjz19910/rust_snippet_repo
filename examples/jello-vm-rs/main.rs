@@ -510,7 +510,7 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> ConstantInfo {
             let bytes = parse_u4_raw(f);
             let bits = bytes;
             let sign = if (bits >> 31) == 0 { 1.0 } else { -1.0 };
-            let exponent = ((bits >> 23) & 0xff).to_i16().unwrap();
+            let exponent = (bits >> 23) & 0xff;
             let mantissa = if exponent == 0 {
                 (bits & 0x7fffff) << 1
             } else {
