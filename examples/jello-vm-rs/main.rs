@@ -459,10 +459,10 @@ impl ParsedAttribute {
     }
 
     pub fn lookup(&self, clazz: &ParsedClass) -> AttributeDescription {
-        let attr_name = clazz.cp_clone(self.attribute_name_index);
-        if let ConstantInfo::Utf8 { bytes } = attr_name {
+        let attr_name = clazz.cp(self.attribute_name_index);
+        if let Some(ConstantInfo::Utf8 { bytes }) = attr_name {
             return AttributeDescription {
-                attribute_name: bytes,
+                attribute_name: bytes.into(),
                 info: self.info.clone(),
             };
         }
@@ -1006,9 +1006,9 @@ pub enum Opcode {
 }
 
 fn get_cp_string(clazz: &ParsedClass, string_index: u16) -> String {
-    let pool_item = clazz.cp_clone(string_index);
-    if let ConstantInfo::Utf8 { bytes } = pool_item {
-        return bytes;
+    let pool_item = clazz.cp(string_index);
+    if let Some(ConstantInfo::Utf8 { bytes }) = pool_item {
+        return bytes.into();
     }
     panic!("get_pool_string not utf8");
 }
@@ -1218,18 +1218,18 @@ pub enum ConstantPrint<'a> {
 
 impl<'a> ConstantPrint<'a> {
     fn new(class: &'a ParsedClass, name_and_type_index: u16) -> Self {
-        let pool_item = class.cp_clone(name_and_type_index);
+        let pool_item = class.cp(name_and_type_index).as_ref().unwrap();
         match pool_item {
             ConstantInfo::NameAndType {
                 name_index,
                 descriptor_index,
             } => {
-                let name = class.cp_as_ref(name_index).str();
-                let descriptor = class.cp_as_ref(descriptor_index).str();
+                let name = class.cp_as_ref(*name_index).str();
+                let descriptor = class.cp_as_ref(*descriptor_index).str();
                 ConstantPrint::NameAndType { name, descriptor }
             }
             ConstantInfo::Class { name_index } => {
-                let name = class.cp_as_ref(name_index).str();
+                let name = class.cp_as_ref(*name_index).str();
                 ConstantPrint::Class { name }
             }
             _ => {
@@ -1255,13 +1255,10 @@ impl<'a> ConstantPrint<'a> {
 }
 
 fn get_name_of_member(clazz: &ParsedClass, name_and_type_index: u16) -> String {
-    let pool_item = clazz.cp_clone(name_and_type_index);
-    if let ConstantInfo::NameAndType { name_index, .. } = pool_item {
-        if let ConstantInfo::Utf8 { bytes } = clazz.cp_clone(name_index) {
-            return bytes;
-        }
-    }
-    panic!();
+    let pool_item = clazz.cp(name_and_type_index);
+    let Some(ConstantInfo::NameAndType { name_index, .. }) = pool_item else {panic!();};
+    let Some(ConstantInfo::Utf8 { bytes }) = clazz.cp(*name_index) else {panic!();};
+    return bytes.into();
 }
 
 fn get_name_of_class(clazz: &ParsedClass, class_index: u16) -> String {
