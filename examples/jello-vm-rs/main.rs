@@ -457,28 +457,26 @@ impl ParsedAttribute {
             info,
         }
     }
-}
 
-#[derive(Debug)]
-pub struct JavaAttribute {
-    pub attribute_name: String,
-    pub info: Vec<u8>,
-}
-
-impl JavaAttribute {
-    pub fn lookup(clazz: &ParsedClass, attr: &ParsedAttribute) -> JavaAttribute {
-        let attr_name = clazz.cp_clone(attr.attribute_name_index);
+    pub fn lookup(&self, clazz: &ParsedClass) -> AttributeDescription {
+        let attr_name = clazz.cp_clone(self.attribute_name_index);
         if let ConstantInfo::Utf8 { bytes } = attr_name {
-            return JavaAttribute {
+            return AttributeDescription {
                 attribute_name: bytes,
-                info: attr.info.clone(),
+                info: self.info.clone(),
             };
         }
-        JavaAttribute {
+        AttributeDescription {
             attribute_name: "".into(),
             info: vec![],
         }
     }
+}
+
+#[derive(Debug)]
+pub struct AttributeDescription {
+    pub attribute_name: String,
+    pub info: Vec<u8>,
 }
 
 // attribute_info { .. }
@@ -680,7 +678,7 @@ fn main() {
     let code_attrib = get_code_attrib(&clazz, &main_overloads[0].attributes);
     if program.lookup_attr {
         let attributes = &code_attrib.attributes;
-        let attr = JavaAttribute::lookup(&clazz, &attributes[0]);
+        let attr = attributes[0].lookup(&clazz);
         println!("{:?}", attr);
     }
     execute_code(&mut runtime, &clazz, &code_attrib.code);
