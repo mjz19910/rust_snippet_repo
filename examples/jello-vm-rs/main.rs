@@ -588,7 +588,7 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> ConstantInfo {
 }
 
 struct Program {
-    print_mode: bool,
+    print_debug_info: bool,
     is_verbose: bool,
     print_overloads: bool,
     lookup_attr: bool,
@@ -598,7 +598,7 @@ struct Program {
 fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<ConstantInfo>> {
     let cp_count = usize::from(parse_u2_raw(f));
     let mut ret: Vec<Option<ConstantInfo>> = vec![];
-    let is_printing_verbose = program.print_mode && program.is_verbose;
+    let is_printing_verbose = program.print_debug_info && program.is_verbose;
     if is_printing_verbose {
         println!("cp_count: {}", cp_count);
         println!("Constant Pool:");
@@ -646,7 +646,7 @@ fn main() {
     let file_path = &args[0];
     let mut program = Program {
         global_class_count: 0,
-        print_mode: false,
+        print_debug_info: false,
         is_verbose: false,
         print_overloads: false,
         lookup_attr: false,
@@ -654,7 +654,7 @@ fn main() {
     let clazz = parse_class_file(&mut program, file_path);
     let main_overloads =
         clazz.find_methods_by_name("main", &format!("({}L{};)V", "[", "java/lang/String"));
-    if (program.print_mode && program.is_verbose) || program.print_overloads {
+    if (program.print_debug_info && program.is_verbose) || program.print_overloads {
         println!("{:?}", main_overloads);
     }
     let mut runtime = Runtime {
