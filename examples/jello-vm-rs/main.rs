@@ -1013,7 +1013,7 @@ fn java_intrinsic_println_value(value: &JavaValue) {
     } else if let JavaValue::Float { value } = value {
         if *value >= 1e7 {
             let exp=value.log10();
-            println!("{:?}E{}", value/(10.0f32.powf(exp)),exp);
+            println!("{:?}E{}", value/(10.0f32.powf(exp)),exp as i32);
         } else {
             println!("{:?}", value);
         }
