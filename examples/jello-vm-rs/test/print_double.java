@@ -4,8 +4,11 @@ public class print_double {
 	public static void main(String[] args) {
 		System.out.println(-1e7d);
 		System.out.println(-1d);
-		System.out.println(-1e-7d);
+		System.out.println(-1e-4d);
+		System.out.println(-1e-3d);
 		System.out.println(0d);
+		System.out.println(1e-3d);
+		System.out.println(1e-4d);
 		System.out.println(1d);
 		System.out.println(2d);
 		System.out.println(3d);

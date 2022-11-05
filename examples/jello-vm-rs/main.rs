@@ -1015,8 +1015,11 @@ fn java_intrinsic_println_value(value: &JavaValue) {
         } else if value <= -1e7 {
             let exp = (value*-1f64).log10();
             println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
-        } else if value <= -1e-7 {
+        } else if value <= -1e-7 && value > -1e-3 {
             let exp = (value*-1f64).log10();
+            println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
+        } else if value >= 1e-7 && value < 1e-3 {
+            let exp = value.log10();
             println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
         } else {
             println!("{:?}", value);
