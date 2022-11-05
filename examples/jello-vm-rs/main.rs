@@ -1009,28 +1009,38 @@ fn java_intrinsic_println_value(value: &JavaValue) {
     } else if let JavaValue::Integer { value } = value {
         println!("{}", value);
     } else if let &JavaValue::Double { value } = value {
+        type F=f64;
+        let ten=10.0 as F;
         if value >= 1e7 {
             let exp = value.log10();
-            println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e7 {
-            let exp = (value*-1f64).log10();
-            println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
+            let exp = (value*(-1.0 as F)).log10();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e-7 && value > -1e-3 {
-            let exp = (value*-1f64).log10();
-            println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
+            let exp = (value*(-1.0 as F)).log10();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value >= 1e-7 && value < 1e-3 {
             let exp = value.log10();
-            println!("{:?}E{}", value / (10.0f64.powf(exp)), exp as i32);
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else {
             println!("{:?}", value);
         }
     } else if let &JavaValue::Float { value } = value {
+        type F=f32;
+        let ten=10.0 as F;
         if value >= 1e7 {
             let exp = value.log10();
-            println!("{:?}E{}", value / (10.0f32.powf(exp)), exp as i32);
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e7 {
-            let exp = (value*-1f32).log10();
-            println!("{:?}E{}", value / (10.0f32.powf(exp)), exp as i32);
+            let exp = (value*(-1.0 as F)).log10();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
+        } else if value <= -1e-7 && value > -1e-3 {
+            let exp = (value*(-1.0 as F)).log10();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
+        } else if value >= 1e-7 && value < 1e-3 {
+            let exp = value.log10();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else {
             println!("{:?}", value);
         }
