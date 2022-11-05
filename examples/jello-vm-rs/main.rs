@@ -609,8 +609,8 @@ fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
     ret
 }
 
-fn parse_methods(f: &mut File, methods_count: u16) -> Vec<ParsedMethod> {
-    (0..methods_count).map(|_| ParsedMethod::parse(f)).collect()
+fn parse_methods(f: &mut File, count: u16) -> Vec<ParsedMethod> {
+    (0..count).map(|_| ParsedMethod::parse(f)).collect()
 }
 
 fn parse_class_file(program: &mut Program, file_path: &str) -> ParsedClass {
