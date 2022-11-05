@@ -3,7 +3,7 @@
 run:
 	cargo run -q --example jello-vm-rs Main.class
 
-tests := general print_int print_float print_str print_long nop_def print_double
+tests := general nop_def print_double print_float print_int print_long print_str
 
 exec_tests := $(foreach t,$(tests),java test.$(t) 2>&1 >test/$(t).java.out; \
 cargo run -q --example jello-vm-rs test/$(t).class 2>&1 >test/$(t).rs.out; \
