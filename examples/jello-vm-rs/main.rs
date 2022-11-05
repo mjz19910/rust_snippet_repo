@@ -496,7 +496,7 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
     match tag {
         ConstantTag::Utf8 => {
             let length = parse_u2_raw(f);
-            let bytes: Vec<u8> = parse_vec_u8(f, length as u64);
+            let bytes = parse_vec_u8(f, length.into());
             Constant::Utf8 {
                 // TODO: Parse from java_utf8 instead of utf8
                 value: String::from_utf8(bytes).unwrap(),
