@@ -676,39 +676,39 @@ fn main() {
 #[repr(u8)]
 #[derive(Debug, FromPrimitive)]
 pub enum Opcode {
-    nop = 0x00,
+    nop,
     // spell:words aconst
-    aconst_null = 0x01,
+    aconst_null,
     // spell:words iconst
-    iconst_m1 = 0x02,
-    iconst_0 = 0x03,
-    iconst_1 = 0x04,
-    iconst_2 = 0x05,
-    iconst_3 = 0x06,
-    iconst_4 = 0x07,
-    iconst_5 = 0x08,
+    iconst_m1,
+    iconst_0,
+    iconst_1,
+    iconst_2,
+    iconst_3,
+    iconst_4,
+    iconst_5,
     // spell:words lconst
-    lconst_0 = 0x09,
-    lconst_1 = 0x0a,
+    lconst_0,
+    lconst_1,
     // spell:words fconst
-    fconst_0 = 0x0b,
-    fconst_1 = 0x0c,
-    fconst_2 = 0x0d,
+    fconst_0,
+    fconst_1,
+    fconst_2,
     // spell:words dconst
-    dconst_0 = 0x0e,
-    dconst_1 = 0x0f,
+    dconst_0,
+    dconst_1,
     // spell:words sipush
-    bipush = 0x10,
-    sipush = 0x11,
-    ldc = 0x12,
-    ldc_w = 0x13,
-    ldc2_w = 0x14,
+    bipush,
+    sipush,
+    ldc,
+    ldc_w,
+    ldc2_w,
     // spell:words iload
-    iload = 0x15,
+    iload,
     // spell:words lload
-    lload = 0x16,
+    lload,
     // spell:words fload
-    fload = 0x17,
+    fload,
     // spell:words dload
     dload,
     // spell:words aload
