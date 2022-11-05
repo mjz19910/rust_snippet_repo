@@ -6,5 +6,7 @@ public class print_float {
 		System.out.println(1f);
 		System.out.println(2f);
 		System.out.println(3f);
+		System.out.println(100f);
+		System.out.println(1e20f);
 	}
 }

@@ -488,8 +488,6 @@ fn parse_vec_u8(f: &mut dyn Read, length: u64) -> Vec<u8> {
     bytes
 }
 
-use crate::num::ToPrimitive;
-
 fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
     let tag_raw = parse_u1_raw(f);
     let tag = ConstantTag::try_from(tag_raw).unwrap();
@@ -508,19 +506,8 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
         }
         ConstantTag::Float => {
             let bytes = parse_u4_raw(f);
-            let bits = bytes;
-            let sign = if (bits >> 31) == 0 { 1.0 } else { -1.0 };
-            let exponent = ((bits >> 23) & 0xff).to_i32().unwrap();
-            let mantissa = if exponent == 0 {
-                (bits & 0x7fffff) << 1
-            } else {
-                (bits & 0x7fffff) | 0x800000
-            };
-            let mantissa = mantissa.to_f32().unwrap();
-            let exponent = 2.0_f64.powi(exponent - 150).to_f32().unwrap();
-            println!("f32::MAX_EXP={}", f32::MAX_EXP+(f32::MANTISSA_DIGITS as i32));
             Constant::Float {
-                value: sign * mantissa * exponent,
+                value: f32::from_bits(bytes),
             }
         }
         ConstantTag::Long => {
