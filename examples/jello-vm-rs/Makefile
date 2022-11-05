@@ -1,4 +1,4 @@
-.PHONY: run test
+.PHONY: run test build_java
 
 run:
 	cargo run -q --example jello-vm-rs Main.class
@@ -21,5 +21,7 @@ test: $(java_req_out)
 build_test_out: $(foreach t,$(tests),test/$(t).class)
 	$(foreach t,$(tests),java test.$(t) 2>&1 >test/$(t).java.out)
 
-build_java: $(foreach t,$(tests),test/$(t).java)
-	$(foreach t,$(tests),echo test/$(t).java | xargs -t javac;)
+build_java: $(foreach t,$(tests),test/$(t).class)
+
+$(foreach t,$(tests),test/$(t).class): $(foreach t,$(tests),test/$(t).java)
+	javac $^
