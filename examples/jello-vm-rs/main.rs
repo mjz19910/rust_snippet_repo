@@ -598,7 +598,7 @@ fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
         if is_printing_verbose {
             println!("  #{} = {:?}", index + 1, item);
         }
-        ret.push(Some(item));
+        ret.insert(index, Some(item));
         if 2 == item_size {
             ret.push(None);
         }
