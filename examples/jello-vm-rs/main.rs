@@ -1384,11 +1384,10 @@ fn find_attributes_by_name<'a>(
 ) -> Vec<ParsedAttribute> {
     let iter = attributes.into_iter();
     let iter = iter.filter(|attr| {
-        if let Constant::Utf8 { value, .. } = clazz.cp_as_ref(attr.attribute_name_index) {
-            name == value
-        } else {
-            false
-        }
+        let Some(Constant::Utf8 { value, .. }) = clazz.cp(attr.attribute_name_index) else {
+            return false;
+        };
+        name == value
     });
     let iter = iter.map(|x| x.clone());
     iter.collect()
