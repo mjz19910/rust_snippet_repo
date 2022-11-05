@@ -602,7 +602,7 @@ fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
         match item_size {
             1 => (),
             2 => ret.push(None),
-            _ => panic!(),
+            _ => panic!("Unhandled item_size {}", item_size),
         }
         index += item_size;
     }
