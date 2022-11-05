@@ -1011,7 +1011,12 @@ fn java_intrinsic_println_value(value: &JavaValue) {
     } else if let JavaValue::Double { value } = value {
         println!("{:?}", value);
     } else if let JavaValue::Float { value } = value {
-        println!("{:?}", value);
+        let exp=value.log10();
+        if exp > 17f32 {
+            println!("{:?}E{}", value/(10.0f32.powf(exp)),exp);
+        } else {
+            println!("{:?}", value);
+        }
     } else if let JavaValue::Long { value } = value {
         println!("{}", value);
     } else {
