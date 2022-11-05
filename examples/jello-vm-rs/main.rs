@@ -56,7 +56,7 @@ pub fn get_command_line_arguments<'a>(
 
 #[derive(Clone, Debug, PartialEq, Eq, FromPrimitive)]
 #[repr(u8)]
-pub enum RawConstant {
+pub enum ConstantTag {
     Utf8 = 1,
     Integer = 3,
     Float = 4,
@@ -76,9 +76,9 @@ pub enum RawConstant {
     Package = 20,
 }
 
-impl Copy for RawConstant {}
+impl Copy for ConstantTag {}
 
-impl TryFrom<u8> for RawConstant {
+impl TryFrom<u8> for ConstantTag {
     type Error = Box<dyn Error>;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let out = FromPrimitive::from_u8(value);
@@ -492,9 +492,9 @@ use crate::num::ToPrimitive;
 
 fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
     let tag_raw = parse_u1_raw(f);
-    let tag = RawConstant::try_from(tag_raw).unwrap();
+    let tag = ConstantTag::try_from(tag_raw).unwrap();
     match tag {
-        RawConstant::Utf8 => {
+        ConstantTag::Utf8 => {
             let length = parse_u2_raw(f);
             let bytes: Vec<u8> = parse_vec_u8(f, length as u64);
             Constant::Utf8 {
@@ -502,11 +502,11 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
                 value: String::from_utf8(bytes).unwrap(),
             }
         }
-        RawConstant::Integer => {
+        ConstantTag::Integer => {
             let value = parse_u4_raw(f) as i32;
             Constant::Integer { value }
         }
-        RawConstant::Float => {
+        ConstantTag::Float => {
             let bytes = parse_u4_raw(f);
             let bits = bytes;
             let sign = if (bits >> 31) == 0 { 1.0 } else { -1.0 };
@@ -522,14 +522,14 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
                 value: sign * mantissa * exponent,
             }
         }
-        RawConstant::Long => {
+        ConstantTag::Long => {
             *inc_size = 2;
             let high_bytes = parse_u4_raw(f);
             let low_bytes = parse_u4_raw(f);
             let value = ((high_bytes as u64) << 32) + (low_bytes as u64);
             Constant::Long { value }
         }
-        RawConstant::Double => {
+        ConstantTag::Double => {
             *inc_size = 2;
             let high_bytes = parse_u4_raw(f);
             let low_bytes = parse_u4_raw(f);
@@ -537,51 +537,51 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
             let value = f64::from_bits(bits);
             Constant::Double { value }
         }
-        RawConstant::Class => Constant::Class {
+        ConstantTag::Class => Constant::Class {
             name_index: parse_u2_raw(f),
         },
-        RawConstant::String => Constant::String {
+        ConstantTag::String => Constant::String {
             string_index: parse_u2_raw(f),
         },
-        RawConstant::FieldRef => Constant::FieldRef {
+        ConstantTag::FieldRef => Constant::FieldRef {
             class_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        RawConstant::MethodRef => Constant::MethodRef {
+        ConstantTag::MethodRef => Constant::MethodRef {
             class_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        RawConstant::InterfaceMethodRef => Constant::InterfaceMethodRef {
+        ConstantTag::InterfaceMethodRef => Constant::InterfaceMethodRef {
             class_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
         // CONSTANT_NameAndType_info { .. }
-        RawConstant::NameAndType => Constant::NameAndType {
+        ConstantTag::NameAndType => Constant::NameAndType {
             // u1 tag;
             // u2 name_index;
             // u2 descriptor_index;
             name_index: parse_u2_raw(f),
             descriptor_index: parse_u2_raw(f),
         },
-        RawConstant::MethodHandle => Constant::MethodHandle {
+        ConstantTag::MethodHandle => Constant::MethodHandle {
             reference_kind: parse_u1_raw(f),
             reference_index: parse_u2_raw(f),
         },
-        RawConstant::MethodType => Constant::MethodType {
+        ConstantTag::MethodType => Constant::MethodType {
             descriptor_index: parse_u2_raw(f),
         },
-        RawConstant::Dynamic => Constant::Dynamic {
+        ConstantTag::Dynamic => Constant::Dynamic {
             bootstrap_method_attr_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        RawConstant::InvokeDynamic => Constant::InvokeDynamic {
+        ConstantTag::InvokeDynamic => Constant::InvokeDynamic {
             bootstrap_method_attr_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        RawConstant::Module => Constant::Module {
+        ConstantTag::Module => Constant::Module {
             name_index: parse_u2_raw(f),
         },
-        RawConstant::Package => Constant::Package {
+        ConstantTag::Package => Constant::Package {
             name_index: parse_u2_raw(f),
         },
     }
