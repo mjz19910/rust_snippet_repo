@@ -1011,7 +1011,19 @@ fn java_intrinsic_println_value(value: &JavaValue) {
     } else if let JavaValue::Double { value } = value {
         println!("{:?}", value);
     } else if let JavaValue::Float { value } = value {
-        println!("{:?}", value);
+        use crate::num::ToPrimitive;
+        let bits: u32 = unsafe { mem::transmute(value.clone()) };
+        let sign: i8 = if (bits >> 31) == 0 { 1 } else { -1 };
+        let exponent = ((bits >> 23) & 0xff).to_i32().unwrap();
+        let mantissa = if exponent == 0 {
+            (bits & 0x7fffff) << 1
+        } else {
+            (bits & 0x7fffff) | 0x800000
+        };
+        let mantissa = mantissa.to_f32().unwrap();
+        let exponent = 2.0_f64.powi(exponent - 150).to_f32().unwrap();
+        let sign = sign.to_f32().unwrap();
+        println!("{}", sign * exponent * mantissa);
     } else if let JavaValue::Long { value } = value {
         println!("{}", value);
     } else {
