@@ -12,5 +12,6 @@ public class print_double {
 		System.out.println(16d);
 		System.out.println(100d);
 		System.out.println(1e7d);
+		System.out.println(1e300d);
 	}
 }
