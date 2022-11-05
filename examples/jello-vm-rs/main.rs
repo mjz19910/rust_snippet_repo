@@ -179,7 +179,7 @@ pub enum JavaValue {
     Integer { value: i32 },
     Double { value: f64 },
     Float { value: f32 },
-    Long { value: u64 },
+    Long { value: i64 },
     String { value: String },
     ClassInstance { index: i32 },
 }
@@ -351,7 +351,7 @@ pub enum Constant {
     },
     // CONSTANT_Long_info { .. }
     Long {
-        value: u64,
+        value: i64,
     },
     // CONSTANT_Double_info { .. }
     Double {
@@ -515,6 +515,7 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
             let high_bytes = parse_u4_raw(f);
             let low_bytes = parse_u4_raw(f);
             let value = ((high_bytes as u64) << 32) + (low_bytes as u64);
+            let value = value as i64;
             Constant::Long { value }
         }
         ConstantTag::Double => {
@@ -1009,8 +1010,8 @@ fn java_intrinsic_println_value(value: &JavaValue) {
     } else if let JavaValue::Integer { value } = value {
         println!("{}", value);
     } else if let &JavaValue::Double { value } = value {
-        let ten=10f64;
-        let minus_one=-1.0;
+        let ten = 10f64;
+        let minus_one = -1.0;
         if value >= 1e7 {
             let exp = value.log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
@@ -1018,17 +1019,17 @@ fn java_intrinsic_println_value(value: &JavaValue) {
             let exp = value.log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e-7 && value > -1e-3 {
-            let exp = (value*minus_one).log10().floor();
+            let exp = (value * minus_one).log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e7 {
-            let exp = (value*minus_one).log10().floor();
+            let exp = (value * minus_one).log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else {
             println!("{:?}", value);
         }
     } else if let &JavaValue::Float { value } = value {
-        let ten=10f32;
-        let minus_one=-1f32;
+        let ten = 10f32;
+        let minus_one = -1f32;
         if false {
         } else if value >= 1e7 {
             let exp = value.log10().floor();
@@ -1037,10 +1038,10 @@ fn java_intrinsic_println_value(value: &JavaValue) {
             let exp = value.log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e-7 && value > -1e-3 {
-            let exp = (value*minus_one).log10().floor();
+            let exp = (value * minus_one).log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else if value <= -1e7 {
-            let exp = (value*minus_one).log10().floor();
+            let exp = (value * minus_one).log10().floor();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else {
             println!("{:?}", value);
