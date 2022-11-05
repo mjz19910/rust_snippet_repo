@@ -621,6 +621,7 @@ fn parse_class_file(program: &mut Program, file_path: &str) -> ParsedClass {
 
 fn get_code_attrib(clazz: &ParsedClass, attributes: &[ParsedAttribute]) -> CodeInfo {
     let code_attrib_vec = find_attributes_by_name(clazz, attributes, "Code");
+    assert_eq!(code_attrib_vec.len(), 1, "found only one \"Code\" attribute");
     let code_attrib = code_attrib_vec[0];
     CodeInfo::parse(&mut &code_attrib.info[..])
 }
