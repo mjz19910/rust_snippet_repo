@@ -648,16 +648,16 @@ fn main() {
         println!("{:?}", main_overloads);
     }
     let mut runtime = Runtime {
-        local_variable_array: vec![],
+        locals: vec![],
         stack: vec![],
     };
     let init_overloads = clazz.find_methods_by_name("<init>", "()V");
     let code_attrib: CodeInfo = get_code_attrib(&clazz, &init_overloads[0].attributes);
-    runtime.local_variable_array.push(JavaValue::ClassInstance {
+    runtime.locals.push(JavaValue::ClassInstance {
         index: clazz.class_id,
     });
     execute_code(&mut runtime, &clazz, &code_attrib.code);
-    runtime.local_variable_array.clear();
+    runtime.locals.clear();
     if main_overloads.len() == 0 {
         println!("no overloads found for main");
         std::process::exit(1);
@@ -1001,7 +1001,7 @@ fn get_cp_string(clazz: &ParsedClass, index: u16) -> String {
 }
 
 struct Runtime {
-    local_variable_array: Vec<JavaValue>,
+    locals: Vec<JavaValue>,
     stack: Vec<JavaValue>,
 }
 
@@ -1185,7 +1185,7 @@ fn execute_instruction(
     } else if let Opcode::lconst_1 = opcode {
         stack.push(JavaValue::Long { value: 1 });
     } else if let Opcode::aload_0 = opcode {
-        stack.push(runtime.local_variable_array[0].clone());
+        stack.push(runtime.locals[0].clone());
     } else if let Opcode::invokespecial = opcode {
         let pool_index = parse_u2_vec(index, &code);
         let pool_item = clazz.cp_as_ref(pool_index);
