@@ -3,14 +3,12 @@
 run:
 	cargo run -q --example jello-vm-rs Main.class
 
+tests := general print_int print_float print_str print_long nop_def print_double
+
+exec_tests := $(foreach t,$(tests),java test.$(t) 2>&1 >test/$(t).java.out; \
+cargo run -q --example jello-vm-rs test/$(t).class 2>&1 >test/$(t).rs.out; \
+diff test/$(t).java.out test/$(t).rs.out && echo "[$(t)] success" || echo "[$(t)] fail";\
+)
+
 test:
-	java test.general 2>&1 >test/general.java.out
-	cargo run -q --example jello-vm-rs test/general.class 2>&1 >test/general.rs.out
-	diff test/general.java.out test/general.rs.out \
-	&& echo "[general] success" \
-	|| echo "[general] fail"
-	java test.print_int 2>&1 >test/print_int.java.out
-	cargo run -q --example jello-vm-rs test/print_int.class 2>&1 >test/print_int.rs.out
-	diff test/print_int.java.out test/print_int.rs.out \
-	&& echo "[print_int] success" \
-	|| echo "[print_int] fail"
+	$(exec_tests)
