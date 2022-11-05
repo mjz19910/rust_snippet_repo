@@ -56,7 +56,7 @@ pub fn get_command_line_arguments<'a>(
 
 #[derive(Clone, Debug, PartialEq, Eq, FromPrimitive)]
 #[repr(u8)]
-pub enum Constant {
+pub enum RawConstant {
     Utf8 = 1,
     Integer = 3,
     Float = 4,
@@ -76,9 +76,9 @@ pub enum Constant {
     Package = 20,
 }
 
-impl Copy for Constant {}
+impl Copy for RawConstant {}
 
-impl TryFrom<u8> for Constant {
+impl TryFrom<u8> for RawConstant {
     type Error = Box<dyn Error>;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let out = FromPrimitive::from_u8(value);
@@ -189,7 +189,7 @@ pub struct ParsedClass {
     pub magic: u32,
     pub minor: u16,
     pub major: u16,
-    pub constant_pool: Vec<Option<ConstantInfo>>,
+    pub constant_pool: Vec<Option<Constant>>,
     pub access_flags: ClassAccessFlags,
     pub this_class: u16,
     pub super_class: u16,
@@ -208,7 +208,7 @@ fn parse_interfaces(f: &mut File, interfaces_count: u16) -> Vec<ParsedInterface>
 
 impl ParsedClass {
     fn matches_name(&self, name_index: u16, needle_name: &str) -> bool {
-        if let ConstantInfo::Utf8 { value, .. } = self.cp_as_ref(name_index) {
+        if let Constant::Utf8 { value, .. } = self.cp_as_ref(name_index) {
             needle_name == *value
         } else {
             false
@@ -216,7 +216,7 @@ impl ParsedClass {
     }
 
     fn matches_descriptor(&self, descriptor_index: u16, needle_name: &str) -> bool {
-        if let ConstantInfo::Utf8 { value, .. } = self.cp_as_ref(descriptor_index) {
+        if let Constant::Utf8 { value, .. } = self.cp_as_ref(descriptor_index) {
             needle_name == *value
         } else {
             false
@@ -233,11 +233,11 @@ impl ParsedClass {
             .collect()
     }
 
-    fn cp_as_ref(&self, index: u16) -> &ConstantInfo {
+    fn cp_as_ref(&self, index: u16) -> &Constant {
         self.cp(index).as_ref().unwrap()
     }
 
-    fn cp(&self, index: u16) -> &Option<ConstantInfo> {
+    fn cp(&self, index: u16) -> &Option<Constant> {
         &self.constant_pool[(index - 1) as usize]
     }
 
@@ -313,7 +313,7 @@ impl ParsedField {
 }
 
 #[derive(PartialEq, Clone, Debug)]
-pub enum ConstantInfo {
+pub enum Constant {
     // CONSTANT_Utf8_info { .. }
     Utf8 {
         value: String,
@@ -394,7 +394,7 @@ pub enum ConstantInfo {
     },
 }
 
-impl ConstantInfo {
+impl Constant {
     fn str(&self) -> &str {
         match self {
             Self::Utf8 { value } => value,
@@ -456,7 +456,7 @@ impl ParsedAttribute {
 
     pub fn lookup(&self, clazz: &ParsedClass) -> AttributeDescription {
         let attr_name = clazz.cp(self.attribute_name_index);
-        if let Some(ConstantInfo::Utf8 { value }) = attr_name {
+        if let Some(Constant::Utf8 { value }) = attr_name {
             return AttributeDescription {
                 attribute_name: value.into(),
                 info: self.info.clone(),
@@ -490,23 +490,23 @@ fn parse_vec_u8(f: &mut dyn Read, length: u64) -> Vec<u8> {
 
 use crate::num::ToPrimitive;
 
-fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> ConstantInfo {
+fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
     let tag_raw = parse_u1_raw(f);
-    let tag = Constant::try_from(tag_raw).unwrap();
+    let tag = RawConstant::try_from(tag_raw).unwrap();
     match tag {
-        Constant::Utf8 => {
+        RawConstant::Utf8 => {
             let length = parse_u2_raw(f);
             let bytes: Vec<u8> = parse_vec_u8(f, length as u64);
-            ConstantInfo::Utf8 {
+            Constant::Utf8 {
                 // TODO: Parse from java_utf8 instead of utf8
                 value: String::from_utf8(bytes).unwrap(),
             }
         }
-        Constant::Integer => {
+        RawConstant::Integer => {
             let value = parse_u4_raw(f) as i32;
-            ConstantInfo::Integer { value }
+            Constant::Integer { value }
         }
-        Constant::Float => {
+        RawConstant::Float => {
             let bytes = parse_u4_raw(f);
             let bits = bytes;
             let sign = if (bits >> 31) == 0 { 1.0 } else { -1.0 };
@@ -518,70 +518,70 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> ConstantInfo {
             };
             let mantissa = mantissa.to_f32().unwrap();
             let exponent = 2.0_f64.powf((exponent - 150).into()).to_f32().unwrap();
-            ConstantInfo::Float {
+            Constant::Float {
                 value: sign * mantissa * exponent,
             }
         }
-        Constant::Long => {
+        RawConstant::Long => {
             *inc_size = 2;
             let high_bytes = parse_u4_raw(f);
             let low_bytes = parse_u4_raw(f);
             let value = ((high_bytes as u64) << 32) + (low_bytes as u64);
-            ConstantInfo::Long { value }
+            Constant::Long { value }
         }
-        Constant::Double => {
+        RawConstant::Double => {
             *inc_size = 2;
             let high_bytes = parse_u4_raw(f);
             let low_bytes = parse_u4_raw(f);
             let bits = ((high_bytes as u64) << 32) + (low_bytes as u64);
             let value = f64::from_bits(bits);
-            ConstantInfo::Double { value }
+            Constant::Double { value }
         }
-        Constant::Class => ConstantInfo::Class {
+        RawConstant::Class => Constant::Class {
             name_index: parse_u2_raw(f),
         },
-        Constant::String => ConstantInfo::String {
+        RawConstant::String => Constant::String {
             string_index: parse_u2_raw(f),
         },
-        Constant::FieldRef => ConstantInfo::FieldRef {
+        RawConstant::FieldRef => Constant::FieldRef {
             class_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        Constant::MethodRef => ConstantInfo::MethodRef {
+        RawConstant::MethodRef => Constant::MethodRef {
             class_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        Constant::InterfaceMethodRef => ConstantInfo::InterfaceMethodRef {
+        RawConstant::InterfaceMethodRef => Constant::InterfaceMethodRef {
             class_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
         // CONSTANT_NameAndType_info { .. }
-        Constant::NameAndType => ConstantInfo::NameAndType {
+        RawConstant::NameAndType => Constant::NameAndType {
             // u1 tag;
             // u2 name_index;
             // u2 descriptor_index;
             name_index: parse_u2_raw(f),
             descriptor_index: parse_u2_raw(f),
         },
-        Constant::MethodHandle => ConstantInfo::MethodHandle {
+        RawConstant::MethodHandle => Constant::MethodHandle {
             reference_kind: parse_u1_raw(f),
             reference_index: parse_u2_raw(f),
         },
-        Constant::MethodType => ConstantInfo::MethodType {
+        RawConstant::MethodType => Constant::MethodType {
             descriptor_index: parse_u2_raw(f),
         },
-        Constant::Dynamic => ConstantInfo::Dynamic {
+        RawConstant::Dynamic => Constant::Dynamic {
             bootstrap_method_attr_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        Constant::InvokeDynamic => ConstantInfo::InvokeDynamic {
+        RawConstant::InvokeDynamic => Constant::InvokeDynamic {
             bootstrap_method_attr_index: parse_u2_raw(f),
             name_and_type_index: parse_u2_raw(f),
         },
-        Constant::Module => ConstantInfo::Module {
+        RawConstant::Module => Constant::Module {
             name_index: parse_u2_raw(f),
         },
-        Constant::Package => ConstantInfo::Package {
+        RawConstant::Package => Constant::Package {
             name_index: parse_u2_raw(f),
         },
     }
@@ -595,9 +595,9 @@ struct Program {
     global_class_count: i32,
 }
 
-fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<ConstantInfo>> {
+fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
     let cp_count = usize::from(parse_u2_raw(f));
-    let mut ret: Vec<Option<ConstantInfo>> = vec![];
+    let mut ret: Vec<Option<Constant>> = vec![];
     let is_printing_verbose = program.print_debug_info && program.is_verbose;
     if is_printing_verbose {
         println!("cp_count: {}", cp_count);
@@ -1004,7 +1004,7 @@ pub enum Opcode {
 
 fn get_cp_string(clazz: &ParsedClass, string_index: u16) -> String {
     let pool_item = clazz.cp(string_index);
-    let Some(ConstantInfo::Utf8 { value }) = pool_item else {
+    let Some(Constant::Utf8 { value }) = pool_item else {
         panic!("get_pool_string not utf8");
     };
     return value.into();
@@ -1042,7 +1042,7 @@ fn execute_instruction(
     if let Opcode::invokevirtual = opcode {
         let index = parse_u2_vec(index, code);
         let methodref = clazz.cp(index);
-        let Some(ConstantInfo::MethodRef {
+        let Some(Constant::MethodRef {
             class_index,
             name_and_type_index,
         }) = methodref else {
@@ -1066,7 +1066,7 @@ fn execute_instruction(
     } else if let Opcode::getstatic = opcode {
         let index = parse_u2_vec(index, &code);
         let fieldref = clazz.cp(index);
-        if let Some(ConstantInfo::FieldRef {
+        if let Some(Constant::FieldRef {
             class_index,
             name_and_type_index,
         }) = fieldref
@@ -1086,12 +1086,12 @@ fn execute_instruction(
     } else if let Opcode::ldc = opcode {
         let index = parse_u1_vec(index, &code);
         let pool_item = clazz.cp(index.into());
-        let value = if let Some(ConstantInfo::String { string_index }) = pool_item {
+        let value = if let Some(Constant::String { string_index }) = pool_item {
             let value = get_cp_string(clazz, *string_index);
             JavaValue::String { value }
-        } else if let &Some(ConstantInfo::Float { value }) = pool_item {
+        } else if let &Some(Constant::Float { value }) = pool_item {
             JavaValue::Float { value }
-        } else if let &Some(ConstantInfo::Integer { value }) = pool_item {
+        } else if let &Some(Constant::Integer { value }) = pool_item {
             JavaValue::Integer { value }
         } else {
             panic!("ldc: value={:?}", pool_item);
@@ -1100,9 +1100,9 @@ fn execute_instruction(
     } else if let Opcode::ldc2_w = opcode {
         let pool_index = parse_u2_vec(index, &code);
         let pool_item = clazz.cp(pool_index);
-        if let &Some(ConstantInfo::Double { value }) = pool_item {
+        if let &Some(Constant::Double { value }) = pool_item {
             stack.push(JavaValue::Double { value });
-        } else if let &Some(ConstantInfo::Long { value }) = pool_item {
+        } else if let &Some(Constant::Long { value }) = pool_item {
             stack.push(JavaValue::Long { value });
         } else {
             panic!("ldc2_w: value={:?}", pool_item);
@@ -1165,7 +1165,7 @@ fn execute_instruction(
     } else if let Opcode::invokespecial = opcode {
         let pool_index = parse_u2_vec(index, &code);
         let pool_item = clazz.cp_as_ref(pool_index);
-        let &ConstantInfo::MethodRef {
+        let &Constant::MethodRef {
             class_index,
             name_and_type_index,
         } = pool_item else {
@@ -1216,7 +1216,7 @@ impl<'a> ConstantPrint<'a> {
     fn new(class: &'a ParsedClass, name_and_type_index: u16) -> Self {
         let pool_item = class.cp(name_and_type_index).as_ref().unwrap();
         match pool_item {
-            ConstantInfo::NameAndType {
+            Constant::NameAndType {
                 name_index,
                 descriptor_index,
             } => {
@@ -1224,7 +1224,7 @@ impl<'a> ConstantPrint<'a> {
                 let descriptor = class.cp_as_ref(*descriptor_index).str();
                 ConstantPrint::NameAndType { name, descriptor }
             }
-            ConstantInfo::Class { name_index } => {
+            Constant::Class { name_index } => {
                 let name = class.cp_as_ref(*name_index).str();
                 ConstantPrint::Class { name }
             }
@@ -1252,15 +1252,15 @@ impl<'a> ConstantPrint<'a> {
 
 fn get_name_of_member(clazz: &ParsedClass, name_and_type_index: u16) -> String {
     let pool_item = clazz.cp(name_and_type_index);
-    let Some(ConstantInfo::NameAndType { name_index, .. }) = pool_item else {panic!()};
-    let Some(ConstantInfo::Utf8 { value }) = clazz.cp(*name_index) else {panic!()};
+    let Some(Constant::NameAndType { name_index, .. }) = pool_item else {panic!()};
+    let Some(Constant::Utf8 { value }) = clazz.cp(*name_index) else {panic!()};
     return value.into();
 }
 
 fn get_name_of_class(clazz: &ParsedClass, class_index: u16) -> String {
     let pool_item = clazz.cp(class_index);
-    let Some(ConstantInfo::Class { name_index, .. }) = pool_item else {panic!()};
-    let Some(ConstantInfo::Utf8 { value }) = clazz.cp(*name_index) else {panic!()};
+    let Some(Constant::Class { name_index, .. }) = pool_item else {panic!()};
+    let Some(Constant::Utf8 { value }) = clazz.cp(*name_index) else {panic!()};
     return value.into();
 }
 
@@ -1360,7 +1360,7 @@ fn find_attributes_by_name<'a>(
 ) -> Vec<ParsedAttribute> {
     let iter = attributes.into_iter();
     let iter = iter.filter(|attr| {
-        if let ConstantInfo::Utf8 { value, .. } = clazz.cp_as_ref(attr.attribute_name_index) {
+        if let Constant::Utf8 { value, .. } = clazz.cp_as_ref(attr.attribute_name_index) {
             name == value
         } else {
             false
