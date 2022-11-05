@@ -620,9 +620,9 @@ fn parse_class_file(program: &mut Program, file_path: &str) -> ParsedClass {
 }
 
 fn get_code_attrib(clazz: &ParsedClass, attributes: &[ParsedAttribute]) -> CodeInfo {
-    let code_attrib_vec = find_attributes_by_name(clazz, attributes, "Code");
-    let attr = code_attrib_vec[0];
-    CodeInfo::parse(&mut &attr.info[..])
+    let mut code_attrib_iter = find_attributes_by_name(clazz, attributes, "Code");
+    let code_attrib = code_attrib_iter.next().unwrap();
+    CodeInfo::parse(&mut &code_attrib.info[..])
 }
 
 fn main() {
@@ -1378,16 +1378,14 @@ fn parse_exception_table(f: &mut dyn Read) -> Vec<ExceptionInfo> {
 }
 
 fn find_attributes_by_name<'a>(
-    clazz: &ParsedClass,
+    clazz: &'a ParsedClass,
     attributes: &'a [ParsedAttribute],
-    name: &str,
-) -> Vec<&'a ParsedAttribute> {
-    let iter = attributes.into_iter();
-    let iter = iter.filter(|&attr| {
+    name: &'a str,
+) -> impl Iterator<Item = &'a ParsedAttribute> + 'a {
+    attributes.iter().filter(move |attr| {
         let Some(Constant::Utf8 { value, .. }) = clazz.cp(attr.attribute_name_index) else {
             return false;
         };
         name == value
-    });
-    iter.collect()
+    })
 }
