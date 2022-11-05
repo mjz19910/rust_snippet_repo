@@ -1017,10 +1017,10 @@ fn java_intrinsic_println_value(value: &JavaValue) {
         } else if value >= 1e-7 && value < 1e-3 {
             let exp = value.log10();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
-        } else if value <= -1e7 {
+        } else if value <= -1e-7 && value > -1e-3 {
             let exp = (value*minus_one).log10();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
-        } else if value <= -1e-7 && value > -1e-3 {
+        } else if value <= -1e7 {
             let exp = (value*minus_one).log10();
             println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
         } else {
