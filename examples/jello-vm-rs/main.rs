@@ -1023,7 +1023,7 @@ fn java_intrinsic_println_value(value: &JavaValue) {
         let mantissa = mantissa.to_f32().unwrap();
         let exponent = 2.0_f64.powi(exponent - 150).to_f32().unwrap();
         let sign = sign.to_f32().unwrap();
-        println!("{}", sign * exponent * mantissa);
+        println!("{:?}", sign * exponent * mantissa);
     } else if let JavaValue::Long { value } = value {
         println!("{}", value);
     } else {
