@@ -992,8 +992,8 @@ pub enum Opcode {
     impdep2 = 0xff,
 }
 
-fn get_cp_string(clazz: &ParsedClass, string_index: u16) -> String {
-    let pool_item = clazz.cp(string_index);
+fn get_cp_string(clazz: &ParsedClass, index: u16) -> String {
+    let pool_item = clazz.cp(index);
     let Some(Constant::Utf8 { value }) = pool_item else {
         panic!("get_pool_string not utf8");
     };
