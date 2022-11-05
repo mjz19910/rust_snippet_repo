@@ -599,8 +599,10 @@ fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
             println!("  #{} = {:?}", index + 1, item);
         }
         ret.insert(index, Some(item));
-        if 2 == item_size {
-            ret.push(None);
+        match item_size {
+            1 => (),
+            2 => ret.push(None),
+            _ => panic!(),
         }
         index += item_size;
     }
