@@ -1172,6 +1172,7 @@ fn execute_instruction(
     } else
     // nop
     if let Opcode::nop = opcode {
+        // this block left intentionally empty
     } else
     // sipush
     if let Opcode::sipush = opcode {
