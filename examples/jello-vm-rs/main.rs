@@ -1029,26 +1029,20 @@ fn java_intrinsic_println_value(value: &JavaValue) {
     } else if let &JavaValue::Float { value } = value {
         let ten=10.0f32;
         let minus_one=-1f32;
-        match value {
-            _ if value >= 1e7 => {
-                let exp = value.log10().floor();
-                println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
-            }
-            _ if value >= 1e-7 && value < 1e-3 => {
-                let exp = value.log10().floor();
-                println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
-            }
-            _ if value <= -1e-7 && value > -1e-3 => {
-                let exp = (value*minus_one).log10().floor();
-                println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
-            }
-            _ if value <= -1e7 => {
-                let exp = (value*minus_one).log10().floor();
-                println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
-            }
-            _ => {
-                println!("{:?}", value);
-            },
+        if value >= 1e7 {
+            let exp = value.log10().floor();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
+        } else if value >= 1e-7 && value < 1e-3 {
+            let exp = value.log10().floor();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
+        } else if value <= -1e-7 && value > -1e-3 {
+            let exp = (value*minus_one).log10().floor();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
+        } else if value <= -1e7 {
+            let exp = (value*minus_one).log10().floor();
+            println!("{:?}E{}", value / (ten.powf(exp)), exp as i32);
+        } else {
+            println!("{:?}", value);
         }
     } else if let JavaValue::Long { value } = value {
         println!("{}", value);
