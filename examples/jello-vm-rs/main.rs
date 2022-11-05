@@ -517,7 +517,8 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
                 (bits & 0x7fffff) | 0x800000
             };
             let mantissa = mantissa.to_f32().unwrap();
-            let exponent = 2.0_f64.powf((exponent - 150).into()).to_f32().unwrap();
+            let exponent = 2.0_f64.powi(exponent - 150).to_f32().unwrap();
+            println!("f32::MAX_EXP={}", f32::MAX_EXP+(f32::MANTISSA_DIGITS as i32));
             Constant::Float {
                 value: sign * mantissa * exponent,
             }
