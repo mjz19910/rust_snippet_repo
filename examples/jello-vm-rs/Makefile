@@ -19,7 +19,7 @@ test: $(java_req_out)
 	$(exec_tests)
 
 build_test_out: $(foreach t,$(tests),test/$(t).class)
-	$(foreach t,$(tests),java test.$(t) 2>&1 >test/$(t).java.out)
+	$(foreach t,$(tests),java test.$(t) 2>&1 >test/$(t).java.out;)
 
 build_java: $(foreach t,$(tests),test/$(t).class)
 
