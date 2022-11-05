@@ -505,10 +505,9 @@ fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
             Constant::Integer { value }
         }
         ConstantTag::Float => {
-            let bytes = parse_u4_raw(f);
-            Constant::Float {
-                value: f32::from_bits(bytes),
-            }
+            let value = parse_u4_raw(f);
+            let value = f32::from_bits(value);
+            Constant::Float { value }
         }
         ConstantTag::Long => {
             *inc_size = 2;
