@@ -13,9 +13,7 @@ exec_tests := $(foreach t,$(tests),\
 diff test/$(t).java.out test/$(t).rs.out && echo "[$(t)] success" || echo "[$(t)] fail";\
 )
 
-java_req_out:=$(foreach t,$(tests),test/$(t).java.out)
-
-test: $(java_req_out)
+test: $(foreach t,$(tests),test/$(t).java.out)
 	$(exec_tests)
 
 build_test_out: $(foreach t,$(tests),test/$(t).class)
