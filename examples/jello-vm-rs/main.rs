@@ -245,7 +245,7 @@ impl ParsedClass {
         let magic = parse_u4_raw(f);
         let minor = parse_u2_raw(f);
         let major = parse_u2_raw(f);
-        let cp_vec = parse_cp(program, f);
+        let constant_pool = parse_constant_pool(program, f);
         let access_flags = ClassAccessFlags::parse(f).unwrap();
         let this_class = parse_u2_raw(f);
         let super_class = parse_u2_raw(f);
@@ -263,7 +263,7 @@ impl ParsedClass {
             magic,
             minor,
             major,
-            constant_pool: cp_vec,
+            constant_pool,
             access_flags,
             this_class,
             super_class,
@@ -507,7 +507,7 @@ fn parse_vec_u8(f: &mut dyn Read, length: u64) -> Vec<u8> {
     bytes
 }
 
-fn parse_cp_item(inc_size: &mut usize, f: &mut File) -> Constant {
+fn parse_constant_pool_item(inc_size: &mut usize, f: &mut File) -> Constant {
     let tag_raw = parse_u1_raw(f);
     let tag = ConstantTag::try_from(tag_raw).unwrap();
     match tag {
@@ -602,7 +602,7 @@ struct Program {
     global_class_count: i32,
 }
 
-fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
+fn parse_constant_pool(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
     let cp_count = usize::from(parse_u2_raw(f));
     let mut ret: Vec<Option<Constant>> = vec![];
     let is_printing_verbose = program.print_debug_info && program.is_verbose;
@@ -613,7 +613,7 @@ fn parse_cp(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
     let mut index = 0;
     while index < cp_count - 1 {
         let mut item_size = 1;
-        let item = parse_cp_item(&mut item_size, f);
+        let item = parse_constant_pool_item(&mut item_size, f);
         if is_printing_verbose {
             println!("  #{} = {:?}", index + 1, item);
         }
