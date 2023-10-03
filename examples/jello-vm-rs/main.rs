@@ -163,6 +163,21 @@ impl MethodAccessFlags {
     }
 }
 
+impl ParseOne<Self> for u8 {
+    fn parse(f: &mut dyn Read) -> Self {
+        let mut value = [0];
+        f.read_exact(&mut value).unwrap();
+        value[0]
+    }
+}
+impl ParseManyOf<Self> for u8 {
+    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<Self> {
+        let mut bytes: Vec<u8> = vec![];
+        f.take(count.into()).read_to_end(&mut bytes).unwrap();
+        bytes
+    }
+}
+
 pub fn parse_u2_raw(f: &mut dyn Read) -> u16 {
     let mut value = [0; 2];
     f.read_exact(&mut value).unwrap();
@@ -496,21 +511,6 @@ impl ParsedAttribute {
 pub struct AttributeDescription {
     pub attribute_name: String,
     pub info: Vec<u8>,
-}
-
-impl ParseOne<Self> for u8 {
-    fn parse(f: &mut dyn Read) -> Self {
-        let mut value = [0];
-        f.read_exact(&mut value).unwrap();
-        value[0]
-    }
-}
-impl ParseManyOf<Self> for u8 {
-    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<Self> {
-        let mut bytes: Vec<u8> = vec![];
-        f.take(count.into()).read_to_end(&mut bytes).unwrap();
-        bytes
-    }
 }
 
 fn parse_constant_pool_item(inc_size: &mut usize, f: &mut dyn Read) -> Constant {
