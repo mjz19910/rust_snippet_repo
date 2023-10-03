@@ -1431,7 +1431,7 @@ mod test {
         fn get_name_and_type_data<'a>(
             box_list: &'a mut Vec<Box<ParsedClass>>,
         ) -> ConstantPrint<'a> {
-            let c_box = Box::new(gen_constant_pool(vec![
+            box_list.push(Box::new(gen_constant_pool(vec![
                 Some(Constant::NameAndType {
                     name_index: 2,
                     descriptor_index: 3,
@@ -1442,8 +1442,7 @@ mod test {
                 Some(Constant::Utf8 {
                     value: "str2".into(),
                 }),
-            ]));
-            box_list.push(c_box);
+            ])));
             let clazz = box_list.last().unwrap().as_ref();
             ConstantPrint::new(clazz, 1)
         }
