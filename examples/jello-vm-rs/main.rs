@@ -146,7 +146,7 @@ bitflags! {
 }
 
 impl MethodAccessFlags {
-    fn parse(f: &mut File) -> Option<Self> {
+    fn parse(f: &mut dyn Read) -> Option<Self> {
         Self::from_bits(parse_u2_raw(f))
     }
 }
@@ -252,9 +252,9 @@ impl ParsedClass {
         let interfaces_count = parse_u2_raw(f);
         let interfaces = parse_interfaces(f, interfaces_count);
         let fields_count = parse_u2_raw(f);
-        let fields = (0..fields_count).map(|_| ParsedField::parse(f)).collect();
+        let fields = ParsedField::parse_vec(f, fields_count);
         let methods_count = parse_u2_raw(f);
-        let methods = (0..methods_count).map(|_| ParsedMethod::parse(f)).collect();
+        let methods = ParsedMethod::parse_vec(f, methods_count);
         let attributes_count = parse_u2_raw(f);
         let attributes = parse_attributes(f, attributes_count);
         let class_id = program.global_class_count;
@@ -314,14 +314,14 @@ pub struct ParsedField {
     pub attributes: Vec<ParsedAttribute>,
 }
 
-impl ParsedField {
-    fn parse(f: &mut File) -> ParsedField {
+impl ParseOne<Self> for ParsedField {
+    fn parse(f: &mut dyn Read) -> Self {
         let access_flags = parse_u2_raw(f);
         let name_index = parse_u2_raw(f);
         let descriptor_index = parse_u2_raw(f);
         let attributes_count = parse_u2_raw(f);
         let attributes = parse_attributes(f, attributes_count);
-        ParsedField {
+        Self {
             access_flags,
             name_index,
             descriptor_index,
@@ -329,6 +329,7 @@ impl ParsedField {
         }
     }
 }
+impl ParseManyOf<Self> for ParsedField {}
 
 #[derive(PartialEq, Clone, Debug)]
 pub enum Constant {
@@ -430,9 +431,21 @@ pub struct ParsedMethod {
     pub attributes: Vec<ParsedAttribute>,
 }
 
-impl ParsedMethod {
+trait ParseOne<T> {
+    fn parse(f: &mut dyn Read) -> T;
+}
+trait ParseManyOf<T>
+where
+    T: ParseOne<T>,
+{
+    fn parse_vec(f: &mut dyn Read, count: u16) -> Vec<T> {
+        (0..count).map(|_| T::parse(f)).collect()
+    }
+}
+
+impl ParseOne<Self> for ParsedMethod {
     // method_info { .. }
-    fn parse(f: &mut File) -> ParsedMethod {
+    fn parse(f: &mut dyn Read) -> Self {
         // u2             access_flags;
         // u2             name_index;
         // u2             descriptor_index;
@@ -443,7 +456,7 @@ impl ParsedMethod {
         let descriptor_index = parse_u2_raw(f);
         let attributes_count = parse_u2_raw(f);
         let attributes = parse_attributes(f, attributes_count);
-        ParsedMethod {
+        Self {
             access_flags,
             name_index,
             descriptor_index,
@@ -451,6 +464,7 @@ impl ParsedMethod {
         }
     }
 }
+impl ParseManyOf<Self> for ParsedMethod {}
 
 #[derive(Clone, Debug)]
 pub struct ParsedAttribute {
@@ -458,7 +472,7 @@ pub struct ParsedAttribute {
     pub info: Vec<u8>,
 }
 
-impl ParsedAttribute {
+impl ParseOne<Self> for ParsedAttribute {
     // attribute_info { .. }
     fn parse(f: &mut dyn Read) -> ParsedAttribute {
         // u2 attribute_name_index;
@@ -472,7 +486,9 @@ impl ParsedAttribute {
             info,
         }
     }
-
+}
+impl ParseManyOf<Self> for ParsedAttribute {}
+impl ParsedAttribute {
     pub fn lookup(&self, clazz: &ParsedClass) -> AttributeDescription {
         let attr_name = clazz.cp(self.attribute_name_index);
         if let Some(Constant::Utf8 { value }) = attr_name {
@@ -498,7 +514,7 @@ pub struct AttributeDescription {
 fn parse_attributes(f: &mut dyn Read, attributes_count: u16) -> Vec<ParsedAttribute> {
     (0..attributes_count)
         .map(|_| ParsedAttribute::parse(f))
-        .collect::<Vec<ParsedAttribute>>()
+        .collect()
 }
 
 fn parse_vec_u8(f: &mut dyn Read, length: u64) -> Vec<u8> {
@@ -683,8 +699,7 @@ fn main() {
     }
     let code_attrib = get_code_attrib(&clazz, &main_overloads[0].attributes);
     if program.lookup_attr {
-        let attributes = &code_attrib.attributes;
-        let attr = attributes[0].lookup(&clazz);
+        let attr = code_attrib.attributes[0].lookup(&clazz);
         println!("{:?}", attr);
     }
     execute_code(&mut runtime, &clazz, &code_attrib.code);
@@ -1336,9 +1351,10 @@ impl CodeInfo {
         let max_locals = parse_u2_raw(f);
         let code_length = parse_u4_raw(f);
         let code = parse_vec_u8(f, code_length as u64);
-        let exception_table = parse_exception_table(f);
+        let exception_count = parse_u2_raw(f);
+        let exception_table = ExceptionInfo::parse_vec(f, exception_count);
         let attributes_count = parse_u2_raw(f);
-        let attributes = parse_attributes(f, attributes_count);
+        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         Self {
             max_stack,
             max_locals,
@@ -1356,8 +1372,8 @@ pub struct ExceptionInfo {
     pub catch_type: u16,
 }
 
-impl ExceptionInfo {
-    fn parse(f: &mut dyn Read) -> ExceptionInfo {
+impl ParseOne<Self> for ExceptionInfo {
+    fn parse(f: &mut dyn Read) -> Self {
         // u2 start_pc;
         // u2 end_pc;
         // u2 handler_pc;
@@ -1366,7 +1382,7 @@ impl ExceptionInfo {
         let end_pc = parse_u2_raw(f);
         let handler_pc = parse_u2_raw(f);
         let catch_type = parse_u2_raw(f);
-        ExceptionInfo {
+        Self {
             start_pc,
             end_pc,
             handler_pc,
@@ -1374,13 +1390,7 @@ impl ExceptionInfo {
         }
     }
 }
-
-fn parse_exception_table(f: &mut dyn Read) -> Vec<ExceptionInfo> {
-    let exception_table_length = parse_u2_raw(f);
-    (0..exception_table_length)
-        .map(|_| ExceptionInfo::parse(f))
-        .collect()
-}
+impl ParseManyOf<Self> for ExceptionInfo {}
 
 fn find_attributes_by_name<'a>(
     clazz: &ParsedClass,
