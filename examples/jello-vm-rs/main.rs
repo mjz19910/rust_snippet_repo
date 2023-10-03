@@ -1448,9 +1448,7 @@ mod test {
             let clazz = box_list.last().unwrap().as_ref();
             ConstantPrint::new(clazz, 1)
         }
-        let obj2 = get_name_and_type_data(&mut vec![])
-            .name_and_type()
-            .unwrap();
+        let obj2 = get_name_and_type_data(&mut vec![]).name_and_type().unwrap();
         assert_eq!(obj2.0, "str1".to_owned());
         assert_eq!(obj2.1, "str2".to_owned());
     }
