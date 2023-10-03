@@ -254,7 +254,7 @@ impl ParsedClass {
         let fields_count = parse_u2_raw(f);
         let fields = (0..fields_count).map(|_| ParsedField::parse(f)).collect();
         let methods_count = parse_u2_raw(f);
-        let methods = parse_methods(f, methods_count);
+        let methods = (0..methods_count).map(|_| ParsedMethod::parse(f)).collect();
         let attributes_count = parse_u2_raw(f);
         let attributes = parse_attributes(f, attributes_count);
         let class_id = program.global_class_count;
@@ -628,14 +628,9 @@ fn parse_constant_pool(program: &Program, f: &mut File) -> Vec<Option<Constant>>
     ret
 }
 
-fn parse_methods(f: &mut File, count: u16) -> Vec<ParsedMethod> {
-    (0..count).map(|_| ParsedMethod::parse(f)).collect()
-}
-
 fn parse_class_file(program: &mut Program, file_path: &str) -> ParsedClass {
     let mut f = File::open(file_path).unwrap();
-    let f = &mut f;
-    ParsedClass::parse(program, f)
+    ParsedClass::parse(program, &mut f)
 }
 
 fn get_code_attrib(clazz: &ParsedClass, attributes: &[ParsedAttribute]) -> CodeInfo {
