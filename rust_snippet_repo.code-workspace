@@ -4,9 +4,5 @@
 			"path": "."
 		}
 	],
-	"settings": {
-		"deno.enable": true,
-		"deno.unstable": true,
-		"java.dependency.syncWithFolderExplorer": true
-	}
+	"settings": {}
 }
