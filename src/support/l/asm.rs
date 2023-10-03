@@ -1,3 +1,3 @@
-pub fn jmp_loop() {
+pub fn jmp_loop() -> ! {
     loop {}
 }
