@@ -1416,7 +1416,6 @@ mod test {
 
     #[test]
     fn constant_print() {
-        let mut box_list: Vec<Box<ParsedClass>> = vec![];
         fn get_class_data<'a>(box_list: &'a mut Vec<Box<ParsedClass>>) -> ConstantPrint<'a> {
             let c_box = Box::new(gen_constant_pool(vec![
                 Some(Constant::Class { name_index: 2 }),
@@ -1428,7 +1427,7 @@ mod test {
             let clazz = box_list.last().unwrap().as_ref();
             ConstantPrint::new(clazz, 1)
         }
-        assert_eq!(get_class_data(&mut box_list).class().unwrap(), "str1");
+        assert_eq!(get_class_data(&mut vec![]).class().unwrap(), "str1");
 
         fn get_name_and_type_data<'a>(
             box_list: &'a mut Vec<Box<ParsedClass>>,
@@ -1449,7 +1448,7 @@ mod test {
             let clazz = box_list.last().unwrap().as_ref();
             ConstantPrint::new(clazz, 1)
         }
-        let obj2 = get_name_and_type_data(&mut box_list)
+        let obj2 = get_name_and_type_data(&mut vec![])
             .name_and_type()
             .unwrap();
         assert_eq!(obj2.0, "str1".to_owned());
