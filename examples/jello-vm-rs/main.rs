@@ -394,11 +394,12 @@ pub enum Constant {
     },
 }
 
+#[cfg(test)]
 impl Constant {
     fn str(&self) -> &str {
         match self {
             Self::Utf8 { value } => value,
-            _ => panic!(),
+            _ => panic!("{self:?}"),
         }
     }
 }
@@ -621,7 +622,11 @@ fn parse_class_file(program: &mut Program, file_path: &str) -> ParsedClass {
 
 fn get_code_attrib(clazz: &ParsedClass, attributes: &[ParsedAttribute]) -> CodeInfo {
     let code_attrib_vec = find_attributes_by_name(clazz, attributes, "Code");
-    assert_eq!(code_attrib_vec.len(), 1, "found only one \"Code\" attribute");
+    assert_eq!(
+        code_attrib_vec.len(),
+        1,
+        "found only one \"Code\" attribute"
+    );
     let code_attrib = code_attrib_vec[0];
     CodeInfo::parse(&mut &code_attrib.info[..])
 }
@@ -1069,9 +1074,7 @@ fn execute_instruction(
         let Some(Constant::MethodRef {
             class_index,
             name_and_type_index,
-        }) = methodref else {
-            panic!();
-        };
+        }) = methodref else {panic!();};
         let name_of_class = get_name_of_class(clazz, *class_index);
         let name_of_member = get_name_of_member(clazz, *name_and_type_index);
         if !(name_of_class == "java/io/PrintStream" && name_of_member == "println") {
@@ -1090,23 +1093,19 @@ fn execute_instruction(
     } else if let Opcode::getstatic = opcode {
         let index = parse_u2_vec(index, &code);
         let fieldref = clazz.cp(index);
-        if let Some(Constant::FieldRef {
+        let Some(Constant::FieldRef {
             class_index,
             name_and_type_index,
-        }) = fieldref
-        {
-            let name_of_class = get_name_of_class(clazz, *class_index);
-            let name_of_member = get_name_of_member(clazz, *name_and_type_index);
-            if name_of_class == "java/lang/System" && name_of_member == "out" {
-                stack.push(JavaValue::FakePrintStream);
-                return;
-            } else {
-                panic!(
-                    "Unsupported member {name_of_class}/{name_of_member} in getstatic instruction"
-                );
-            }
+        }) = fieldref else {panic!();};
+
+        let name_of_class = get_name_of_class(clazz, *class_index);
+        let name_of_member = get_name_of_member(clazz, *name_and_type_index);
+        if name_of_class == "java/lang/System" && name_of_member == "out" {
+            stack.push(JavaValue::FakePrintStream);
+            return;
+        } else {
+            panic!("Unsupported member {name_of_class}/{name_of_member} in getstatic instruction");
         }
-        panic!();
     } else if let Opcode::ldc = opcode {
         let index = parse_u1_vec(index, &code);
         let pool_item = clazz.cp(index.into());
@@ -1193,25 +1192,14 @@ fn execute_instruction(
         let &Constant::MethodRef {
             class_index,
             name_and_type_index,
-        } = pool_item else {
-            panic!();
-        };
-        if let Some((x, y)) = None::<(u16, u16)> {
-            println!(
-                "invokespecial: MethodRef {{ class: {:?}, name_and_type: {:?} }}",
-                ConstantPrint::new(clazz, x).class().unwrap(),
-                ConstantPrint::new(clazz, y).name_and_type().unwrap()
-            );
-        }
+        } = pool_item else {panic!();};
         let name_of_class = get_name_of_class(clazz, class_index);
         let name_of_member = get_name_of_member(clazz, name_and_type_index);
         if name_of_class == "java/lang/Object" && name_of_member == "<init>" {
             // Skip <init> for java/lang/Object
             return;
         } else {
-            panic!(
-                "Unsupported member {name_of_class}/{name_of_member} in invokespecial instruction"
-            );
+            panic!("Unsupported member {name_of_class}/{name_of_member}");
         }
     } else {
         panic!("Unknown opcode {:?}", opcode);
@@ -1237,6 +1225,7 @@ pub enum ConstantPrint<'a> {
     Class { name: &'a str },
 }
 
+#[cfg(test)]
 impl<'a> ConstantPrint<'a> {
     fn new(class: &'a ParsedClass, name_and_type_index: u16) -> Self {
         let pool_item = class.cp(name_and_type_index).as_ref().unwrap();
@@ -1262,15 +1251,17 @@ impl<'a> ConstantPrint<'a> {
 
     fn class(&self) -> Option<&str> {
         match self {
-            ConstantPrint::Class { name } => Some(name),
-            _ => None,
+            &ConstantPrint::Class { name } => Some(name),
+            _ => panic!("invalid constant formatter {self:?}"),
         }
     }
 
-    fn name_and_type(&self) -> Option<ConstantPrint> {
+    fn name_and_type(&self) -> Option<(String, String)> {
         match self {
-            ConstantPrint::NameAndType { .. } => Some(self.clone()),
-            _ => None,
+            &ConstantPrint::NameAndType { name, descriptor } => {
+                Some((name.into(), descriptor.into()))
+            }
+            _ => panic!("invalid constant formatter {self:?}"),
         }
     }
 }
@@ -1391,4 +1382,77 @@ fn find_attributes_by_name<'a>(
         name == value
     });
     iter.collect()
+}
+
+#[cfg(test)]
+fn gen_constant_pool(pool: Vec<Option<Constant>>) -> ParsedClass {
+    ParsedClass {
+        magic: 0,
+        minor: 0,
+        major: 0,
+        constant_pool: pool,
+        access_flags: ClassAccessFlags { bits: 0 },
+        this_class: 0,
+        super_class: 0,
+        interfaces: vec![],
+        fields: vec![],
+        methods: vec![],
+        attributes: vec![],
+        class_id: 0,
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn constant_get_str() {
+        let c_val: Constant = Constant::Utf8 {
+            value: "str".into(),
+        };
+        assert_eq!(c_val.str(), "str");
+    }
+
+    #[test]
+    fn constant_print() {
+        let mut box_list: Vec<Box<ParsedClass>> = vec![];
+        fn get_class_data<'a>(box_list: &'a mut Vec<Box<ParsedClass>>) -> ConstantPrint<'a> {
+            let c_box = Box::new(gen_constant_pool(vec![
+                Some(Constant::Class { name_index: 2 }),
+                Some(Constant::Utf8 {
+                    value: "str1".into(),
+                }),
+            ]));
+            box_list.push(c_box);
+            let clazz = box_list.last().unwrap().as_ref();
+            ConstantPrint::new(clazz, 1)
+        }
+        assert_eq!(get_class_data(&mut box_list).class().unwrap(), "str1");
+
+        fn get_name_and_type_data<'a>(
+            box_list: &'a mut Vec<Box<ParsedClass>>,
+        ) -> ConstantPrint<'a> {
+            let c_box = Box::new(gen_constant_pool(vec![
+                Some(Constant::NameAndType {
+                    name_index: 2,
+                    descriptor_index: 3,
+                }),
+                Some(Constant::Utf8 {
+                    value: "str1".into(),
+                }),
+                Some(Constant::Utf8 {
+                    value: "str2".into(),
+                }),
+            ]));
+            box_list.push(c_box);
+            let clazz = box_list.last().unwrap().as_ref();
+            ConstantPrint::new(clazz, 1)
+        }
+        let obj2 = get_name_and_type_data(&mut box_list)
+            .name_and_type()
+            .unwrap();
+        assert_eq!(obj2.0, "str1".to_owned());
+        assert_eq!(obj2.1, "str2".to_owned());
+    }
 }
