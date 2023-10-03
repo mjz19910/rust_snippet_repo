@@ -122,9 +122,9 @@ bitflags! {
     }
 }
 
-impl ClassAccessFlags {
-    fn parse(f: &mut File) -> Option<Self> {
-        Self::from_bits(parse_u2_raw(f))
+impl ParseOne<Self> for ClassAccessFlags {
+    fn parse(f: &mut dyn Read) -> Self {
+        Self::from_bits(parse_u2_raw(f)).unwrap()
     }
 }
 
@@ -151,7 +151,7 @@ impl MethodAccessFlags {
     }
 }
 
-pub fn parse_u1_raw(f: &mut File) -> u8 {
+pub fn parse_u1_raw(f: &mut dyn Read) -> u8 {
     let mut value = [0];
     f.read_exact(&mut value).unwrap();
     value[0]
@@ -200,12 +200,6 @@ pub struct ParsedClass {
     pub class_id: i32,
 }
 
-fn parse_interfaces(f: &mut File, interfaces_count: u16) -> Vec<ParsedInterface> {
-    (0..interfaces_count)
-        .map(|_| ParsedInterface::parse(f))
-        .collect()
-}
-
 impl ParsedClass {
     fn matches_name(&self, name_index: u16, needle_name: &str) -> bool {
         if let Constant::Utf8 { value, .. } = self.cp_as_ref(name_index) {
@@ -241,16 +235,16 @@ impl ParsedClass {
         &self.constant_pool[(index - 1) as usize]
     }
 
-    fn parse(program: &mut Program, f: &mut File) -> Self {
+    fn parse(program: &mut Program, f: &mut dyn Read) -> Self {
         let magic = parse_u4_raw(f);
         let minor = parse_u2_raw(f);
         let major = parse_u2_raw(f);
         let constant_pool = parse_constant_pool(program, f);
-        let access_flags = ClassAccessFlags::parse(f).unwrap();
+        let access_flags = ClassAccessFlags::parse(f);
         let this_class = parse_u2_raw(f);
         let super_class = parse_u2_raw(f);
         let interfaces_count = parse_u2_raw(f);
-        let interfaces = parse_interfaces(f, interfaces_count);
+        let interfaces = ParsedInterface::parse_vec(f, interfaces_count);
         let fields_count = parse_u2_raw(f);
         let fields = ParsedField::parse_vec(f, fields_count);
         let methods_count = parse_u2_raw(f);
@@ -298,13 +292,13 @@ impl ParsedClass {
 pub struct ParsedInterface {
     pub interface_index: u16,
 }
-
-impl ParsedInterface {
-    fn parse(f: &mut File) -> ParsedInterface {
+impl ParseOne<Self> for ParsedInterface {
+    fn parse(f: &mut dyn Read) -> Self {
         let interface_index = parse_u2_raw(f);
-        ParsedInterface { interface_index }
+        Self { interface_index }
     }
 }
+impl ParseManyOf<Self> for ParsedInterface {}
 
 #[derive(Clone, Debug)]
 pub struct ParsedField {
@@ -434,12 +428,12 @@ pub struct ParsedMethod {
 trait ParseOne<T> {
     fn parse(f: &mut dyn Read) -> T;
 }
-trait ParseManyOf<T>
-where
-    T: ParseOne<T>,
-{
-    fn parse_vec(f: &mut dyn Read, count: u16) -> Vec<T> {
-        (0..count).map(|_| T::parse(f)).collect()
+trait ParseManyOf<T> {
+    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<T>
+    where
+        T: ParseOne<T>,
+    {
+        (0..count.into()).map(|_| T::parse(f)).collect()
     }
 }
 
@@ -480,7 +474,7 @@ impl ParseOne<Self> for ParsedAttribute {
         // u1 info[attribute_length];
         let attribute_name_index = parse_u2_raw(f);
         let attribute_length = parse_u4_raw(f);
-        let info = parse_vec_u8(f, attribute_length as u64);
+        let info = parse_vec_u8(f, attribute_length);
         ParsedAttribute {
             attribute_name_index,
             info,
@@ -510,19 +504,19 @@ pub struct AttributeDescription {
     pub info: Vec<u8>,
 }
 
-fn parse_vec_u8(f: &mut dyn Read, length: u64) -> Vec<u8> {
+fn parse_vec_u8<S: Into<u64>>(f: &mut dyn Read, length: S) -> Vec<u8> {
     let mut bytes: Vec<u8> = vec![];
-    f.take(length as u64).read_to_end(&mut bytes).unwrap();
+    f.take(length.into()).read_to_end(&mut bytes).unwrap();
     bytes
 }
 
-fn parse_constant_pool_item(inc_size: &mut usize, f: &mut File) -> Constant {
+fn parse_constant_pool_item(inc_size: &mut usize, f: &mut dyn Read) -> Constant {
     let tag_raw = parse_u1_raw(f);
     let tag = ConstantTag::try_from(tag_raw).unwrap();
     match tag {
         ConstantTag::Utf8 => {
             let length = parse_u2_raw(f);
-            let vec = parse_vec_u8(f, length.into());
+            let vec = parse_vec_u8(f, length);
             // TODO: Parse from java_utf8 instead of utf8
             let value = String::from_utf8(vec).unwrap();
             Constant::Utf8 { value }
@@ -611,7 +605,7 @@ struct Program {
     global_class_count: i32,
 }
 
-fn parse_constant_pool(program: &Program, f: &mut File) -> Vec<Option<Constant>> {
+fn parse_constant_pool(program: &Program, f: &mut dyn Read) -> Vec<Option<Constant>> {
     let cp_count = usize::from(parse_u2_raw(f));
     let mut ret: Vec<Option<Constant>> = vec![];
     let is_printing_verbose = program.print_debug_info && program.is_verbose;
@@ -1364,7 +1358,6 @@ pub struct ExceptionInfo {
     pub handler_pc: u16,
     pub catch_type: u16,
 }
-
 impl ParseOne<Self> for ExceptionInfo {
     fn parse(f: &mut dyn Read) -> Self {
         // u2 start_pc;
