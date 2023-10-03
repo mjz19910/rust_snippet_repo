@@ -24,6 +24,7 @@
         "powf",
         "powi",
         "repr",
+        "rustc",
         "saddr",
         "tsoding",
         "uninit",
