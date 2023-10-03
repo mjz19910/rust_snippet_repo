@@ -18,6 +18,20 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     }
 }
 
+fn show_val<'a, T>(value: T) -> Vec<&'a [u64]> {
+    let c = ptr::addr_of!(value);
+    let a = c as *const *const u64;
+    let size = mem::size_of_val(&value);
+    let slice_len = size / 8;
+    let lambda_parts = unsafe { slice::from_raw_parts(a, slice_len) };
+    let mut ret_parts = vec![];
+    for item in lambda_parts {
+        let slice = unsafe { slice::from_raw_parts(*item, 1) };
+        ret_parts.push(slice);
+    }
+    ret_parts
+}
+
 pub fn lambda_ref() {
     println!("[lambda_ref]");
     let lambda_a = 0u64;
@@ -26,19 +40,6 @@ pub fn lambda_ref() {
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
     let fn_ptr = &lambda as &dyn FnOnce() -> (u64, fn(), u64, u64);
-    fn show_val<'a, T>(value: T) -> Vec<&'a [u64]> {
-        let c = ptr::addr_of!(value);
-        let a = c as *const *const u64;
-        let size = mem::size_of_val(&value);
-        let slice_len = size / 8;
-        let lambda_parts = unsafe { slice::from_raw_parts(a, slice_len) };
-        let mut ret_parts = vec![];
-        for item in lambda_parts {
-            let slice = unsafe { slice::from_raw_parts(*item, 1) };
-            ret_parts.push(slice);
-        }
-        ret_parts
-    }
     println!("read all captured refs: {:x?}", show_val(fn_ptr));
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = mem::size_of_val(&gdb_bp_fn);
