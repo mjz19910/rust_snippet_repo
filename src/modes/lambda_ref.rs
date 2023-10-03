@@ -40,8 +40,8 @@ pub fn lambda_ref() {
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
     let fn_ptr = &lambda as &dyn FnOnce() -> (u64, fn(), u64, u64);
-    let fn_ptr_data=show_val(fn_ptr);
-    println!("lambda as dyn Fn: {:x?}", fn_ptr_data);
+    let fn_ptr_data = show_val(fn_ptr);
+    println!("lambda as dyn Fn={:x?}", fn_ptr_data);
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = mem::size_of_val(&gdb_bp_fn);
     let gdb_bp_ptr = ptr::addr_of!(gdb_bp_fn);
