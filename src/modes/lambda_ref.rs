@@ -1,4 +1,5 @@
 use core::ptr;
+use std::collections::VecDeque;
 use std::mem;
 use std::slice;
 
@@ -22,7 +23,8 @@ fn show_val_1<T>(value: T) -> Vec<u64> {
     let lambda_parts = unsafe { slice::from_raw_parts(a, size / 8) };
     lambda_parts.to_owned()
 }
-fn show_val_2<T: ?Sized>(value: &T) -> Vec<&[u64]> {
+fn show_val_2<'a, T: ?Sized>(value: &'a T, sizes: VecDeque<usize>) -> Vec<&'a [u64]> {
+    let mut sizes = sizes.clone();
     let c = ptr::addr_of!(value);
     let a = c as *const *const u64;
     let size = mem::size_of_val(&value);
@@ -30,7 +32,8 @@ fn show_val_2<T: ?Sized>(value: &T) -> Vec<&[u64]> {
     let lambda_parts = unsafe { slice::from_raw_parts(a, slice_len) };
     let mut ret_parts = vec![];
     for item in lambda_parts {
-        let slice = unsafe { slice::from_raw_parts(*item, 1) };
+        let size = sizes.pop_front().unwrap();
+        let slice = unsafe { slice::from_raw_parts(*item, size) };
         ret_parts.push(slice);
     }
     ret_parts
@@ -44,10 +47,10 @@ pub fn lambda_ref() {
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
     let fn_ptr = &lambda as &dyn FnOnce() -> (u64, fn(), u64, u64);
-    let fn_ptr_data = show_val_2(fn_ptr);
-    println!("&dyn FnOnce {:x?}", show_val_1(fn_ptr));
-    println!("lambda {:x?}", show_val_1(lambda));
-    println!("lambda as dyn FnOnce={:x?}", fn_ptr_data);
+    let fn_ptr_data_level1 = show_val_1(fn_ptr);
+    println!("fn_ptr_data_level1={fn_ptr_data_level1:x?}");
+    let fn_ptr_data_level2 = show_val_2(fn_ptr, VecDeque::from([4, 1]));
+    println!("fn_ptr_data_level2={fn_ptr_data_level2:x?}");
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = mem::size_of_val(&gdb_bp_fn);
     let gdb_bp_ptr = ptr::addr_of!(gdb_bp_fn);

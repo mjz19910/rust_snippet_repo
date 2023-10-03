@@ -8,6 +8,7 @@
         "bitor",
         "clazz",
         "demangle",
+        "Deque",
         "dladdr",
         "dlerror",
         "dli_fbase",
