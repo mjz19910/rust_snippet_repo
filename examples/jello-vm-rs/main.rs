@@ -1285,8 +1285,7 @@ fn get_name_of_class(clazz: &ParsedClass, class_index: u16) -> String {
 
 fn parse_u2_vec(index: &mut usize, code: &[u8]) -> u16 {
     let value = &code[*index..*index + 2];
-    let value = [value[1], value[0]];
-    let value = (value[0] as u16) + ((value[1] as u16) << 8);
+    let value = (value[1] as u16) + ((value[0] as u16) << 8);
     *index += 2;
     value
 }
