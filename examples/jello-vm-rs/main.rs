@@ -256,7 +256,7 @@ impl ParsedClass {
         let methods_count = parse_u2_raw(f);
         let methods = ParsedMethod::parse_vec(f, methods_count);
         let attributes_count = parse_u2_raw(f);
-        let attributes = parse_attributes(f, attributes_count);
+        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         let class_id = program.global_class_count;
         program.global_class_count += 1;
         Self {
@@ -320,7 +320,7 @@ impl ParseOne<Self> for ParsedField {
         let name_index = parse_u2_raw(f);
         let descriptor_index = parse_u2_raw(f);
         let attributes_count = parse_u2_raw(f);
-        let attributes = parse_attributes(f, attributes_count);
+        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         Self {
             access_flags,
             name_index,
@@ -455,7 +455,7 @@ impl ParseOne<Self> for ParsedMethod {
         let name_index = parse_u2_raw(f);
         let descriptor_index = parse_u2_raw(f);
         let attributes_count = parse_u2_raw(f);
-        let attributes = parse_attributes(f, attributes_count);
+        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         Self {
             access_flags,
             name_index,
@@ -508,13 +508,6 @@ impl ParsedAttribute {
 pub struct AttributeDescription {
     pub attribute_name: String,
     pub info: Vec<u8>,
-}
-
-// attribute_info { .. }
-fn parse_attributes(f: &mut dyn Read, attributes_count: u16) -> Vec<ParsedAttribute> {
-    (0..attributes_count)
-        .map(|_| ParsedAttribute::parse(f))
-        .collect()
 }
 
 fn parse_vec_u8(f: &mut dyn Read, length: u64) -> Vec<u8> {
