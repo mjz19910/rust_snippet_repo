@@ -175,7 +175,7 @@ impl ParseManyOf<Self> for u8 {
         let mut value: Vec<u8> = vec![];
         let count = count.into();
         value.resize(count as usize, 0);
-        f.read_exact(value.as_mut_slice()).unwrap();
+        f.read_exact(&mut value).unwrap();
         value
     }
 }
