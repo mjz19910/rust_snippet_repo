@@ -151,12 +151,6 @@ impl MethodAccessFlags {
     }
 }
 
-pub fn parse_u1_raw(f: &mut dyn Read) -> u8 {
-    let mut value = [0];
-    f.read_exact(&mut value).unwrap();
-    value[0]
-}
-
 pub fn parse_u2_raw(f: &mut dyn Read) -> u16 {
     let mut value = [0; 2];
     f.read_exact(&mut value).unwrap();
@@ -474,7 +468,7 @@ impl ParseOne<Self> for ParsedAttribute {
         // u1 info[attribute_length];
         let attribute_name_index = parse_u2_raw(f);
         let attribute_length = parse_u4_raw(f);
-        let info = parse_vec_u8(f, attribute_length);
+        let info = u8::parse_vec(f, attribute_length);
         ParsedAttribute {
             attribute_name_index,
             info,
@@ -504,19 +498,28 @@ pub struct AttributeDescription {
     pub info: Vec<u8>,
 }
 
-fn parse_vec_u8<S: Into<u64>>(f: &mut dyn Read, length: S) -> Vec<u8> {
-    let mut bytes: Vec<u8> = vec![];
-    f.take(length.into()).read_to_end(&mut bytes).unwrap();
-    bytes
+impl ParseOne<Self> for u8 {
+    fn parse(f: &mut dyn Read) -> Self {
+        let mut value = [0];
+        f.read_exact(&mut value).unwrap();
+        value[0]
+    }
+}
+impl ParseManyOf<Self> for u8 {
+    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<Self> {
+        let mut bytes: Vec<u8> = vec![];
+        f.take(count.into()).read_to_end(&mut bytes).unwrap();
+        bytes
+    }
 }
 
 fn parse_constant_pool_item(inc_size: &mut usize, f: &mut dyn Read) -> Constant {
-    let tag_raw = parse_u1_raw(f);
+    let tag_raw = u8::parse(f);
     let tag = ConstantTag::try_from(tag_raw).unwrap();
     match tag {
         ConstantTag::Utf8 => {
             let length = parse_u2_raw(f);
-            let vec = parse_vec_u8(f, length);
+            let vec = u8::parse_vec(f, length);
             // TODO: Parse from java_utf8 instead of utf8
             let value = String::from_utf8(vec).unwrap();
             Constant::Utf8 { value }
@@ -574,7 +577,7 @@ fn parse_constant_pool_item(inc_size: &mut usize, f: &mut dyn Read) -> Constant 
             descriptor_index: parse_u2_raw(f),
         },
         ConstantTag::MethodHandle => Constant::MethodHandle {
-            reference_kind: parse_u1_raw(f),
+            reference_kind: u8::parse(f),
             reference_index: parse_u2_raw(f),
         },
         ConstantTag::MethodType => Constant::MethodType {
@@ -1337,7 +1340,7 @@ impl CodeInfo {
         let max_stack = parse_u2_raw(f);
         let max_locals = parse_u2_raw(f);
         let code_length = parse_u4_raw(f);
-        let code = parse_vec_u8(f, code_length as u64);
+        let code = u8::parse_vec(f, code_length);
         let exception_count = parse_u2_raw(f);
         let exception_table = ExceptionInfo::parse_vec(f, exception_count);
         let attributes_count = parse_u2_raw(f);
