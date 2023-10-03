@@ -18,7 +18,14 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     }
 }
 
-fn show_val<'a, T>(value: T) -> Vec<&'a [u64]> {
+fn show_val_1<T>(value: T) -> Vec<u64> {
+    let c = ptr::addr_of!(value);
+    let a = c as *const u64;
+    let size = mem::size_of_val(&value);
+    let lambda_parts = unsafe { slice::from_raw_parts(a, size / 8) };
+    lambda_parts.to_owned()
+}
+fn show_val_2<'a, T>(value: T) -> Vec<&'a [u64]> {
     let c = ptr::addr_of!(value);
     let a = c as *const *const u64;
     let size = mem::size_of_val(&value);
@@ -40,7 +47,9 @@ pub fn lambda_ref() {
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
     let fn_ptr = &lambda as &dyn FnOnce() -> (u64, fn(), u64, u64);
-    let fn_ptr_data = show_val(fn_ptr);
+    let fn_ptr_data = show_val_2(fn_ptr);
+    println!("&dyn FnOnce {:x?}", show_val_1(fn_ptr));
+    println!("lambda {:x?}", show_val_1(lambda));
     println!("lambda as dyn Fn={:x?}", fn_ptr_data);
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = mem::size_of_val(&gdb_bp_fn);
