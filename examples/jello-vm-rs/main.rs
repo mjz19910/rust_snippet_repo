@@ -1417,13 +1417,12 @@ mod test {
     #[test]
     fn constant_print() {
         fn get_class_data<'a>(box_list: &'a mut Vec<Box<ParsedClass>>) -> ConstantPrint<'a> {
-            let c_box = Box::new(gen_constant_pool(vec![
+            box_list.push(Box::new(gen_constant_pool(vec![
                 Some(Constant::Class { name_index: 2 }),
                 Some(Constant::Utf8 {
                     value: "str1".into(),
                 }),
-            ]));
-            box_list.push(c_box);
+            ])));
             let clazz = box_list.last().unwrap().as_ref();
             ConstantPrint::new(clazz, 1)
         }
