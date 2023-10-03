@@ -18,7 +18,7 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     }
 }
 
-pub fn lambda_ref() -> Option<()> {
+pub fn lambda_ref() {
     println!("[lambda_ref]");
     let lambda_a = 0u64;
     let lambda_b = (|| ()) as fn();
@@ -47,7 +47,7 @@ pub fn lambda_ref() -> Option<()> {
     let f_ptr = ptr::addr_of!(func);
     let ptr = f_ptr as *const u64;
     println!("f_ptr: {:#x?}[{:#x}]", unsafe { *ptr }, func_size);
-    let func = read_as_optional(f_ptr)?;
+    let func = read_as_optional(f_ptr).unwrap();
     func();
     let value = unsafe { *(lambda_parts[1] as *const usize) };
     match value {
@@ -57,5 +57,4 @@ pub fn lambda_ref() -> Option<()> {
     }
     let ret = lambda();
     println!("(ret.1): {:x?}[{:#x?}]", ret.1, mem::size_of_val(&ret.1));
-    Some(())
 }

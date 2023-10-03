@@ -14,10 +14,6 @@ use crate::{
 
 use crate::modes::lambda_moved::lambda_moved;
 
-fn exec_optional_func<U>(func_name: &str, func: fn() -> Option<U>) -> Result<U, String> {
-    func().map_or_else(|| Err(format!("Failed to run {}", func_name)), |x| Ok(x))
-}
-
 use std::env;
 
 pub fn exec_mode<U>(main_addr: fn() -> U) -> Result<(), String> {
@@ -61,7 +57,7 @@ pub fn exec_mode<U>(main_addr: fn() -> U) -> Result<(), String> {
 
             // For modes modules
             "do_asm_get_rip" => do_asm_get_rip(),
-            "lambda_ref" => exec_optional_func(func_name, lambda_ref)?,
+            "lambda_ref" => lambda_ref(),
             "lambda_moved" => lambda_moved(),
             "print_dl_addr_info" => print_dl_addr_info(main_addr),
             "ptr_meta_run" => ptr_meta_run(main_addr as *const u8)?,
