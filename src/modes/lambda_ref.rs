@@ -39,15 +39,6 @@ pub fn lambda_ref() {
         }
         ret_parts
     }
-    let c = ptr::addr_of!(fn_ptr);
-    let a = c as *const *const u64;
-    let size = mem::size_of_val(&fn_ptr);
-    let slice_len = size / 8;
-    let lambda_parts = unsafe { slice::from_raw_parts(a, slice_len) };
-    println!(
-        "addr of lambda info: {:x?}[{:#x}]={{{:x?}}}",
-        c, size, lambda_parts
-    );
     println!("read all captured refs: {:x?}", show_val(fn_ptr));
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = mem::size_of_val(&gdb_bp_fn);
