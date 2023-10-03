@@ -136,7 +136,7 @@ bitflags! {
 
 impl ParseOne<Self> for ClassAccessFlags {
     fn parse(f: &mut dyn Read) -> Self {
-        Self::from_bits(parse_u2_raw(f)).unwrap()
+        Self::from_bits(u16::parse(f)).unwrap()
     }
 }
 
@@ -157,9 +157,9 @@ bitflags! {
     }
 }
 
-impl MethodAccessFlags {
-    fn parse(f: &mut dyn Read) -> Option<Self> {
-        Self::from_bits(parse_u2_raw(f))
+impl ParseOne<Self> for MethodAccessFlags {
+    fn parse(f: &mut dyn Read) -> Self {
+        Self::from_bits(u16::parse(f)).unwrap()
     }
 }
 
@@ -172,26 +172,26 @@ impl ParseOne<Self> for u8 {
 }
 impl ParseManyOf<Self> for u8 {
     fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<Self> {
-        let mut bytes: Vec<u8> = vec![];
-        f.take(count.into()).read_to_end(&mut bytes).unwrap();
-        bytes
+        let mut value: Vec<u8> = vec![];
+        let count = count.into();
+        value.resize(count as usize, 0);
+        f.read_exact(value.as_mut_slice()).unwrap();
+        value
     }
 }
-
-pub fn parse_u2_raw(f: &mut dyn Read) -> u16 {
-    let mut value = [0; 2];
-    f.read_exact(&mut value).unwrap();
-    let v1 = value[1] as u16 + ((value[0] as u16) << 8);
-    v1
+impl ParseOne<Self> for u16 {
+    fn parse(f: &mut dyn Read) -> Self {
+        let mut value = [0; 2];
+        f.read_exact(&mut value).unwrap();
+        unsafe { *(&value as *const u8 as *const u16) }.swap_bytes()
+    }
 }
-
-pub fn parse_u4_raw(f: &mut dyn Read) -> u32 {
-    let mut value = [0; 4];
-    f.read_exact(&mut value).unwrap();
-    value[3] as u32
-        + ((value[2] as u32) << 8)
-        + ((value[1] as u32) << 16)
-        + ((value[0] as u32) << 24)
+impl ParseOne<Self> for u32 {
+    fn parse(f: &mut dyn Read) -> Self {
+        let mut value = [0; 4];
+        f.read_exact(&mut value).unwrap();
+        unsafe { *(&value as *const u8 as *const u32) }.swap_bytes()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -257,20 +257,20 @@ impl ParsedClass {
     }
 
     fn parse(program: &mut Program, f: &mut dyn Read) -> Self {
-        let magic = parse_u4_raw(f);
-        let minor = parse_u2_raw(f);
-        let major = parse_u2_raw(f);
+        let magic = u32::parse(f);
+        let minor = u16::parse(f);
+        let major = u16::parse(f);
         let constant_pool = parse_constant_pool(program, f);
         let access_flags = ClassAccessFlags::parse(f);
-        let this_class = parse_u2_raw(f);
-        let super_class = parse_u2_raw(f);
-        let interfaces_count = parse_u2_raw(f);
+        let this_class = u16::parse(f);
+        let super_class = u16::parse(f);
+        let interfaces_count = u16::parse(f);
         let interfaces = ParsedInterface::parse_vec(f, interfaces_count);
-        let fields_count = parse_u2_raw(f);
+        let fields_count = u16::parse(f);
         let fields = ParsedField::parse_vec(f, fields_count);
-        let methods_count = parse_u2_raw(f);
+        let methods_count = u16::parse(f);
         let methods = ParsedMethod::parse_vec(f, methods_count);
-        let attributes_count = parse_u2_raw(f);
+        let attributes_count = u16::parse(f);
         let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         let class_id = program.global_class_count;
         program.global_class_count += 1;
@@ -315,7 +315,7 @@ pub struct ParsedInterface {
 }
 impl ParseOne<Self> for ParsedInterface {
     fn parse(f: &mut dyn Read) -> Self {
-        let interface_index = parse_u2_raw(f);
+        let interface_index = u16::parse(f);
         Self { interface_index }
     }
 }
@@ -331,10 +331,10 @@ pub struct ParsedField {
 
 impl ParseOne<Self> for ParsedField {
     fn parse(f: &mut dyn Read) -> Self {
-        let access_flags = parse_u2_raw(f);
-        let name_index = parse_u2_raw(f);
-        let descriptor_index = parse_u2_raw(f);
-        let attributes_count = parse_u2_raw(f);
+        let access_flags = u16::parse(f);
+        let name_index = u16::parse(f);
+        let descriptor_index = u16::parse(f);
+        let attributes_count = u16::parse(f);
         let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         Self {
             access_flags,
@@ -454,10 +454,10 @@ impl ParseOne<Self> for ParsedMethod {
         // u2             descriptor_index;
         // u2             attributes_count;
         // attribute_info attributes[attributes_count];
-        let access_flags = MethodAccessFlags::parse(f).unwrap();
-        let name_index = parse_u2_raw(f);
-        let descriptor_index = parse_u2_raw(f);
-        let attributes_count = parse_u2_raw(f);
+        let access_flags = MethodAccessFlags::parse(f);
+        let name_index = u16::parse(f);
+        let descriptor_index = u16::parse(f);
+        let attributes_count = u16::parse(f);
         let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         Self {
             access_flags,
@@ -481,8 +481,8 @@ impl ParseOne<Self> for ParsedAttribute {
         // u2 attribute_name_index;
         // u4 attribute_length;
         // u1 info[attribute_length];
-        let attribute_name_index = parse_u2_raw(f);
-        let attribute_length = parse_u4_raw(f);
+        let attribute_name_index = u16::parse(f);
+        let attribute_length = u32::parse(f);
         let info = u8::parse_vec(f, attribute_length);
         ParsedAttribute {
             attribute_name_index,
@@ -518,84 +518,84 @@ fn parse_constant_pool_item(inc_size: &mut usize, f: &mut dyn Read) -> Constant 
     let tag = ConstantTag::try_from(tag_raw).unwrap();
     match tag {
         ConstantTag::Utf8 => {
-            let length = parse_u2_raw(f);
+            let length = u16::parse(f);
             let vec = u8::parse_vec(f, length);
             // TODO: Parse from java_utf8 instead of utf8
             let value = String::from_utf8(vec).unwrap();
             Constant::Utf8 { value }
         }
         ConstantTag::Integer => {
-            let value = parse_u4_raw(f);
+            let value = u32::parse(f);
             let value = value as i32;
             Constant::Integer { value }
         }
         ConstantTag::Float => {
-            let value = parse_u4_raw(f);
+            let value = u32::parse(f);
             let value = f32::from_bits(value);
             Constant::Float { value }
         }
         ConstantTag::Long => {
             *inc_size = 2;
-            let high_bytes = parse_u4_raw(f);
-            let low_bytes = parse_u4_raw(f);
+            let high_bytes = u32::parse(f);
+            let low_bytes = u32::parse(f);
             let value = ((high_bytes as u64) << 32) + (low_bytes as u64);
             let value = value as i64;
             Constant::Long { value }
         }
         ConstantTag::Double => {
             *inc_size = 2;
-            let high_bytes = parse_u4_raw(f);
-            let low_bytes = parse_u4_raw(f);
+            let high_bytes = u32::parse(f);
+            let low_bytes = u32::parse(f);
             let bits = ((high_bytes as u64) << 32) + (low_bytes as u64);
             let value = f64::from_bits(bits);
             Constant::Double { value }
         }
         ConstantTag::Class => Constant::Class {
-            name_index: parse_u2_raw(f),
+            name_index: u16::parse(f),
         },
         ConstantTag::String => Constant::String {
-            string_index: parse_u2_raw(f),
+            string_index: u16::parse(f),
         },
         ConstantTag::FieldRef => Constant::FieldRef {
-            class_index: parse_u2_raw(f),
-            name_and_type_index: parse_u2_raw(f),
+            class_index: u16::parse(f),
+            name_and_type_index: u16::parse(f),
         },
         ConstantTag::MethodRef => Constant::MethodRef {
-            class_index: parse_u2_raw(f),
-            name_and_type_index: parse_u2_raw(f),
+            class_index: u16::parse(f),
+            name_and_type_index: u16::parse(f),
         },
         ConstantTag::InterfaceMethodRef => Constant::InterfaceMethodRef {
-            class_index: parse_u2_raw(f),
-            name_and_type_index: parse_u2_raw(f),
+            class_index: u16::parse(f),
+            name_and_type_index: u16::parse(f),
         },
         // CONSTANT_NameAndType_info { .. }
         ConstantTag::NameAndType => Constant::NameAndType {
             // u1 tag;
             // u2 name_index;
             // u2 descriptor_index;
-            name_index: parse_u2_raw(f),
-            descriptor_index: parse_u2_raw(f),
+            name_index: u16::parse(f),
+            descriptor_index: u16::parse(f),
         },
         ConstantTag::MethodHandle => Constant::MethodHandle {
             reference_kind: u8::parse(f),
-            reference_index: parse_u2_raw(f),
+            reference_index: u16::parse(f),
         },
         ConstantTag::MethodType => Constant::MethodType {
-            descriptor_index: parse_u2_raw(f),
+            descriptor_index: u16::parse(f),
         },
         ConstantTag::Dynamic => Constant::Dynamic {
-            bootstrap_method_attr_index: parse_u2_raw(f),
-            name_and_type_index: parse_u2_raw(f),
+            bootstrap_method_attr_index: u16::parse(f),
+            name_and_type_index: u16::parse(f),
         },
         ConstantTag::InvokeDynamic => Constant::InvokeDynamic {
-            bootstrap_method_attr_index: parse_u2_raw(f),
-            name_and_type_index: parse_u2_raw(f),
+            bootstrap_method_attr_index: u16::parse(f),
+            name_and_type_index: u16::parse(f),
         },
         ConstantTag::Module => Constant::Module {
-            name_index: parse_u2_raw(f),
+            name_index: u16::parse(f),
         },
         ConstantTag::Package => Constant::Package {
-            name_index: parse_u2_raw(f),
+            name_index: u16::parse(f),
         },
     }
 }
@@ -609,7 +609,7 @@ struct Program {
 }
 
 fn parse_constant_pool(program: &Program, f: &mut dyn Read) -> Vec<Option<Constant>> {
-    let cp_count = usize::from(parse_u2_raw(f));
+    let cp_count = usize::from(u16::parse(f));
     let mut ret: Vec<Option<Constant>> = vec![];
     let is_printing_verbose = program.print_debug_info && program.is_verbose;
     if is_printing_verbose {
@@ -1337,13 +1337,13 @@ impl CodeInfo {
         // } exception_table[exception_table_length];
         // u2 attributes_count;
         // attribute_info attributes[attributes_count];
-        let max_stack = parse_u2_raw(f);
-        let max_locals = parse_u2_raw(f);
-        let code_length = parse_u4_raw(f);
+        let max_stack = u16::parse(f);
+        let max_locals = u16::parse(f);
+        let code_length = u32::parse(f);
         let code = u8::parse_vec(f, code_length);
-        let exception_count = parse_u2_raw(f);
+        let exception_count = u16::parse(f);
         let exception_table = ExceptionInfo::parse_vec(f, exception_count);
-        let attributes_count = parse_u2_raw(f);
+        let attributes_count = u16::parse(f);
         let attributes = ParsedAttribute::parse_vec(f, attributes_count);
         Self {
             max_stack,
@@ -1367,10 +1367,10 @@ impl ParseOne<Self> for ExceptionInfo {
         // u2 end_pc;
         // u2 handler_pc;
         // u2 catch_type;
-        let start_pc = parse_u2_raw(f);
-        let end_pc = parse_u2_raw(f);
-        let handler_pc = parse_u2_raw(f);
-        let catch_type = parse_u2_raw(f);
+        let start_pc = u16::parse(f);
+        let end_pc = u16::parse(f);
+        let handler_pc = u16::parse(f);
+        let catch_type = u16::parse(f);
         Self {
             start_pc,
             end_pc,
