@@ -112,10 +112,11 @@ trait ParseOne<T> {
     fn parse(f: &mut dyn Read) -> T;
 }
 trait ParseManyOf<T> {
-    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<T>
+    fn parse_vec<U: ParseOne<U> + Into<u64>>(f: &mut dyn Read) -> Vec<T>
     where
         T: ParseOne<T>,
     {
+        let count = U::parse(f);
         (0..count.into()).map(|_| T::parse(f)).collect()
     }
 }
@@ -171,9 +172,9 @@ impl ParseOne<Self> for u8 {
     }
 }
 impl ParseManyOf<Self> for u8 {
-    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<Self> {
+    fn parse_vec<U: ParseOne<U> + Into<u64>>(f: &mut dyn Read) -> Vec<Self> {
+        let count = U::parse(f).into();
         let mut value: Vec<u8> = vec![];
-        let count = count.into();
         value.resize(count as usize, 0);
         f.read_exact(&mut value).unwrap();
         value
@@ -264,14 +265,10 @@ impl ParsedClass {
         let access_flags = ClassAccessFlags::parse(f);
         let this_class = u16::parse(f);
         let super_class = u16::parse(f);
-        let interfaces_count = u16::parse(f);
-        let interfaces = ParsedInterface::parse_vec(f, interfaces_count);
-        let fields_count = u16::parse(f);
-        let fields = ParsedField::parse_vec(f, fields_count);
-        let methods_count = u16::parse(f);
-        let methods = ParsedMethod::parse_vec(f, methods_count);
-        let attributes_count = u16::parse(f);
-        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
+        let interfaces = ParsedInterface::parse_vec::<u16>(f);
+        let fields = ParsedField::parse_vec::<u16>(f);
+        let methods = ParsedMethod::parse_vec::<u16>(f);
+        let attributes = ParsedAttribute::parse_vec::<u16>(f);
         let class_id = program.global_class_count;
         program.global_class_count += 1;
         Self {
@@ -334,8 +331,7 @@ impl ParseOne<Self> for ParsedField {
         let access_flags = u16::parse(f);
         let name_index = u16::parse(f);
         let descriptor_index = u16::parse(f);
-        let attributes_count = u16::parse(f);
-        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
+        let attributes = ParsedAttribute::parse_vec::<u16>(f);
         Self {
             access_flags,
             name_index,
@@ -457,8 +453,7 @@ impl ParseOne<Self> for ParsedMethod {
         let access_flags = MethodAccessFlags::parse(f);
         let name_index = u16::parse(f);
         let descriptor_index = u16::parse(f);
-        let attributes_count = u16::parse(f);
-        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
+        let attributes = ParsedAttribute::parse_vec::<u16>(f);
         Self {
             access_flags,
             name_index,
@@ -482,8 +477,7 @@ impl ParseOne<Self> for ParsedAttribute {
         // u4 attribute_length;
         // u1 info[attribute_length];
         let attribute_name_index = u16::parse(f);
-        let attribute_length = u32::parse(f);
-        let info = u8::parse_vec(f, attribute_length);
+        let info = u8::parse_vec::<u32>(f);
         ParsedAttribute {
             attribute_name_index,
             info,
@@ -518,8 +512,7 @@ fn parse_constant_pool_item(inc_size: &mut usize, f: &mut dyn Read) -> Constant 
     let tag = ConstantTag::try_from(tag_raw).unwrap();
     match tag {
         ConstantTag::Utf8 => {
-            let length = u16::parse(f);
-            let vec = u8::parse_vec(f, length);
+            let vec = u8::parse_vec::<u16>(f);
             // TODO: Parse from java_utf8 instead of utf8
             let value = String::from_utf8(vec).unwrap();
             Constant::Utf8 { value }
@@ -1339,12 +1332,9 @@ impl CodeInfo {
         // attribute_info attributes[attributes_count];
         let max_stack = u16::parse(f);
         let max_locals = u16::parse(f);
-        let code_length = u32::parse(f);
-        let code = u8::parse_vec(f, code_length);
-        let exception_count = u16::parse(f);
-        let exception_table = ExceptionInfo::parse_vec(f, exception_count);
-        let attributes_count = u16::parse(f);
-        let attributes = ParsedAttribute::parse_vec(f, attributes_count);
+        let code = u8::parse_vec::<u32>(f);
+        let exception_table = ExceptionInfo::parse_vec::<u16>(f);
+        let attributes = ParsedAttribute::parse_vec::<u16>(f);
         Self {
             max_stack,
             max_locals,
