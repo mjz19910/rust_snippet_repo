@@ -108,6 +108,18 @@ impl Display for MyError {
 
 impl Error for MyError {}
 
+trait ParseOne<T> {
+    fn parse(f: &mut dyn Read) -> T;
+}
+trait ParseManyOf<T> {
+    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<T>
+    where
+        T: ParseOne<T>,
+    {
+        (0..count.into()).map(|_| T::parse(f)).collect()
+    }
+}
+
 bitflags! {
     pub struct ClassAccessFlags: u16 {
         const PUBLIC = 0x0001;
@@ -417,18 +429,6 @@ pub struct ParsedMethod {
     pub name_index: u16,
     pub descriptor_index: u16,
     pub attributes: Vec<ParsedAttribute>,
-}
-
-trait ParseOne<T> {
-    fn parse(f: &mut dyn Read) -> T;
-}
-trait ParseManyOf<T> {
-    fn parse_vec<U: Into<u64>>(f: &mut dyn Read, count: U) -> Vec<T>
-    where
-        T: ParseOne<T>,
-    {
-        (0..count.into()).map(|_| T::parse(f)).collect()
-    }
 }
 
 impl ParseOne<Self> for ParsedMethod {
