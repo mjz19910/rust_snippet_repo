@@ -261,7 +261,7 @@ impl ParsedClass {
         let magic = u32::parse(f);
         let minor = u16::parse(f);
         let major = u16::parse(f);
-        let constant_pool = parse_constant_pool(program, f);
+        let constant_pool = parse_constant_pool(f);
         let access_flags = ClassAccessFlags::parse(f);
         let this_class = u16::parse(f);
         let super_class = u16::parse(f);
@@ -601,21 +601,13 @@ struct Program {
     global_class_count: i32,
 }
 
-fn parse_constant_pool(program: &Program, f: &mut dyn Read) -> Vec<Option<Constant>> {
+fn parse_constant_pool(f: &mut dyn Read) -> Vec<Option<Constant>> {
     let cp_count = usize::from(u16::parse(f));
     let mut ret: Vec<Option<Constant>> = vec![];
-    let is_printing_verbose = program.print_debug_info && program.is_verbose;
-    if is_printing_verbose {
-        println!("cp_count: {}", cp_count);
-        println!("Constant Pool:");
-    }
     let mut index = 0;
     while index < cp_count - 1 {
         let mut item_size = 1;
         let item = parse_constant_pool_item(&mut item_size, f);
-        if is_printing_verbose {
-            println!("  #{} = {:?}", index + 1, item);
-        }
         ret.insert(index, Some(item));
         match item_size {
             1 => (),
