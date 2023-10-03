@@ -116,8 +116,8 @@ trait ParseManyOf<T> {
     where
         T: ParseOne<T>,
     {
-        let count = U::parse(f);
-        (0..count.into()).map(|_| T::parse(f)).collect()
+        let count = U::parse(f).into();
+        (0..count).map(|_| T::parse(f)).collect()
     }
 }
 
