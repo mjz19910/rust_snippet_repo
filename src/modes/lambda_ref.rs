@@ -7,9 +7,6 @@ extern "C" fn gdb_bp() {
     println!("hit gdb_bp");
 }
 
-/// # Safety
-///
-/// This function will panic when you read null ptr
 pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     if value as usize != 0 {
         Some(unsafe { *value })
@@ -47,10 +44,10 @@ pub fn lambda_ref() {
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
     let fn_ptr = &lambda as &dyn FnOnce() -> (u64, fn(), u64, u64);
-    let fn_ptr_data = show_val_2::<dyn FnOnce() -> (u64, fn(), u64, u64)>(fn_ptr);
+    let fn_ptr_data = show_val_2(fn_ptr);
     println!("&dyn FnOnce {:x?}", show_val_1(fn_ptr));
     println!("lambda {:x?}", show_val_1(lambda));
-    println!("lambda as dyn Fn={:x?}", fn_ptr_data);
+    println!("lambda as dyn FnOnce={:x?}", fn_ptr_data);
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = mem::size_of_val(&gdb_bp_fn);
     let gdb_bp_ptr = ptr::addr_of!(gdb_bp_fn);
