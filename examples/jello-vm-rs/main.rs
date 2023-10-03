@@ -241,7 +241,7 @@ impl ParsedClass {
         &self.constant_pool[(index - 1) as usize]
     }
 
-    fn parse(program: &mut Program, f: &mut File) -> ParsedClass {
+    fn parse(program: &mut Program, f: &mut File) -> Self {
         let magic = parse_u4_raw(f);
         let minor = parse_u2_raw(f);
         let major = parse_u2_raw(f);
@@ -259,7 +259,7 @@ impl ParsedClass {
         let attributes = parse_attributes(f, attributes_count);
         let class_id = program.global_class_count;
         program.global_class_count += 1;
-        ParsedClass {
+        Self {
             magic,
             minor,
             major,
@@ -272,6 +272,24 @@ impl ParsedClass {
             methods,
             attributes,
             class_id,
+        }
+    }
+
+    #[cfg(test)]
+    fn with_constant_pool(pool: Vec<Option<Constant>>) -> Self {
+        Self {
+            magic: 0,
+            minor: 0,
+            major: 0,
+            constant_pool: pool,
+            access_flags: ClassAccessFlags { bits: 0 },
+            this_class: 0,
+            super_class: 0,
+            interfaces: vec![],
+            fields: vec![],
+            methods: vec![],
+            attributes: vec![],
+            class_id: 0,
         }
     }
 }
@@ -1385,24 +1403,6 @@ fn find_attributes_by_name<'a>(
 }
 
 #[cfg(test)]
-fn gen_constant_pool(pool: Vec<Option<Constant>>) -> ParsedClass {
-    ParsedClass {
-        magic: 0,
-        minor: 0,
-        major: 0,
-        constant_pool: pool,
-        access_flags: ClassAccessFlags { bits: 0 },
-        this_class: 0,
-        super_class: 0,
-        interfaces: vec![],
-        fields: vec![],
-        methods: vec![],
-        attributes: vec![],
-        class_id: 0,
-    }
-}
-
-#[cfg(test)]
 mod test {
     use super::*;
 
@@ -1417,7 +1417,7 @@ mod test {
     #[test]
     fn constant_print() {
         let mut box_list = vec![];
-        box_list.push(Box::new(gen_constant_pool(vec![
+        box_list.push(Box::new(ParsedClass::with_constant_pool(vec![
             Some(Constant::Class { name_index: 2 }),
             Some(Constant::Utf8 {
                 value: "str1".into(),
@@ -1427,7 +1427,7 @@ mod test {
         let const_print1 = ConstantPrint::new(clazz1, 1);
         assert_eq!(const_print1.class().unwrap(), "str1");
 
-        box_list.push(Box::new(gen_constant_pool(vec![
+        box_list.push(Box::new(ParsedClass::with_constant_pool(vec![
             Some(Constant::NameAndType {
                 name_index: 2,
                 descriptor_index: 3,
