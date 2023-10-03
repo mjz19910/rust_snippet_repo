@@ -1416,37 +1416,32 @@ mod test {
 
     #[test]
     fn constant_print() {
-        fn get_class_data<'a>(box_list: &'a mut Vec<Box<ParsedClass>>) -> ConstantPrint<'a> {
-            box_list.push(Box::new(gen_constant_pool(vec![
-                Some(Constant::Class { name_index: 2 }),
-                Some(Constant::Utf8 {
-                    value: "str1".into(),
-                }),
-            ])));
-            let clazz = box_list.last().unwrap().as_ref();
-            ConstantPrint::new(clazz, 1)
-        }
-        assert_eq!(get_class_data(&mut vec![]).class().unwrap(), "str1");
+        let mut box_list = vec![];
+        box_list.push(Box::new(gen_constant_pool(vec![
+            Some(Constant::Class { name_index: 2 }),
+            Some(Constant::Utf8 {
+                value: "str1".into(),
+            }),
+        ])));
+        let clazz1 = box_list.last().unwrap().as_ref();
+        let const_print1 = ConstantPrint::new(clazz1, 1);
+        assert_eq!(const_print1.class().unwrap(), "str1");
 
-        fn get_name_and_type_data<'a>(
-            box_list: &'a mut Vec<Box<ParsedClass>>,
-        ) -> ConstantPrint<'a> {
-            box_list.push(Box::new(gen_constant_pool(vec![
-                Some(Constant::NameAndType {
-                    name_index: 2,
-                    descriptor_index: 3,
-                }),
-                Some(Constant::Utf8 {
-                    value: "str1".into(),
-                }),
-                Some(Constant::Utf8 {
-                    value: "str2".into(),
-                }),
-            ])));
-            let clazz = box_list.last().unwrap().as_ref();
-            ConstantPrint::new(clazz, 1)
-        }
-        let obj2 = get_name_and_type_data(&mut vec![]).name_and_type().unwrap();
+        box_list.push(Box::new(gen_constant_pool(vec![
+            Some(Constant::NameAndType {
+                name_index: 2,
+                descriptor_index: 3,
+            }),
+            Some(Constant::Utf8 {
+                value: "str1".into(),
+            }),
+            Some(Constant::Utf8 {
+                value: "str2".into(),
+            }),
+        ])));
+        let clazz2 = box_list.last().unwrap().as_ref();
+        let const_print2 = ConstantPrint::new(clazz2, 1);
+        let obj2 = const_print2.name_and_type().unwrap();
         assert_eq!(obj2.0, "str1".to_owned());
         assert_eq!(obj2.1, "str2".to_owned());
     }
