@@ -7,15 +7,15 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug executable 'misc'",
+			"name": "Debug executable 'rust_snippet_repo'",
 			"cargo": {
 				"args": [
 					"build",
-					"--bin=misc",
-					"--package=misc"
+					"--bin=rust_snippet_repo",
+					"--package=rust_snippet_repo"
 				],
 				"filter": {
-					"name": "misc",
+					"name": "rust_snippet_repo",
 					"kind": "bin"
 				}
 			},
@@ -25,16 +25,16 @@
 		{
 			"type": "lldb",
 			"request": "launch",
-			"name": "Debug unit tests in executable 'misc'",
+			"name": "Debug unit tests in executable 'rust_snippet_repo'",
 			"cargo": {
 				"args": [
 					"test",
 					"--no-run",
-					"--bin=misc",
-					"--package=misc"
+					"--bin=rust_snippet_repo",
+					"--package=rust_snippet_repo"
 				],
 				"filter": {
-					"name": "misc",
+					"name": "rust_snippet_repo",
 					"kind": "bin"
 				}
 			},
@@ -49,7 +49,7 @@
 				"args": [
 					"build",
 					"--example=traits",
-					"--package=misc"
+					"--package=rust_snippet_repo"
 				],
 				"filter": {
 					"name": "traits",
@@ -68,7 +68,7 @@
 					"test",
 					"--no-run",
 					"--example=traits",
-					"--package=misc"
+					"--package=rust_snippet_repo"
 				],
 				"filter": {
 					"name": "traits",
