@@ -49,9 +49,8 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     }
     let v1 = a2.as_ptr().cast::<V>();
     let v2 = unsafe { *v1 };
-    let iter = &ret_parts[1..];
     let mut ret_parts2 = vec![];
-    for &item in iter {
+    for &item in &ret_parts[1..] {
         ret_parts2.push(item);
     }
     (v2, ret_parts2)
