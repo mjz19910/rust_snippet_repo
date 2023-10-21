@@ -16,10 +16,9 @@ use crate::{
     },
     support::{
         asm::jmp_loop,
+        async_vec,
         constants::{FORCE_CODE_GEN, FORCE_DEBUG_FLAG, SKIP_CODE_GEN, SKIP_DEBUG_FLAG},
-        disabled_code::drop_helpers::drop_helpers_async_vec,
-        get_command_line_arguments::get_command_line_arguments,
-        CmdArg,
+        get_command_line_arguments, CmdArg,
     },
 };
 
@@ -70,7 +69,7 @@ pub fn main() -> Result<(), String> {
     }
     for func_name in exec_vec {
         match func_name {
-            "drop_helpers_async_vec" => drop_helpers_async_vec(),
+            "async_vec" => async_vec(),
 
             // For modes modules
             "do_asm_get_rip" => do_asm_get_rip(),
