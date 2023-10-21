@@ -8,6 +8,8 @@ use std::ffi::OsStr;
 use std::os::unix::prelude::OsStrExt;
 use std::slice;
 
+use LoopState::LoopContinue;
+
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct RawLocation(*const u8, usize, u32, u32);
 
@@ -68,7 +70,6 @@ fn is_cached_offset(state: &PtrIter) -> bool {
 }
 
 fn loop_branch_4(state: &mut PtrIter, value: (*const u8, usize, u32, u32)) -> LoopState {
-    use LoopState::LoopContinue;
     disabled!(println!("{} str_ptr: {:x?}", p_dbg(state), value.0));
     use crate::support::ptr_math::add;
     add(&mut state.fns_arr, 1);
@@ -87,7 +88,6 @@ fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, 
 }
 
 fn loop_branch_2(state: &mut PtrIter) -> LoopState {
-    use LoopState::LoopContinue;
     let value: (*const u8, usize, u32, u32) = get_type(state.fns_arr);
     let slice = unsafe { slice::from_raw_parts(value.0, value.1) };
     let os_str = OsStr::from_bytes(slice);
@@ -109,7 +109,6 @@ fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
 }
 
 fn loop_branch_1(state: &mut PtrIter) -> LoopState {
-    use LoopState::LoopContinue;
     let value: RawStrRef = get_type(state.fns_arr);
     use crate::support::ptr_math::add;
     add(&mut state.fns_arr, 2);

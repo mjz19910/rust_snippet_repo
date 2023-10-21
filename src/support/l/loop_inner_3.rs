@@ -1,16 +1,18 @@
 use crate::{
     disabled, ignore_template_macro,
     support::{
-        is_cached_offset,
-        metadata::{GetX, XVTable}, elf_base,
+        elf_base, is_cached_offset,
+        metadata::{GetX, XVTable},
     },
 };
 
-use super::{p_dbg, ptr_iter::PtrIter, LoopState};
+use super::{
+    p_dbg,
+    ptr_iter::PtrIter,
+    LoopState::{self, LoopBreak, LoopContinue},
+};
 
 pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
-    use LoopState::LoopBreak;
-    use LoopState::LoopContinue;
     let opt = is_cached_offset(state);
     ignore_template_macro!({
         opt |= match state.cur_offset {
