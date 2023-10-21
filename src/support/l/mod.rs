@@ -52,6 +52,7 @@ pub mod metadata;
 pub mod ptr_math;
 pub mod symbol_info;
 pub mod symbol_info_ffi;
-mod toggle_macro;
 pub mod typename;
 pub mod waker_utils;
+
+mod toggle_macro;
