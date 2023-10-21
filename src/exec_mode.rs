@@ -23,17 +23,11 @@ pub fn exec_mode() -> Result<(), String> {
     for arg in args {
         match arg {
             CmdArg::LongOpt(value) => match value {
-                // --gdb
                 "gdb" => is_gdb_mode = true,
-                // --code-gen
                 "code-gen" => unsafe { FORCE_CODE_GEN = true },
-                // --no-code-gen
                 "no-code-gen" => unsafe { SKIP_CODE_GEN = true },
-                // --run
                 "run" => capture_next_arg_to_exec = true,
-                // --debug
                 "debug" => unsafe { FORCE_DEBUG_FLAG = true },
-                // --no-debug
                 "no-debug" => unsafe { SKIP_DEBUG_FLAG = true },
                 _ => return Err(format!("Invalid option '--{}'", value)),
             },
