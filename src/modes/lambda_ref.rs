@@ -64,7 +64,7 @@ pub fn lambda_ref() {
     let lambda_x = 0x4151u64;
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
-    let fn_ptr = &lambda as &dyn FnOnce() -> _;
+    let fn_ptr = &lambda as &dyn Fn() -> _;
     let fn_ptr_data_level1: Vec<u64> = show_val_1(fn_ptr);
     println!("fn_ptr_data_level1={fn_ptr_data_level1:x?}");
     let (fn_ptr_data_level2, fn_ptr_data_vec2) = show_val_2(fn_ptr, VecDeque::from([4]));
