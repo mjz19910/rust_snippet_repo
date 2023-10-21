@@ -1,9 +1,4 @@
 use self::ptr_iter::PtrIter;
-use crate::disabled;
-use std::ffi::OsStr;
-use std::os::unix::prelude::OsStrExt;
-use std::slice;
-use LoopState::LoopContinue;
 
 mod l;
 pub use l::*;
@@ -58,13 +53,6 @@ fn is_cached_offset(state: &PtrIter) -> bool {
     matches!(state.cur_offset, 0)
 }
 
-fn loop_branch_4(state: &mut PtrIter, value: (*const u8, usize, u32, u32)) -> LoopState {
-    disabled!(println!("{} str_ptr: {:x?}", p_dbg(state), value.0));
-    use crate::support::ptr_math::add;
-    add(&mut state.fns_arr, 1);
-    LoopContinue
-}
-
 fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, u32, u32)) {
     println!(
         "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
@@ -76,18 +64,6 @@ fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, 
     );
 }
 
-fn loop_branch_2(state: &mut PtrIter) -> LoopState {
-    let value: (*const u8, usize, u32, u32) = get_type(state.fns_arr);
-    let slice = unsafe { slice::from_raw_parts(value.0, value.1) };
-    let os_str = OsStr::from_bytes(slice);
-    if let Some(str_v) = os_str.to_str() {
-        disabled!(debug_location_value(state, str_v, value));
-    }
-    use crate::support::ptr_math::add;
-    add(&mut state.fns_arr, 3);
-    LoopContinue
-}
-
 fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
     println!(
         "{} debug_str_ref: ({:#x}, {:?})",
@@ -95,16 +71,4 @@ fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
         elf_base(state.elf_base_ptr, value.0),
         str_v
     );
-}
-
-fn loop_branch_1(state: &mut PtrIter) -> LoopState {
-    let value: RawStrRef = get_type(state.fns_arr);
-    use crate::support::ptr_math::add;
-    add(&mut state.fns_arr, 2);
-    let res = unsafe { slice::from_raw_parts(value.0, value.1) };
-    let os_str = OsStr::from_bytes(res);
-    if let Some(str_v) = os_str.to_str() {
-        disabled!(debug_str_ref(state, str_v, value));
-    }
-    LoopContinue
 }
