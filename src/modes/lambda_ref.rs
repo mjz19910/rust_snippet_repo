@@ -34,11 +34,17 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     let slice_len = size / 8;
     let lambda_parts = unsafe { slice::from_raw_parts(a, slice_len) };
     let mut ret_parts = vec![];
-    use std::mem::size_of;
-    sizes.push_front(size_of::<V>() / 8);
-    for item in lambda_parts {
+    {
+        let slice = unsafe { slice::from_raw_parts(lambda_parts[0], mem::size_of::<V>() / 8) };
+        ret_parts.push(slice);
+    }
+    {
+        let slice = unsafe { slice::from_raw_parts(lambda_parts[1], sizes.pop_front().unwrap()) };
+        ret_parts.push(slice);
+    }
+    for &item in &lambda_parts[2..] {
         let size = sizes.pop_front().unwrap();
-        let slice = unsafe { slice::from_raw_parts(*item, size) };
+        let slice = unsafe { slice::from_raw_parts(item, size) };
         ret_parts.push(slice);
     }
     let a1 = ret_parts[0] as *const [u64];
@@ -46,10 +52,8 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     let a4 = unsafe { &*a3 };
     let mut a2 = vec![];
     for item in a4 {
-        let i2 = *item;
-        let i3 = i2 as *const u64;
-        let i4 = unsafe { &*i3 };
-        a2.push(*i4);
+        let i2 = *item as *const u64;
+        a2.push(unsafe { *i2 });
     }
     let v1 = a2.as_ptr() as *const V;
     let v2 = unsafe { *v1 };
