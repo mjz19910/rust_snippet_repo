@@ -44,7 +44,6 @@ fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
         _ => (),
     }
     if size_of < 0x1000 {
-        use crate::support::p_dbg::p_dbg;
         println!(
             "{} find_next_object(new_size): {:#x}",
             p_dbg(state),
@@ -71,7 +70,6 @@ fn is_cached_offset(state: &PtrIter) -> bool {
 }
 
 fn loop_branch_4(state: &mut PtrIter, value: (*const u8, usize, u32, u32)) -> LoopState {
-    use crate::support::p_dbg::p_dbg;
     use LoopState::LoopContinue;
     disabled!(println!("{} str_ptr: {:x?}", p_dbg(state), value.0));
     use crate::support::ptr_math::add;
@@ -81,7 +79,6 @@ fn loop_branch_4(state: &mut PtrIter, value: (*const u8, usize, u32, u32)) -> Lo
 
 fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, u32, u32)) {
     use crate::support::elf_base::elf_base;
-    use crate::support::p_dbg::p_dbg;
     println!(
         "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
         p_dbg(state),
@@ -107,7 +104,6 @@ fn loop_branch_2(state: &mut PtrIter) -> LoopState {
 
 fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
     use crate::support::elf_base::elf_base;
-    use crate::support::p_dbg::p_dbg;
     println!(
         "{} debug_str_ref: ({:#x}, {:?})",
         p_dbg(state),

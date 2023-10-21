@@ -2,7 +2,7 @@ use crate::{
     disabled,
     support::{
         check_vtable_size_of, get_location, get_str_ref, is_location_str, is_str_ref_like,
-        metadata::XVTable, p_dbg::p_dbg,
+        metadata::XVTable, p_dbg,
     },
 };
 

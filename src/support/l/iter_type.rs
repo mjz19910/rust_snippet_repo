@@ -3,6 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::disabled;
 
+use super::p_dbg;
 use super::ptr_iter::PtrIter;
 
 pub fn iter_type<T, U>(
@@ -31,7 +32,6 @@ where
     }
     let c = Rc::clone(step_count);
     *c.borrow_mut() += 1;
-    use crate::support::p_dbg::p_dbg;
     disabled!(println!(
         "{} iter_type: ({}, {})",
         p_dbg(state),

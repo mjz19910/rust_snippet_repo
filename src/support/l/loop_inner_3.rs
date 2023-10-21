@@ -7,7 +7,7 @@ use crate::{
     },
 };
 
-use super::ptr_iter::PtrIter;
+use super::{p_dbg, ptr_iter::PtrIter};
 
 pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     use LoopState::LoopBreak;
@@ -36,7 +36,6 @@ pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     if let LoopContinue = result {
         return result;
     }
-    use crate::support::p_dbg::p_dbg;
     print!("state_check_3: {} {:#x}: ", p_dbg(state), state.cur_offset);
     print!("({:x?}) ", vtable_rva);
     print!("@!(3) ");
