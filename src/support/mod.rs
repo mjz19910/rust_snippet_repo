@@ -1,13 +1,12 @@
 pub mod l;
+pub use l::*;
 pub mod s;
+pub use s::*;
 use std::cell::{LazyCell, RefCell};
 use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::os::unix::prelude::OsStrExt;
 use std::slice;
-
-pub use l::*;
-pub use s::*;
 
 use loop_state::LoopState;
 
