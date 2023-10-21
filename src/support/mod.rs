@@ -10,6 +10,10 @@ use std::slice;
 
 use LoopState::LoopContinue;
 
+use crate::disabled;
+
+use self::ptr_iter::PtrIter;
+
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct RawLocation(*const u8, usize, u32, u32);
 
@@ -119,6 +123,3 @@ fn loop_branch_1(state: &mut PtrIter) -> LoopState {
     }
     LoopContinue
 }
-
-use crate::disabled;
-use ptr_iter::PtrIter;
