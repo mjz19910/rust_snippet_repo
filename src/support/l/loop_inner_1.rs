@@ -3,10 +3,13 @@ use crate::{
     support::{elf_base, loop_branch_1, loop_branch_2, loop_branch_4, loop_inner_3},
 };
 
-use super::{p_dbg, ptr_iter::PtrIter, LoopState};
+use super::{
+    p_dbg,
+    ptr_iter::PtrIter,
+    LoopState::{self, LoopBreak},
+};
 
 pub fn loop_inner_1(state: &mut PtrIter) -> LoopState {
-    use LoopState::LoopBreak;
     let value: (*const u8, usize, u32, u32) = crate::support::get_type(state.fns_arr);
     state.ptr_base = elf_base(state.elf_base_ptr, value.0);
     state.cur_offset = state.ptr_base - state.start_count[0];
