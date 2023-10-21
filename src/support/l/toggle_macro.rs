@@ -15,5 +15,3 @@ macro_rules! enabled {
         $body;
     };
 }
-
-enabled!(use_enabled_macro);
