@@ -1,7 +1,7 @@
-use core::ptr;
+use core::ptr::addr_of;
 use std::collections::VecDeque;
-use std::mem;
-use std::slice;
+use std::mem::{size_of, size_of_val};
+use std::slice::from_raw_parts;
 
 #[no_mangle]
 extern "C" fn gdb_bp() {
@@ -17,10 +17,10 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
 }
 
 fn show_val_1<T>(value: T) -> Vec<u64> {
-    let c = ptr::addr_of!(value);
+    let c = addr_of!(value);
     let a = c as *const u64;
-    let size = mem::size_of_val(&value);
-    let lambda_parts = unsafe { slice::from_raw_parts(a, size / 8) };
+    let size = size_of_val(&value);
+    let lambda_parts = unsafe { from_raw_parts(a, size / 8) };
     lambda_parts.to_owned()
 }
 fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
@@ -28,24 +28,19 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     sizes: VecDeque<usize>,
 ) -> (V, Vec<&'a [u64]>) {
     let mut sizes = sizes.clone();
-    let c = ptr::addr_of!(value);
+    let c = addr_of!(value);
     let a = c as *const *const u64;
-    let size = mem::size_of_val(&value);
+    let size = size_of_val(&value);
     let slice_len = size / 8;
-    let lambda_parts = unsafe { slice::from_raw_parts(a, slice_len) };
+    let lambda_parts = unsafe { from_raw_parts(a, slice_len) };
     let mut ret_parts = vec![];
-    {
-        let slice = unsafe { slice::from_raw_parts(lambda_parts[0], mem::size_of::<V>() / 8) };
-        ret_parts.push(slice);
-    }
-    {
-        let slice = unsafe { slice::from_raw_parts(lambda_parts[1], sizes.pop_front().unwrap()) };
-        ret_parts.push(slice);
-    }
+    let mut rp = |data, len| {
+        ret_parts.push(unsafe { from_raw_parts(data, len) });
+    };
+    rp(lambda_parts[0], size_of::<V>() / 8);
+    rp(lambda_parts[1], sizes.pop_front().unwrap());
     for &item in &lambda_parts[2..] {
-        let size = sizes.pop_front().unwrap();
-        let slice = unsafe { slice::from_raw_parts(item, size) };
-        ret_parts.push(slice);
+        rp(item, sizes.pop_front().unwrap());
     }
     let a1 = ret_parts[0] as *const [u64];
     let a3 = a1 as *const [*const ()];
@@ -79,8 +74,8 @@ pub fn lambda_ref() {
     println!("fn_ptr_data_level2={fn_ptr_data_level2:x?}");
     println!("fn_ptr_data_vec2={fn_ptr_data_vec2:x?}");
     let gdb_bp_fn = gdb_bp as extern "C" fn();
-    let func_size = mem::size_of_val(&gdb_bp_fn);
-    let gdb_bp_ptr = ptr::addr_of!(gdb_bp_fn);
+    let func_size = size_of_val(&gdb_bp_fn);
+    let gdb_bp_ptr = addr_of!(gdb_bp_fn);
     let gdb_bp_ptr_u64 = gdb_bp_ptr as *const u64;
     println!(
         "gdb_bp_fn: {:#x?}[{:#x}]",
@@ -90,5 +85,5 @@ pub fn lambda_ref() {
     let gdb_bp_fn = read_as_optional(gdb_bp_ptr).unwrap();
     gdb_bp_fn();
     let (_ret_a, ret_b, _ret_x, _ret_z, ..) = lambda();
-    println!("(ret.1): {:x?}[{:#x?}]", ret_b, mem::size_of_val(&ret_b));
+    println!("(ret.1): {:x?}[{:#x?}]", ret_b, size_of_val(&ret_b));
 }
