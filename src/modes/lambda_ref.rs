@@ -57,6 +57,50 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     (v2, ret_parts2)
 }
 
+#[derive(Debug, Clone, Copy)]
+struct LambdaType<'a> {
+    pub captures: &'a LambdaTypeCaptures<'a>, // (&'a u64, &'a fn(), &'a u64, &'a u64),
+    pub metadata: &'static LambdaTypeMeta,    // (u64, u64, u64, u64),
+}
+impl<'a> LambdaType<'a> {
+    fn show(&self) {
+        self.captures.show();
+        self.metadata.show();
+    }
+}
+#[derive(Debug)]
+struct LambdaTypeMeta {
+    drop_in_place: u64,
+    size_of: u64,
+    align_of: u64,
+    call_once: u64,
+    closure: u64
+}
+impl LambdaTypeMeta {
+    fn show(&self) {
+        self.drop_in_place;
+        self.size_of;
+        self.align_of;
+        self.call_once;
+        self.closure;
+    }
+}
+#[derive(Debug)]
+struct LambdaTypeCaptures<'a> {
+    pub a: &'a u64,
+    pub b: &'a fn(),
+    pub x: &'a u64,
+    pub z: &'a u64,
+}
+impl<'a> LambdaTypeCaptures<'a> {
+    fn show(&self) {
+        self.a;
+        self.b;
+        self.x;
+        self.z;
+    }
+}
+
 pub fn lambda_ref() {
     println!("[lambda_ref]");
     let lambda_a = 0u64;
@@ -70,13 +114,17 @@ pub fn lambda_ref() {
     let (fn_ptr_data_level2, fn_ptr_data_vec2) = show_val_2(fn_ptr, VecDeque::from([4]));
     println!("fn_ptr_data2.0={fn_ptr_data_level2:x?}");
     println!("fn_ptr_data2.1={fn_ptr_data_vec2:x?}");
+    let fn_info1 = addr_of!(fn_ptr) as *const LambdaType;
+    let fn_info_p = unsafe { *fn_info1 };
+    println!("fn_info_p={fn_info_p:x?}");
+    fn_info_p.show();
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     assert_eq!(size_of_val(&gdb_bp_fn), 8);
     let gdb_bp_ptr = addr_of!(gdb_bp_fn);
     let u64_ptr = gdb_bp_ptr.cast::<u64>();
     println!("gdb_bp_fn: {:#x?}", unsafe { *u64_ptr });
     read_as_optional(gdb_bp_ptr).unwrap()();
-    let (_ret_a, ret_b, _ret_x, _ret_z) = lambda();
+    let (_ret_a, ret_b, _ret_x, _ret_z, ..) = lambda();
     assert_eq!(size_of_val(&ret_b), 8);
     println!("ret_b: {ret_b:x?}");
 }
