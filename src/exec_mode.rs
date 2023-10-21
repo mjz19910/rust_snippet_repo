@@ -35,7 +35,10 @@ pub fn exec_mode() -> Result<(), String> {
                 "r" => capture_next_arg_to_exec = true,
                 _ => return Err(format!("Invalid option '-{}'", value)),
             },
-            CmdArg::Seq(value) if capture_next_arg_to_exec => exec_vec.push(value),
+            CmdArg::Seq(value) if capture_next_arg_to_exec => {
+                exec_vec.push(value);
+                capture_next_arg_to_exec = false;
+            }
             _ => {
                 return Err(format!("Unknown option `{:?}`", arg));
             }
