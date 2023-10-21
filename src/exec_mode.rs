@@ -19,26 +19,31 @@ pub fn exec_mode() -> Result<(), String> {
     let args = get_command_line_arguments(&env_args)?;
     let mut is_gdb_mode = false;
     let mut exec_vec = vec![];
-    let mut capture_next_arg_to_exec = false;
-    for arg in args {
+    let mut args = args.iter();
+    loop {
+        let arg = args.next();
+        let Some(&arg) = arg else {
+            break;
+        };
         match arg {
+            CmdArg::LongOpt("run") | CmdArg::ShortOpt("r") => {
+                let arg2 = *args
+                    .next()
+                    .ok_or_else(|| format!("Missing option for `{}`", arg))?;
+                if let CmdArg::Seq(arg2) = arg2 {
+                    exec_vec.push(arg2);
+                } else {
+                    return Err(format!("Unknown option `{}` for `{}`", arg2, arg));
+                }
+            }
             CmdArg::LongOpt(value) => match value {
                 "gdb" => is_gdb_mode = true,
                 "code-gen" => unsafe { FORCE_CODE_GEN = true },
                 "no-code-gen" => unsafe { SKIP_CODE_GEN = true },
-                "run" => capture_next_arg_to_exec = true,
                 "debug" => unsafe { FORCE_DEBUG_FLAG = true },
                 "no-debug" => unsafe { SKIP_DEBUG_FLAG = true },
-                _ => return Err(format!("Invalid option '--{}'", value)),
+                _ => return Err(format!("Invalid option `{}`", arg)),
             },
-            CmdArg::ShortOpt(value) => match value {
-                "r" => capture_next_arg_to_exec = true,
-                _ => return Err(format!("Invalid option '-{}'", value)),
-            },
-            CmdArg::Seq(value) if capture_next_arg_to_exec => {
-                exec_vec.push(value);
-                capture_next_arg_to_exec = false;
-            }
             _ => {
                 return Err(format!("Unknown option `{:?}`", arg));
             }
