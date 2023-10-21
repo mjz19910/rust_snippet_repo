@@ -1,7 +1,7 @@
 macro_rules! export1 {
     ($body:tt) => {
         mod $body;
-				pub(crate) use $body::$body;
+        pub(crate) use $body::$body;
     };
 }
 
@@ -22,19 +22,20 @@ export1!(loop_inner_3);
 export1!(p_dbg);
 export1!(print_debug_state);
 
-pub mod box_;
 mod cmd_arg;
 pub use cmd_arg::CmdArg;
+mod loop_state;
+pub use loop_state::LoopState;
+mod ptr_iter;
+pub use ptr_iter::PtrIter;
+
+pub mod box_;
 pub mod constants;
 pub mod describe;
 pub mod drop_helpers;
 pub mod internal_types;
-mod loop_state;
-pub use loop_state::LoopState;
 pub mod mark_offset_hit;
 pub mod metadata;
-mod ptr_iter;
-pub use ptr_iter::PtrIter;
 pub mod ptr_math;
 pub mod symbol_info;
 pub mod symbol_info_ffi;
