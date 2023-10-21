@@ -1,10 +1,12 @@
 use std::slice;
 
-pub fn read_main_ptr<T>(main_addr: fn() -> T) {
+use crate::main;
+
+pub fn read_main_ptr() {
     println!("[read_main_ptr]");
-    let fn_val = [main_addr];
+    let fn_val = [main];
     let fn_ref = &fn_val;
-    let fn_ptr = fn_ref.as_ptr() as *const fn();
+    let fn_ptr = fn_ref.as_ptr().cast::<fn()>();
     let ptr = unsafe {
         let ptr2 = (*fn_ptr) as *const usize;
         (

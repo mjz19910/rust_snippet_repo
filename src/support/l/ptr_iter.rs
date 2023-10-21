@@ -1,3 +1,4 @@
+use crate::main;
 use crate::support::metadata::XVTable;
 use crate::support::symbol_info::get_dli_fbase;
 use crate::support::symbol_info::SymbolInfo;
@@ -22,11 +23,7 @@ pub struct PtrIter {
 }
 
 impl PtrIter {
-    pub fn new(
-        vtable: &XVTable<dyn Any, 1>,
-        runtime_code_gen_flag: bool,
-        main_addr: *const u8,
-    ) -> Self {
+    pub fn new(vtable: &XVTable<dyn Any, 1>, runtime_code_gen_flag: bool) -> Self {
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
         let info = vtable.drop_in_place.symbol_info();
         let elf_base_ptr = get_dli_fbase(info)
@@ -34,7 +31,7 @@ impl PtrIter {
             .cast();
         let last_func_ptr = _fini as *const u8;
         use crate::support::elf_base::elf_base;
-        let main_rva = elf_base(elf_base_ptr, main_addr);
+        let main_rva = elf_base(elf_base_ptr, main as *const u8);
         let is_debug_build = (main_rva > 0x18000).into();
         Self {
             fns_arr,

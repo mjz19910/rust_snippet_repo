@@ -1,5 +1,4 @@
 use crate::{
-    main,
     modes::{
         do_asm_get_rip::do_asm_get_rip, lambda_moved::lambda_moved, lambda_ref::lambda_ref,
         print_dl_addr_info::print_dl_addr_info, ptr_meta_run::ptr_meta_run,
@@ -58,9 +57,9 @@ pub fn exec_mode() -> Result<(), String> {
             "do_asm_get_rip" => do_asm_get_rip(),
             "lambda_ref" => lambda_ref(),
             "lambda_moved" => lambda_moved(),
-            "print_dl_addr_info" => print_dl_addr_info(main),
-            "ptr_meta_run" => ptr_meta_run(main as *const u8)?,
-            "read_main_ptr" => read_main_ptr(main),
+            "print_dl_addr_info" => print_dl_addr_info(),
+            "ptr_meta_run" => ptr_meta_run()?,
+            "read_main_ptr" => read_main_ptr(),
 
             // None
             "none" => (),

@@ -24,6 +24,7 @@
         "Pointee",
         "powf",
         "powi",
+        "ptrs",
         "repr",
         "rustc",
         "saddr",

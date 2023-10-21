@@ -1,7 +1,7 @@
-use crate::support::symbol_info::symbol_info_from_addr;
+use crate::{support::symbol_info::symbol_info_from_addr, main};
 
-pub fn print_dl_addr_info<T>(main_func: fn() -> T) {
-    let info = symbol_info_from_addr(&main_func);
+pub fn print_dl_addr_info() {
+    let info = symbol_info_from_addr(&main);
     let info = if let Some(info) = info {
         info
     } else {
@@ -16,6 +16,6 @@ pub fn print_dl_addr_info<T>(main_func: fn() -> T) {
     println!(
         "[{}] main @ {:#x?}",
         info.dli_fname.unwrap(),
-        main_func as usize - info.dli_fbase.unwrap() as usize,
+        main as usize - info.dli_fbase.unwrap() as usize,
     );
 }

@@ -7,7 +7,7 @@ use crate::{
 };
 use std::{any::Any, cell::RefCell, ptr::metadata, rc::Rc};
 
-pub fn ptr_meta_run(main_addr: *const u8) -> Result<(), String> {
+pub fn ptr_meta_run() -> Result<(), String> {
     let mut runtime_code_gen_flag = false;
     if unsafe { FORCE_CODE_GEN } {
         runtime_code_gen_flag = true;
@@ -16,7 +16,7 @@ pub fn ptr_meta_run(main_addr: *const u8) -> Result<(), String> {
     let ptr_metadata = metadata::<dyn Any>(&value);
     let vtable = get_vtable(&ptr_metadata);
     let step_count = Rc::new(RefCell::new(0));
-    let mut state = PtrIter::new(vtable, runtime_code_gen_flag, main_addr);
+    let mut state = PtrIter::new(vtable, runtime_code_gen_flag);
     let mut pos = state.fns_arr as usize;
     pos -= pos % 0x10;
     use crate::support::elf_base::elf_base;
