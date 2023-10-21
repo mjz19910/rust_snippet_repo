@@ -21,6 +21,7 @@ export1!(loop_inner_1);
 export1!(loop_inner_3);
 export1!(p_dbg);
 export1!(print_debug_state);
+export1!(mark_offset_hit);
 
 mod cmd_arg;
 pub use cmd_arg::CmdArg;
@@ -34,7 +35,6 @@ pub mod constants;
 pub mod describe;
 pub mod drop_helpers;
 pub mod internal_types;
-pub mod mark_offset_hit;
 pub mod metadata;
 pub mod ptr_math;
 pub mod symbol_info;
