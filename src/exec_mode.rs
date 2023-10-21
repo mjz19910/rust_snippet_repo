@@ -1,6 +1,7 @@
 use crate::{
+    main,
     modes::{
-        do_asm_get_rip::do_asm_get_rip, lambda_ref::lambda_ref,
+        do_asm_get_rip::do_asm_get_rip, lambda_moved::lambda_moved, lambda_ref::lambda_ref,
         print_dl_addr_info::print_dl_addr_info, ptr_meta_run::ptr_meta_run,
     },
     support::{
@@ -12,11 +13,9 @@ use crate::{
     },
 };
 
-use crate::modes::lambda_moved::lambda_moved;
-
 use std::env;
 
-pub fn exec_mode<U>(main_addr: fn() -> U) -> Result<(), String> {
+pub fn exec_mode() -> Result<(), String> {
     let env_args = env::args().collect();
     let args = get_command_line_arguments(&env_args)?;
     let mut is_gdb_mode = false;
@@ -59,9 +58,9 @@ pub fn exec_mode<U>(main_addr: fn() -> U) -> Result<(), String> {
             "do_asm_get_rip" => do_asm_get_rip(),
             "lambda_ref" => lambda_ref(),
             "lambda_moved" => lambda_moved(),
-            "print_dl_addr_info" => print_dl_addr_info(main_addr),
-            "ptr_meta_run" => ptr_meta_run(main_addr as *const u8)?,
-            "read_main_ptr" => read_main_ptr(main_addr),
+            "print_dl_addr_info" => print_dl_addr_info(main),
+            "ptr_meta_run" => ptr_meta_run(main as *const u8)?,
+            "read_main_ptr" => read_main_ptr(main),
 
             // None
             "none" => (),

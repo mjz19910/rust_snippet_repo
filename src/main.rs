@@ -14,6 +14,6 @@ pub mod support;
 use exec_mode::exec_mode;
 
 pub fn main() -> Result<(), String> {
-    exec_mode(main)?;
+    exec_mode()?;
     Ok(())
 }
