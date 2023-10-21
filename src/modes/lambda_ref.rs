@@ -79,7 +79,7 @@ pub fn lambda_ref() {
     let gdb_bp_ptr = ptr::addr_of!(gdb_bp_fn);
     let gdb_bp_ptr_u64 = gdb_bp_ptr as *const u64;
     println!(
-        "f_ptr: {:#x?}[{:#x}]",
+        "gdb_bp_fn: {:#x?}[{:#x}]",
         unsafe { *gdb_bp_ptr_u64 },
         func_size
     );
