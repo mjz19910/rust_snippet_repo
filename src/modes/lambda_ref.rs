@@ -75,7 +75,8 @@ pub fn lambda_ref() {
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     assert_eq!(size_of_val(&gdb_bp_fn), 8);
     let gdb_bp_ptr = addr_of!(gdb_bp_fn);
-    println!("gdb_bp_fn: {:#x?}", unsafe { *gdb_bp_ptr.cast::<u64>() });
+    let u64_ptr = gdb_bp_ptr.cast::<u64>();
+    println!("gdb_bp_fn: {:#x?}", unsafe { *u64_ptr });
     read_as_optional(gdb_bp_ptr).unwrap()();
     let (_ret_a, ret_b, _ret_x, _ret_z) = lambda();
     assert_eq!(size_of_val(&ret_b), 8);
