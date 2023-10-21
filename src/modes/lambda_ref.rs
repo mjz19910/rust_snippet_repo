@@ -58,47 +58,24 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
 }
 
 #[derive(Debug, Clone, Copy)]
-struct LambdaType<'a> {
+pub struct LambdaType<'a> {
     pub captures: &'a LambdaTypeCaptures<'a>,
     pub metadata: &'static LambdaTypeMeta,
 }
-impl<'a> LambdaType<'a> {
-    fn show(&self) {
-        self.captures.show();
-        self.metadata.show();
-    }
+#[derive(Debug)]
+pub struct LambdaTypeMeta {
+    pub drop_in_place: u64,
+    pub size_of: u64,
+    pub align_of: u64,
+    pub call_once: u64,
+    pub closure: u64
 }
 #[derive(Debug)]
-struct LambdaTypeMeta {
-    drop_in_place: u64,
-    size_of: u64,
-    align_of: u64,
-    call_once: u64,
-    closure: u64
-}
-impl LambdaTypeMeta {
-    fn show(&self) {
-        self.drop_in_place;
-        self.size_of;
-        self.align_of;
-        self.call_once;
-        self.closure;
-    }
-}
-#[derive(Debug)]
-struct LambdaTypeCaptures<'a> {
+pub struct LambdaTypeCaptures<'a> {
     pub a: &'a u64,
     pub b: &'a fn(),
     pub x: &'a u64,
-    pub z: &'a u64,
-}
-impl<'a> LambdaTypeCaptures<'a> {
-    fn show(&self) {
-        self.a;
-        self.b;
-        self.x;
-        self.z;
-    }
+    pub z: &'a u64
 }
 
 pub fn lambda_ref() {
@@ -117,7 +94,6 @@ pub fn lambda_ref() {
     let fn_info1 = addr_of!(fn_ptr) as *const LambdaType;
     let fn_info_p = unsafe { *fn_info1 };
     println!("fn_info_p={fn_info_p:x?}");
-    fn_info_p.show();
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     assert_eq!(size_of_val(&gdb_bp_fn), 8);
     let gdb_bp_ptr = addr_of!(gdb_bp_fn);
