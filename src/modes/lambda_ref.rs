@@ -44,7 +44,7 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     let a4 = unsafe { &*a3 };
     let mut a2 = vec![];
     for &item in a4 {
-        let i2 = item as *const u64;
+        let i2 = item.cast::<u64>();
         a2.push(unsafe { *i2 });
     }
     let v1 = a2.as_ptr().cast::<V>();
