@@ -1,6 +1,7 @@
 pub mod asm;
 pub mod box_;
-pub mod cmd_arg;
+mod cmd_arg;
+pub use cmd_arg::CmdArg;
 pub mod constants;
 pub mod describe;
 pub mod drop_helpers;
