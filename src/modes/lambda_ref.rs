@@ -91,6 +91,7 @@ trait PtrReadU64 {
 }
 impl<T> PtrReadU64 for *const T {
     fn read_as_u64(&self) -> u64 {
+        assert_eq!(size_of::<T>(), 8);
         unsafe { self.cast::<u64>().read() }
     }
 }
