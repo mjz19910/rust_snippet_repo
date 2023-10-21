@@ -4,6 +4,12 @@ macro_rules! export1 {
         pub(crate) use $body::$body;
     };
 }
+macro_rules! export2 {
+    ($ns:tt, $type:tt) => {
+        mod $ns;
+        pub(crate) use $ns::$type;
+    };
+}
 
 export1!(async_vec);
 export1!(check_vtable_size_of);
@@ -31,17 +37,11 @@ export1!(mark_offset_hit);
 export1!(p_dbg);
 export1!(print_debug_state);
 export1!(ptr_to_str);
-
-mod cmd_arg;
-pub(crate) use cmd_arg::CmdArg;
-mod loop_state;
-pub(crate) use loop_state::LoopState;
-mod ptr_iter;
-pub(crate) use ptr_iter::PtrIter;
-mod raw_location;
-pub(crate) use raw_location::RawLocation;
-mod raw_str_ref;
-pub(crate) use raw_str_ref::RawStrRef;
+export2!(cmd_arg, CmdArg);
+export2!(loop_state, LoopState);
+export2!(ptr_iter, PtrIter);
+export2!(raw_location, RawLocation);
+export2!(raw_str_ref, RawStrRef);
 
 pub mod box_;
 pub mod constants;
