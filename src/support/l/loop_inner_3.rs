@@ -3,6 +3,7 @@ use crate::{
     support::{
         elf_base, is_cached_offset, iter_find_next_object, mark_offset_hit,
         metadata::{GetX, XVTable},
+        ptr_math::add,
     },
 };
 
@@ -34,7 +35,6 @@ pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     print!("@!(3) ");
     print!("{:x?}", value);
     println!();
-    use crate::support::ptr_math::add;
     add(&mut state.fns_arr, 6);
     LoopBreak
 }
