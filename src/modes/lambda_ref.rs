@@ -69,13 +69,12 @@ impl<'a> LambdaType<'a> {
     }
 }
 #[derive(Debug)]
-pub struct LambdaTypeMeta {
+struct LambdaTypeMeta {
     drop_in_place: u64,
     size_of: u64,
     align_of: u64,
     call_once: u64,
-    closure: u64,
-    pub a: [u64; 128],
+    closure: u64
 }
 impl LambdaTypeMeta {
     fn show(&self) {
