@@ -1,7 +1,7 @@
 use crate::{
     disabled, ignore_template_macro,
     support::{
-        elf_base, is_cached_offset,
+        elf_base, is_cached_offset, iter_find_next_object,
         metadata::{GetX, XVTable},
     },
 };
@@ -26,7 +26,6 @@ pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(state.elf_base_ptr, x));
     let _vtable_num: [usize; N] = value.vtable_fns.map(|x| x as usize);
     let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));
-    use crate::support::iter_find_next_object::iter_find_next_object;
     let result = iter_find_next_object(state, &mut get_x);
     disabled!(println!(
         "{} print_get_x_box: {}",

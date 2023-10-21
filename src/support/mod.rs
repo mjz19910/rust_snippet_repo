@@ -1,5 +1,3 @@
-use self::ptr_iter::PtrIter;
-
 mod l;
 pub use l::*;
 mod s;

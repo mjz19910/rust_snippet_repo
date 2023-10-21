@@ -1,8 +1,8 @@
 use super::{loop_state::LoopState, metadata::GetX, ptr_iter::PtrIter};
 
 pub fn iter_find_next_object(state: &mut PtrIter, get_x: &mut Option<Box<dyn GetX>>) -> LoopState {
-    use crate::support::find_next_object::find_next_object;
-    use crate::support::handle_current_object::handle_current_object;
+    use crate::support::find_next_object;
+    use crate::support::handle_current_object;
     {
         const N: usize = 1;
         if find_next_object::<N>(state) {

@@ -2,7 +2,7 @@ use crate::{
     disabled,
     support::{
         constants::CODE_GEN_ENABLED, elf_base, get_debug_flag_state, get_type,
-        iter_type::iter_type, loop_inner_1, metadata::get_vtable, p_dbg, ptr_iter::PtrIter,
+        iter_type, loop_inner_1, metadata::get_vtable, p_dbg, PtrIter,
         ptr_math::sub, LoopState::LoopContinue,
     },
 };
