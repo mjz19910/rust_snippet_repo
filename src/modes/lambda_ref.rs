@@ -76,7 +76,6 @@ pub struct LambdaTypeCaptures<'a> {
     pub x: &'a u64,
     pub z: &'a u64
 }
-
 pub fn lambda_ref() {
     println!("[lambda_ref]");
     let lambda_a = 0u64;
