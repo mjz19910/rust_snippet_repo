@@ -16,12 +16,12 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     }
 }
 
-fn show_val_1<T>(value: T) -> Vec<u64> {
+fn show_val_1<T, U: Clone>(value: T) -> Vec<U> {
     let c = addr_of!(value);
-    let a = c as *const u64;
+    let a = c.cast::<U>();
     let size = size_of_val(&value);
     let lambda_parts = unsafe { from_raw_parts(a, size / 8) };
-    lambda_parts.to_owned()
+    lambda_parts.to_vec()
 }
 fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     value: &'a T,
@@ -29,7 +29,7 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
 ) -> (V, Vec<&'a [u64]>) {
     let mut sizes = sizes.clone();
     let c = addr_of!(value);
-    let a = c as *const *const u64;
+    let a = c.cast::<*const u64>();
     let size = size_of_val(&value);
     let slice_len = size / 8;
     let lambda_parts = unsafe { from_raw_parts(a, slice_len) };
@@ -50,7 +50,7 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
         let i2 = item as *const u64;
         a2.push(unsafe { *i2 });
     }
-    let v1 = a2.as_ptr() as *const V;
+    let v1 = a2.as_ptr().cast::<V>();
     let v2 = unsafe { *v1 };
     let iter = &ret_parts[1..];
     let mut ret_parts2 = vec![];
@@ -68,7 +68,7 @@ pub fn lambda_ref() {
     let lambda_z = 0u64;
     let lambda = || (lambda_a, lambda_b, lambda_x, lambda_z);
     let fn_ptr = &lambda as &dyn FnOnce() -> _;
-    let fn_ptr_data_level1 = show_val_1(fn_ptr);
+    let fn_ptr_data_level1: Vec<u64> = show_val_1(fn_ptr);
     println!("fn_ptr_data_level1={fn_ptr_data_level1:x?}");
     let (fn_ptr_data_level2, fn_ptr_data_vec2) = show_val_2(fn_ptr, VecDeque::from([4]));
     println!("fn_ptr_data2.0={fn_ptr_data_level2:x?}");
