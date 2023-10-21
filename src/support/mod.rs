@@ -1,17 +1,14 @@
+use self::ptr_iter::PtrIter;
+use crate::disabled;
 use std::ffi::OsStr;
 use std::os::unix::prelude::OsStrExt;
 use std::slice;
+use LoopState::LoopContinue;
 
 mod l;
 pub use l::*;
 mod s;
 pub use s::*;
-
-use LoopState::LoopContinue;
-
-use crate::disabled;
-
-use self::ptr_iter::PtrIter;
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct RawLocation(*const u8, usize, u32, u32);
