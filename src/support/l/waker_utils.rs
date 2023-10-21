@@ -14,6 +14,5 @@ const fn noop_raw_waker() -> RawWaker {
 }
 
 pub fn noop_waker() -> Waker {
-    let raw_waker = noop_raw_waker();
-    unsafe { Waker::from_raw(raw_waker) }
+    unsafe { Waker::from_raw(noop_raw_waker()) }
 }
