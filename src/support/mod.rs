@@ -1,6 +1,6 @@
-pub mod l;
+mod l;
 pub use l::*;
-pub mod s;
+mod s;
 pub use s::*;
 use std::cell::{LazyCell, RefCell};
 use std::collections::HashSet;
@@ -130,6 +130,4 @@ fn loop_branch_1(state: &mut PtrIter) -> LoopState {
 }
 
 use crate::disabled;
-use crate::support::get_type::get_type;
-
-use self::ptr_iter::PtrIter;
+use ptr_iter::PtrIter;

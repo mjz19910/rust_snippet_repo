@@ -1,16 +1,14 @@
 use crate::support::p_dbg::p_dbg;
 use crate::{
     disabled,
-    support::{
-        get_type::get_type, loop_branch_1, loop_branch_2, loop_branch_4, loop_state::LoopState,
-    },
+    support::{loop_branch_1, loop_branch_2, loop_branch_4, loop_state::LoopState},
 };
 
 use super::ptr_iter::PtrIter;
 
 pub fn loop_inner_1(state: &mut PtrIter) -> LoopState {
     use LoopState::LoopBreak;
-    let value: (*const u8, usize, u32, u32) = get_type(state.fns_arr);
+    let value: (*const u8, usize, u32, u32) = crate::support::get_type(state.fns_arr);
     use crate::support::elf_base::elf_base;
     state.ptr_base = elf_base(state.elf_base_ptr, value.0);
     state.cur_offset = state.ptr_base - state.start_count[0];

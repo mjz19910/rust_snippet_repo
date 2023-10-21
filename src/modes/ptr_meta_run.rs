@@ -1,8 +1,9 @@
 use crate::{
     disabled,
     support::{
-        constants::FORCE_CODE_GEN, get_debug_flag_state::get_debug_flag_state, get_type,
-        loop_state::LoopState, metadata::get_vtable, ptr_iter::PtrIter,
+        constants::FORCE_CODE_GEN, elf_base::elf_base, get_debug_flag_state,
+        get_type, loop_state::LoopState, metadata::get_vtable, p_dbg::p_dbg,
+        ptr_iter::PtrIter, ptr_math::sub, loop_inner_1::loop_inner_1, iter_type::iter_type,
     },
 };
 use std::{any::Any, cell::RefCell, ptr::metadata, rc::Rc};
@@ -19,9 +20,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
     let mut state = PtrIter::new(vtable, runtime_code_gen_flag);
     let mut pos = state.fns_arr as usize;
     pos -= pos % 0x10;
-    use crate::support::elf_base::elf_base;
     state.start_count[0] = elf_base(state.elf_base_ptr, pos as *const u8) - 0xf100000;
-    use crate::support::p_dbg::p_dbg;
     disabled!(println!(
         "{} main_rva_ptr: {:#x?}",
         p_dbg(&state),
@@ -57,7 +56,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
     }
     let mut loop_count = 0;
     loop {
-        let value: [u64; 5] = get_type::get_type(fns_arr_cur);
+        let value: [u64; 5] = get_type(fns_arr_cur);
         match value {
             [2, 0, 0, 0, val] if val > 0x1000 => {
                 ptr_count -= 7;
@@ -82,7 +81,6 @@ pub fn ptr_meta_run() -> Result<(), String> {
             loop_count * 8,
         )
     };
-    use crate::support::ptr_math::sub;
     sub(&mut state.fns_arr, ptr_count);
     let start_offset = elf_base(state.elf_base_ptr, state.fns_arr);
     disabled!(println!(
@@ -93,11 +91,9 @@ pub fn ptr_meta_run() -> Result<(), String> {
         state.fns_arr
     ));
     let fns_arr_start = state.fns_arr as *const u8;
-    use crate::support::loop_inner_1::loop_inner_1;
     while let LoopState::LoopContinue = loop_inner_1(&mut state) {}
     if false {
         let mul = if false { 46 } else { 1 };
-        use crate::support::iter_type::iter_type;
         state.fns_arr = iter_type::<*const (), *const ()>(8, &state, &step_count, 8 * mul);
     }
     disabled!(println!(

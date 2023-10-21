@@ -1,8 +1,8 @@
 use crate::{
     disabled,
     support::{
-        check_vtable_size_of, get_location, get_str_ref, get_type, is_location_str,
-        is_str_ref_like, metadata::XVTable, p_dbg::p_dbg,
+        check_vtable_size_of, get_location, get_str_ref, is_location_str, is_str_ref_like,
+        metadata::XVTable, p_dbg::p_dbg,
     },
 };
 
@@ -12,11 +12,11 @@ pub fn find_next_object<const N: usize>(state: &mut PtrIter) -> bool
 where
     [(); N + 3]:,
 {
-    let value: XVTable<(), { N + 3 }> = get_type::get_type(state.fns_arr);
+    let value: XVTable<(), { N + 3 }> = crate::support::get_type(state.fns_arr);
     let mut fns_arr_cur = state.fns_arr;
     use crate::support::ptr_math::add;
     add(&mut fns_arr_cur, N + 3);
-    let next_is_location = is_location_str(state, get_type::get_type(fns_arr_cur));
+    let next_is_location = is_location_str(state, crate::support::get_type(fns_arr_cur));
     if next_is_location {
         disabled!(println!(
             "{} find_next_object: {:x?}",
@@ -25,7 +25,7 @@ where
         ));
         return true;
     }
-    let next_is_str_desc = is_str_ref_like(state, get_type::get_type(fns_arr_cur));
+    let next_is_str_desc = is_str_ref_like(state, crate::support::get_type(fns_arr_cur));
     let val = &value.vtable_fns.map(|x| x as usize)[N..];
     if next_is_str_desc {
         disabled!(println!(
