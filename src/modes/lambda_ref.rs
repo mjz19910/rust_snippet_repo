@@ -81,5 +81,5 @@ pub fn lambda_ref() {
     gdb_bp_fn();
     let (_ret_a, ret_b, _ret_x, _ret_z) = lambda();
     assert_eq!(size_of_val(&ret_b), 8);
-    println!("ret_b: {:x?}", ret_b);
+    println!("ret_b: {ret_b:x?}");
 }
