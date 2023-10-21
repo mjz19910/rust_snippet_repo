@@ -1,10 +1,11 @@
 use crate::disabled;
 
-use super::p_dbg;
-use super::ptr_math::add;
-use super::{ptr_iter::PtrIter, LoopState};
-
-use LoopState::LoopContinue;
+use super::{
+    p_dbg,
+    ptr_iter::PtrIter,
+    ptr_math::add,
+    LoopState::{self, LoopContinue},
+};
 
 pub fn loop_branch_4(state: &mut PtrIter, value: (*const u8, usize, u32, u32)) -> LoopState {
     disabled!(println!("{} str_ptr: {:x?}", p_dbg(state), value.0));

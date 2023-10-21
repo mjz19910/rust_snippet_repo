@@ -1,12 +1,9 @@
 use crate::{
     disabled,
-    support::{
-        check_vtable_size_of, get_location, get_str_ref, is_location_str, is_str_ref_like,
-        metadata::XVTable, p_dbg,
-    },
+    support::{check_vtable_size_of, get_location, get_str_ref, is_location_str, is_str_ref_like},
 };
 
-use super::ptr_iter::PtrIter;
+use super::{metadata::XVTable, p_dbg, ptr_iter::PtrIter, ptr_math::add};
 
 pub fn find_next_object<const N: usize>(state: &mut PtrIter) -> bool
 where
@@ -14,7 +11,6 @@ where
 {
     let value: XVTable<(), { N + 3 }> = crate::support::get_type(state.fns_arr);
     let mut fns_arr_cur = state.fns_arr;
-    use crate::support::ptr_math::add;
     add(&mut fns_arr_cur, N + 3);
     let next_is_location = is_location_str(state, crate::support::get_type(fns_arr_cur));
     if next_is_location {

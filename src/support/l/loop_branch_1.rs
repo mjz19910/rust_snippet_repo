@@ -1,10 +1,10 @@
 use crate::disabled;
 use crate::support::{debug_str_ref, RawStrRef};
 
-use super::ptr_math::add;
-use super::{get_type, ptr_iter::PtrIter, LoopState};
 use std::os::unix::ffi::OsStrExt;
 use std::{ffi::OsStr, slice::from_raw_parts};
+
+use super::{get_type, ptr_iter::PtrIter, ptr_math::add, LoopState};
 
 use LoopState::LoopContinue;
 

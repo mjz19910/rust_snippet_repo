@@ -1,15 +1,11 @@
-use crate::{
-    disabled,
-    support::{
-        elf_base, is_cached_offset, iter_find_next_object, mark_offset_hit,
-        metadata::{GetX, XVTable},
-        ptr_math::add,
-    },
-};
+use crate::{disabled, support::is_cached_offset};
 
 use super::{
+    elf_base, iter_find_next_object, mark_offset_hit,
+    metadata::{GetX, XVTable},
     p_dbg,
     ptr_iter::PtrIter,
+    ptr_math::add,
     LoopState::{self, LoopBreak, LoopContinue},
 };
 

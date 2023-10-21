@@ -3,8 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::disabled;
 
-use super::p_dbg;
-use super::ptr_iter::PtrIter;
+use super::{p_dbg, ptr_iter::PtrIter, ptr_math::add};
 
 pub fn iter_type<T, U>(
     per_line: usize,
@@ -21,7 +20,6 @@ where
             disabled!(print!("{} vtable_next: ", p_dbg(state)));
         }
         disabled!(print!("{:02x?}, ", unsafe { *fns_arr }));
-        use super::ptr_math::add;
         add(&mut fns_arr, 1);
         if x % per_line == (per_line - 1) {
             disabled!(println!());
