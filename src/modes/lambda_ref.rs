@@ -38,9 +38,7 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     };
     rp(lambda_parts[0], size_of::<V>() / 8);
     rp(lambda_parts[1], sizes.pop_front().unwrap());
-    for &item in &lambda_parts[2..] {
-        rp(item, sizes.pop_front().unwrap());
-    }
+    assert_eq!(get_size(value), 2);
     let a1 = ret_parts[0] as *const [u64];
     let a3 = a1 as *const [*const ()];
     let a4 = unsafe { &*a3 };
