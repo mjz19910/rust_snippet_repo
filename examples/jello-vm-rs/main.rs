@@ -122,6 +122,7 @@ trait ParseManyOf<T> {
 }
 
 bitflags! {
+    #[derive(Clone, Debug)]
     pub struct ClassAccessFlags: u16 {
         const PUBLIC = 0x0001;
         const FINAL = 0x0010;
@@ -142,6 +143,7 @@ impl ParseOne<Self> for ClassAccessFlags {
 }
 
 bitflags! {
+    #[derive(Clone, Debug)]
     pub struct MethodAccessFlags: u16 {
         const PUBLIC = 0x0001;
         const PRIVATE = 0x0002;
@@ -294,7 +296,7 @@ impl ParsedClass {
             minor: 0,
             major: 0,
             constant_pool: pool,
-            access_flags: ClassAccessFlags { bits: 0 },
+            access_flags: ClassAccessFlags(0),
             this_class: 0,
             super_class: 0,
             interfaces: vec![],
