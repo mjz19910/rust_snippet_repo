@@ -32,7 +32,6 @@ pub fn exec_mode() -> Result<(), String> {
                 _ => return Err(format!("Invalid option '--{}'", value)),
             },
             CmdArg::ShortOpt(value) => match value {
-                // -r
                 "r" => capture_next_arg_to_exec = true,
                 _ => return Err(format!("Invalid option '-{}'", value)),
             },
