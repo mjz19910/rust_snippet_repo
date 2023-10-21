@@ -73,16 +73,13 @@ pub fn lambda_ref() {
     println!("fn_ptr_data2.0={fn_ptr_data_level2:x?}");
     println!("fn_ptr_data2.1={fn_ptr_data_vec2:x?}");
     let gdb_bp_fn = gdb_bp as extern "C" fn();
-    let func_size = size_of_val(&gdb_bp_fn);
+    assert_eq!(size_of_val(&gdb_bp_fn), 8);
     let gdb_bp_ptr = addr_of!(gdb_bp_fn);
     let gdb_bp_ptr_u64 = gdb_bp_ptr as *const u64;
-    println!(
-        "gdb_bp_fn: {:#x?}[{:#x}]",
-        unsafe { *gdb_bp_ptr_u64 },
-        func_size
-    );
+    println!("gdb_bp_fn: {:#x?}", unsafe { *gdb_bp_ptr_u64 });
     let gdb_bp_fn = read_as_optional(gdb_bp_ptr).unwrap();
     gdb_bp_fn();
     let (_ret_a, ret_b, _ret_x, _ret_z) = lambda();
-    println!("(ret.1): {:x?}[{:#x?}]", ret_b, size_of_val(&ret_b));
+    assert_eq!(size_of_val(&ret_b), 8);
+    println!("ret_b: {:x?}", ret_b);
 }
