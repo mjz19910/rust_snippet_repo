@@ -17,10 +17,8 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
 }
 
 fn show_val_1<T, U: Clone>(value: T) -> Vec<U> {
-    let c = addr_of!(value);
-    let a = c.cast::<U>();
-    let size = size_of_val(&value);
-    let lambda_parts = unsafe { from_raw_parts(a, size / 8) };
+    let data = addr_of!(value).cast::<U>();
+    let lambda_parts = unsafe { from_raw_parts(data, size_of_val(&value) / 8) };
     lambda_parts.to_vec()
 }
 fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
