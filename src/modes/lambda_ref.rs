@@ -59,8 +59,8 @@ fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
 
 #[derive(Debug, Clone, Copy)]
 struct LambdaType<'a> {
-    pub captures: &'a LambdaTypeCaptures<'a>, // (&'a u64, &'a fn(), &'a u64, &'a u64),
-    pub metadata: &'static LambdaTypeMeta,    // (u64, u64, u64, u64),
+    pub captures: &'a LambdaTypeCaptures<'a>,
+    pub metadata: &'static LambdaTypeMeta,
 }
 impl<'a> LambdaType<'a> {
     fn show(&self) {
