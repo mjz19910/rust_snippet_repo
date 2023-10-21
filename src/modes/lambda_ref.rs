@@ -71,8 +71,8 @@ pub fn lambda_ref() {
     let fn_ptr_data_level1 = show_val_1(fn_ptr);
     println!("fn_ptr_data_level1={fn_ptr_data_level1:x?}");
     let (fn_ptr_data_level2, fn_ptr_data_vec2) = show_val_2(fn_ptr, VecDeque::from([4]));
-    println!("fn_ptr_data_level2={fn_ptr_data_level2:x?}");
-    println!("fn_ptr_data_vec2={fn_ptr_data_vec2:x?}");
+    println!("fn_ptr_data2.0={fn_ptr_data_level2:x?}");
+    println!("fn_ptr_data2.1={fn_ptr_data_vec2:x?}");
     let gdb_bp_fn = gdb_bp as extern "C" fn();
     let func_size = size_of_val(&gdb_bp_fn);
     let gdb_bp_ptr = addr_of!(gdb_bp_fn);
