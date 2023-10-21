@@ -1,5 +1,7 @@
-use crate::support::print_debug_state::print_debug_state;
-use crate::{disabled, support::metadata::XVTable};
+use crate::{
+    disabled,
+    support::{metadata::XVTable, print_debug_state},
+};
 
 use super::{loop_state::LoopState, metadata::GetX, ptr_iter::PtrIter};
 
