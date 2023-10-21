@@ -1,20 +1,6 @@
 mod l;
 pub use l::*;
 
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct RawLocation(*const u8, usize, u32, u32);
-
-pub(crate) fn get_location(fns_arr: *const *const ()) -> RawLocation {
-    get_type(fns_arr)
-}
-
-pub(crate) fn is_location_str(state: &PtrIter, value: RawLocation) -> bool {
-    if value.0 < state.last_func_ptr {
-        return false;
-    }
-    value.3 != 0 && value.3 < 0x1000
-}
-
 #[derive(Copy, Clone, Debug)]
 pub(crate) struct RawStrRef(*const u8, usize);
 
