@@ -1,5 +1,5 @@
 use crate::{
-    disabled, ignore_template_macro,
+    disabled,
     support::{
         elf_base, is_cached_offset, iter_find_next_object,
         metadata::{GetX, XVTable},
@@ -14,11 +14,6 @@ use super::{
 
 pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     let opt = is_cached_offset(state);
-    ignore_template_macro!({
-        opt |= match state.cur_offset {
-            _ => false,
-        };
-    });
     use crate::support::mark_offset_hit::mark_offset_hit;
     mark_offset_hit(state, opt);
     const N: usize = 3;

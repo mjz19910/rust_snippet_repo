@@ -18,7 +18,6 @@ export1!(get_command_line_arguments);
 export1!(get_debug_flag_state);
 export1!(get_type);
 export1!(handle_current_object);
-pub mod ignore_template_macro;
 pub mod internal_types;
 export1!(iter_find_next_object);
 export1!(iter_type);
