@@ -29,7 +29,7 @@ pub fn exec_mode() -> Result<(), String> {
                 "code-gen" => unsafe { FORCE_CODE_GEN = true },
                 // --no-code-gen
                 "no-code-gen" => unsafe { SKIP_CODE_GEN = true },
-                // --run-meta
+                // --run
                 "run" => capture_next_arg_to_exec = true,
                 // --debug
                 "debug" => unsafe { FORCE_DEBUG_FLAG = true },
