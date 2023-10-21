@@ -16,21 +16,22 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     }
 }
 
-fn show_val_1<T, U: Clone>(value: T) -> Vec<U> {
+fn get_size<'a, T: ?Sized>(a: &'a T) -> usize {
+    size_of_val(&a) / 8
+}
+
+fn show_val_1<'a, T: ?Sized, U: Clone>(value: &'a T) -> Vec<U> {
     let data = addr_of!(value).cast::<U>();
-    let lambda_parts = unsafe { from_raw_parts(data, size_of_val(&value) / 8) };
+    let lambda_parts = unsafe { from_raw_parts(data, get_size(value)) };
     lambda_parts.to_vec()
 }
+
 fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
     value: &'a T,
-    sizes: VecDeque<usize>,
+    mut sizes: VecDeque<usize>,
 ) -> (V, Vec<&'a [u64]>) {
-    let mut sizes = sizes.clone();
-    let c = addr_of!(value);
-    let a = c.cast::<*const u64>();
-    let size = size_of_val(&value);
-    let slice_len = size / 8;
-    let lambda_parts = unsafe { from_raw_parts(a, slice_len) };
+    let data = addr_of!(value).cast::<*const u64>();
+    let lambda_parts = unsafe { from_raw_parts(data, get_size(value)) };
     let mut ret_parts = vec![];
     let mut rp = |data, len| {
         ret_parts.push(unsafe { from_raw_parts(data, len) });
