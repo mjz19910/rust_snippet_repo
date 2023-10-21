@@ -77,8 +77,7 @@ pub fn lambda_ref() {
     let gdb_bp_ptr = addr_of!(gdb_bp_fn);
     let gdb_bp_ptr_u64 = gdb_bp_ptr.cast::<u64>();
     println!("gdb_bp_fn: {:#x?}", unsafe { *gdb_bp_ptr_u64 });
-    let gdb_bp_fn = read_as_optional(gdb_bp_ptr).unwrap();
-    gdb_bp_fn();
+    read_as_optional(addr_of!(gdb_bp_fn)).unwrap()();
     let (_ret_a, ret_b, _ret_x, _ret_z) = lambda();
     assert_eq!(size_of_val(&ret_b), 8);
     println!("ret_b: {ret_b:x?}");
