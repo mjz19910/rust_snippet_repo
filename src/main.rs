@@ -15,7 +15,6 @@ use crate::{
         do_asm_get_rip, lambda_moved, lambda_ref, print_dl_addr_info, ptr_meta_run, read_main_ptr,
     },
     support::{
-        asm::jmp_loop,
         async_vec,
         constants::{FORCE_CODE_GEN, FORCE_DEBUG_FLAG, SKIP_CODE_GEN, SKIP_DEBUG_FLAG},
         get_command_line_arguments, CmdArg,
@@ -87,7 +86,7 @@ pub fn main() -> Result<(), String> {
         }
     }
     if is_gdb_mode {
-        jmp_loop();
+        loop {}
     }
     Ok(())
 }
