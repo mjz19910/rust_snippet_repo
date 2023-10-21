@@ -1,16 +1,16 @@
 use crate::{
     disabled,
     support::{
-        constants::FORCE_CODE_GEN, elf_base, get_debug_flag_state, get_type, iter_type::iter_type,
-        loop_inner_1::loop_inner_1, metadata::get_vtable, p_dbg, ptr_iter::PtrIter, ptr_math::sub,
-        LoopState::LoopContinue,
+        constants::CODE_GEN_ENABLED, elf_base, get_debug_flag_state, get_type,
+        iter_type::iter_type, loop_inner_1, metadata::get_vtable, p_dbg, ptr_iter::PtrIter,
+        ptr_math::sub, LoopState::LoopContinue,
     },
 };
 use std::{any::Any, cell::RefCell, ptr::metadata, rc::Rc};
 
 pub fn ptr_meta_run() -> Result<(), String> {
     let mut runtime_code_gen_flag = false;
-    if unsafe { FORCE_CODE_GEN } {
+    if unsafe { CODE_GEN_ENABLED } {
         runtime_code_gen_flag = true;
     }
     let value = 0;
@@ -42,15 +42,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
     }
     sp!(fns_arr_cur, ptr_count, 7);
     if state.is_debug_build == 1 {
-        if cfg!(feature = "debug") && cfg!(feature = "code_gen") {
-            sp!(x fns_arr_cur, ptr_count, 0x680);
-        } else if cfg!(feature = "debug") {
-            sp!(x fns_arr_cur, ptr_count, 0xe60);
-        } else if cfg!(feature = "code_gen") {
-            sp!(x fns_arr_cur, ptr_count, 0x1000);
-        } else {
-            sp!(x fns_arr_cur, ptr_count, 0x738);
-        }
+        sp!(x fns_arr_cur, ptr_count, 0x738);
     } else {
         sp!(x fns_arr_cur, ptr_count, 0x6b8);
     }

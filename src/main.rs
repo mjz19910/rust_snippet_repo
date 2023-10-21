@@ -16,7 +16,7 @@ use crate::{
     },
     support::{
         async_vec,
-        constants::{FORCE_CODE_GEN, FORCE_DEBUG_FLAG, SKIP_CODE_GEN, SKIP_DEBUG_FLAG},
+        constants::{DEBUG_ENABLED, CODE_GEN_ENABLED},
         get_command_line_arguments, CmdArg,
     },
 };
@@ -50,8 +50,8 @@ pub fn main() -> Result<(), String> {
                 "gdb" => is_gdb_mode = true,
                 "code-gen" => code_gen_opt = Some(true),
                 "no-code-gen" => code_gen_opt = Some(false),
-                "debug" => unsafe { FORCE_DEBUG_FLAG = true },
-                "no-debug" => unsafe { SKIP_DEBUG_FLAG = true },
+                "debug" => unsafe { DEBUG_ENABLED = true },
+                "no-debug" => unsafe { DEBUG_ENABLED = false },
                 _ => return Err(format!("Invalid option `{}`", arg)),
             },
             _ => {
@@ -60,11 +60,7 @@ pub fn main() -> Result<(), String> {
         }
     }
     if let Some(code_gen_opt) = code_gen_opt {
-        if code_gen_opt {
-            unsafe { FORCE_CODE_GEN = true }
-        } else {
-            unsafe { SKIP_CODE_GEN = true }
-        }
+        unsafe { CODE_GEN_ENABLED = code_gen_opt }
     }
     for func_name in exec_vec {
         match func_name {

@@ -1,6 +1,6 @@
 use crate::{
     disabled,
-    support::{elf_base, loop_branch_1, loop_branch_2, loop_branch_4},
+    support::{elf_base, loop_branch_1, loop_branch_2, loop_branch_4, loop_inner_3},
 };
 
 use super::{p_dbg, ptr_iter::PtrIter, LoopState};
@@ -18,7 +18,6 @@ pub fn loop_inner_1(state: &mut PtrIter) -> LoopState {
         return loop_branch_4(state, value);
     }
     if value.0 < state.last_func_ptr {
-        use crate::support::loop_inner_3::loop_inner_3;
         return loop_inner_3(state);
     }
     if value.3 < 0x1000 {

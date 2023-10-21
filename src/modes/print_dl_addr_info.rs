@@ -1,4 +1,7 @@
-use crate::{support::symbol_info::symbol_info_from_addr, main};
+use crate::{
+    main,
+    support::{get_debug_flag_state, symbol_info::symbol_info_from_addr},
+};
 
 pub fn print_dl_addr_info() {
     let info = symbol_info_from_addr(&main);
@@ -10,7 +13,7 @@ pub fn print_dl_addr_info() {
     };
     assert!(info.dli_sname.is_none());
     assert!(info.dli_saddr.is_none());
-    if cfg!(feature = "debug") {
+    if get_debug_flag_state() {
         println!("info: {:x?}", info);
     }
     println!(
