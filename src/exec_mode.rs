@@ -20,6 +20,7 @@ pub fn exec_mode() -> Result<(), String> {
     let mut is_gdb_mode = false;
     let mut exec_vec = vec![];
     let mut args = args.iter();
+    let mut code_gen_opt = None;
     loop {
         let arg = args.next();
         let Some(&arg) = arg else {
@@ -38,8 +39,8 @@ pub fn exec_mode() -> Result<(), String> {
             }
             CmdArg::LongOpt(value) => match value {
                 "gdb" => is_gdb_mode = true,
-                "code-gen" => unsafe { FORCE_CODE_GEN = true },
-                "no-code-gen" => unsafe { SKIP_CODE_GEN = true },
+                "code-gen" => code_gen_opt = Some(true), // unsafe { FORCE_CODE_GEN = true },
+                "no-code-gen" => code_gen_opt = Some(false), // unsafe { SKIP_CODE_GEN = true },
                 "debug" => unsafe { FORCE_DEBUG_FLAG = true },
                 "no-debug" => unsafe { SKIP_DEBUG_FLAG = true },
                 _ => return Err(format!("Invalid option `{}`", arg)),
@@ -47,6 +48,13 @@ pub fn exec_mode() -> Result<(), String> {
             _ => {
                 return Err(format!("Unknown option `{}`", arg));
             }
+        }
+    }
+    if let Some(code_gen_opt) = code_gen_opt {
+        if code_gen_opt {
+            unsafe { FORCE_CODE_GEN = true }
+        } else {
+            unsafe { SKIP_CODE_GEN = true }
         }
     }
     for func_name in exec_vec {
