@@ -39,8 +39,8 @@ pub fn exec_mode() -> Result<(), String> {
             }
             CmdArg::LongOpt(value) => match value {
                 "gdb" => is_gdb_mode = true,
-                "code-gen" => code_gen_opt = Some(true), // unsafe { FORCE_CODE_GEN = true },
-                "no-code-gen" => code_gen_opt = Some(false), // unsafe { SKIP_CODE_GEN = true },
+                "code-gen" => code_gen_opt = Some(true),
+                "no-code-gen" => code_gen_opt = Some(false),
                 "debug" => unsafe { FORCE_DEBUG_FLAG = true },
                 "no-debug" => unsafe { SKIP_DEBUG_FLAG = true },
                 _ => return Err(format!("Invalid option `{}`", arg)),
