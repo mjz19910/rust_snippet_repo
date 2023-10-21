@@ -78,7 +78,6 @@ fn loop_branch_4(state: &mut PtrIter, value: (*const u8, usize, u32, u32)) -> Lo
 }
 
 fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, u32, u32)) {
-    use crate::support::elf_base::elf_base;
     println!(
         "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
         p_dbg(state),
@@ -103,7 +102,6 @@ fn loop_branch_2(state: &mut PtrIter) -> LoopState {
 }
 
 fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
-    use crate::support::elf_base::elf_base;
     println!(
         "{} debug_str_ref: ({:#x}, {:?})",
         p_dbg(state),

@@ -5,6 +5,8 @@ use crate::support::symbol_info::SymbolInfo;
 use std::any::Any;
 use std::ptr::addr_of;
 
+use super::elf_base;
+
 extern "C" {
     fn _fini();
 }
@@ -30,7 +32,6 @@ impl PtrIter {
             .expect("get_dli_fbase on symbol_info is not None")
             .cast();
         let last_func_ptr = _fini as *const u8;
-        use crate::support::elf_base::elf_base;
         let main_rva = elf_base(elf_base_ptr, main as *const u8);
         let is_debug_build = (main_rva > 0x18000).into();
         Self {

@@ -3,7 +3,7 @@ use crate::{
     support::{
         is_cached_offset,
         loop_state::LoopState,
-        metadata::{GetX, XVTable},
+        metadata::{GetX, XVTable}, elf_base,
     },
 };
 
@@ -22,7 +22,6 @@ pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     mark_offset_hit(state, opt);
     const N: usize = 3;
     let value: XVTable<(), N> = crate::support::get_type(state.fns_arr);
-    use crate::support::elf_base::elf_base;
     let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(state.elf_base_ptr, x));
     let _vtable_num: [usize; N] = value.vtable_fns.map(|x| x as usize);
     let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));
