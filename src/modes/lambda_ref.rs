@@ -84,6 +84,6 @@ pub fn lambda_ref() {
     );
     let gdb_bp_fn = read_as_optional(gdb_bp_ptr).unwrap();
     gdb_bp_fn();
-    let (_ret_a, ret_b, _ret_x, _ret_z, ..) = lambda();
+    let (_ret_a, ret_b, _ret_x, _ret_z) = lambda();
     println!("(ret.1): {:x?}[{:#x?}]", ret_b, size_of_val(&ret_b));
 }
