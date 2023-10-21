@@ -8,8 +8,6 @@ use std::ffi::OsStr;
 use std::os::unix::prelude::OsStrExt;
 use std::slice;
 
-use loop_state::LoopState;
-
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct RawLocation(*const u8, usize, u32, u32);
 

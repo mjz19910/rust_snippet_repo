@@ -1,9 +1,9 @@
 use crate::{
     disabled,
-    support::{loop_branch_1, loop_branch_2, loop_branch_4, loop_state::LoopState, elf_base},
+    support::{elf_base, loop_branch_1, loop_branch_2, loop_branch_4},
 };
 
-use super::{p_dbg, ptr_iter::PtrIter};
+use super::{p_dbg, ptr_iter::PtrIter, LoopState};
 
 pub fn loop_inner_1(state: &mut PtrIter) -> LoopState {
     use LoopState::LoopBreak;

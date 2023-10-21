@@ -2,12 +2,11 @@ use crate::{
     disabled, ignore_template_macro,
     support::{
         is_cached_offset,
-        loop_state::LoopState,
         metadata::{GetX, XVTable}, elf_base,
     },
 };
 
-use super::{p_dbg, ptr_iter::PtrIter};
+use super::{p_dbg, ptr_iter::PtrIter, LoopState};
 
 pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     use LoopState::LoopBreak;
