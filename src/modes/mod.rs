@@ -1,6 +1,13 @@
-pub mod do_asm_get_rip;
-pub mod lambda_moved;
-pub mod lambda_ref;
-pub mod print_dl_addr_info;
-pub mod ptr_meta_run;
-pub mod read_main_ptr;
+mod do_asm_get_rip;
+mod lambda_moved;
+mod lambda_ref;
+mod print_dl_addr_info;
+mod ptr_meta_run;
+mod read_main_ptr;
+
+pub use do_asm_get_rip::do_asm_get_rip;
+pub use lambda_moved::lambda_moved;
+pub use lambda_ref::lambda_ref;
+pub use print_dl_addr_info::print_dl_addr_info;
+pub use ptr_meta_run::ptr_meta_run;
+pub use read_main_ptr::read_main_ptr;

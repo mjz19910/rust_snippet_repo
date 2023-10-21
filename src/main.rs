@@ -12,8 +12,7 @@ pub mod support;
 
 use crate::{
     modes::{
-        do_asm_get_rip::do_asm_get_rip, lambda_moved::lambda_moved, lambda_ref::lambda_ref,
-        print_dl_addr_info::print_dl_addr_info, ptr_meta_run::ptr_meta_run,
+        do_asm_get_rip, lambda_moved, lambda_ref, print_dl_addr_info, ptr_meta_run, read_main_ptr,
     },
     support::{
         asm::jmp_loop,
@@ -70,7 +69,6 @@ pub fn main() -> Result<(), String> {
         }
     }
     for func_name in exec_vec {
-        use crate::modes::read_main_ptr::read_main_ptr;
         match func_name {
             "drop_helpers_async_vec_i32" => drop_helpers_async_vec_i32(),
 
