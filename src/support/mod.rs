@@ -29,7 +29,7 @@ pub(crate) fn get_str_ref(fns_arr: *const *const ()) -> RawStrRef {
     get_type(fns_arr)
 }
 
-fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
+pub(crate) fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
     match size_of {
         0x8 | 0x10 | 0x18 | 0x20 | 0x28 | 0x30 | 0x38 | 0x40 | 0x48 | 0x50 => return true,
         _ => (),
@@ -45,11 +45,15 @@ fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
     false
 }
 
-fn is_cached_offset(state: &PtrIter) -> bool {
+pub(crate) fn is_cached_offset(state: &PtrIter) -> bool {
     matches!(state.cur_offset, 0)
 }
 
-fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, u32, u32)) {
+pub(crate) fn debug_location_value(
+    state: &PtrIter,
+    str_v: &str,
+    value: (*const u8, usize, u32, u32),
+) {
     println!(
         "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
         p_dbg(state),
@@ -60,7 +64,7 @@ fn debug_location_value(state: &PtrIter, str_v: &str, value: (*const u8, usize, 
     );
 }
 
-fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
+pub(crate) fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
     println!(
         "{} debug_str_ref: ({:#x}, {:?})",
         p_dbg(state),
