@@ -1,7 +1,9 @@
 use std::ptr;
 
-use crate::support::symbol_info_ffi;
-use crate::support::symbol_info_ffi::ptr_to_str;
+use super::{
+    ptr_to_str,
+    symbol_info_ffi::{raw_symbol_info_from_addr, RawDLInfo},
+};
 
 #[derive(Copy, Clone, Debug)]
 pub struct DLInfo {
@@ -12,7 +14,7 @@ pub struct DLInfo {
 }
 
 impl DLInfo {
-    fn new(src_info: symbol_info_ffi::DLInfo) -> DLInfo {
+    fn new(src_info: RawDLInfo) -> DLInfo {
         if src_info.dli_saddr.is_null() {
             return Self {
                 dli_fname: ptr_to_str(src_info.dli_fname),
@@ -30,24 +32,22 @@ impl DLInfo {
     }
 }
 
-use symbol_info_ffi::symbol_info_from_addr as symbol_info_from_addr_ffi;
-
 pub fn symbol_info_from_addr<T>(x: &T) -> Option<DLInfo> {
     let x = x as *const T as *const ();
-    let info = symbol_info_from_addr_ffi(x)?;
+    let info = raw_symbol_info_from_addr(x)?;
     Some(DLInfo::new(info))
 }
 
 pub fn symbol_info_from_fn<T, U>(value: fn(T) -> U) -> Option<DLInfo> {
     let fn_ptr = &value as *const fn(T) -> U as *const *const ();
     let ptr = unsafe { *fn_ptr };
-    let info = symbol_info_from_addr_ffi(ptr)?;
+    let info = raw_symbol_info_from_addr(ptr)?;
     Some(DLInfo::new(info))
 }
 
 pub trait SymbolInfo {
     fn symbol_info(&self) -> Option<DLInfo> {
-        let info = symbol_info_from_addr_ffi(self)?;
+        let info = raw_symbol_info_from_addr(self)?;
         Some(DLInfo::new(info))
     }
 }
@@ -57,7 +57,7 @@ impl<T, U> SymbolInfo for fn(T) -> U {}
 impl<T, U> SymbolInfo for unsafe fn(T) -> U {}
 impl<T> SymbolInfo for *const T {
     fn symbol_info(&self) -> Option<DLInfo> {
-        let info = symbol_info_from_addr_ffi(*self)?;
+        let info = raw_symbol_info_from_addr(*self)?;
         Some(DLInfo::new(info))
     }
 }
@@ -73,7 +73,7 @@ pub fn get_dli_fbase(info: Option<DLInfo>) -> Option<*const ()> {
 
 pub fn symbol_info_and_ptr_from_addr<T: ?Sized>(ptr: &T) -> (*const (), *const ()) {
     let ptr = ptr as *const T as *const ();
-    let info = symbol_info_ffi::symbol_info_from_addr(ptr);
+    let info = raw_symbol_info_from_addr(ptr);
     match info {
         Some(info) => (info.dli_fbase, ptr),
         None => (ptr::null(), ptr),
@@ -83,7 +83,7 @@ pub fn symbol_info_and_ptr_from_addr<T: ?Sized>(ptr: &T) -> (*const (), *const (
 pub fn symbol_info_and_ptr_from_fn<T, U>(value: fn(T) -> U) -> (*const (), *const ()) {
     let fn_ptr = &value as *const fn(T) -> U as *const *const ();
     let ptr = unsafe { *fn_ptr };
-    let info = symbol_info_from_addr_ffi(ptr);
+    let info = raw_symbol_info_from_addr(ptr);
     match info {
         Some(info) => (info.dli_fbase, ptr),
         None => (ptr::null(), ptr),
@@ -93,7 +93,7 @@ pub fn symbol_info_and_ptr_from_fn<T, U>(value: fn(T) -> U) -> (*const (), *cons
 pub fn symbol_info_and_ptr_from_fn_0<U>(value: fn() -> U) -> (*const (), *const ()) {
     let fn_ptr = &value as *const fn() -> U as *const *const ();
     let ptr = unsafe { *fn_ptr };
-    let info = symbol_info_from_addr_ffi(ptr);
+    let info = raw_symbol_info_from_addr(ptr);
     match info {
         Some(info) => (info.dli_fbase, ptr),
         None => (ptr::null(), ptr),

@@ -1,11 +1,13 @@
-use crate::main;
-use crate::support::metadata::XVTable;
-use crate::support::symbol_info::get_dli_fbase;
-use crate::support::symbol_info::SymbolInfo;
 use std::any::Any;
 use std::ptr::addr_of;
 
-use super::elf_base;
+use crate::main;
+
+use super::{
+    elf_base,
+    metadata::XVTable,
+    symbol_info::{get_dli_fbase, SymbolInfo},
+};
 
 extern "C" {
     fn _fini();

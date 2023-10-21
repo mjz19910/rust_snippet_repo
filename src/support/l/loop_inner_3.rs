@@ -1,7 +1,7 @@
 use crate::{disabled, support::is_cached_offset};
 
 use super::{
-    elf_base, iter_find_next_object, mark_offset_hit,
+    elf_base, get_type, iter_find_next_object, mark_offset_hit,
     metadata::{GetX, XVTable},
     p_dbg,
     ptr_iter::PtrIter,
@@ -13,7 +13,7 @@ pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
     let opt = is_cached_offset(state);
     mark_offset_hit(state, opt);
     const N: usize = 3;
-    let value: XVTable<(), N> = crate::support::get_type(state.fns_arr);
+    let value: XVTable<(), N> = get_type(state.fns_arr);
     let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(state.elf_base_ptr, x));
     let _vtable_num: [usize; N] = value.vtable_fns.map(|x| x as usize);
     let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));

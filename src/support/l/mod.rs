@@ -22,6 +22,7 @@ export1!(loop_inner_3);
 export1!(p_dbg);
 export1!(print_debug_state);
 export1!(mark_offset_hit);
+export1!(ptr_to_str);
 
 mod cmd_arg;
 pub use cmd_arg::CmdArg;

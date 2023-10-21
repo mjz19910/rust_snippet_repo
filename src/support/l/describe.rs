@@ -3,9 +3,7 @@ use std::{
     ptr::{DynMetadata, Pointee},
 };
 
-use crate::support::{
-    drop_helpers::get_drop_in_place_for, metadata::get_vtable, typename::TypeName,
-};
+use super::{drop_helpers::get_drop_in_place_for, metadata::get_vtable, typename::TypeName};
 
 pub fn describe_ptr_parts<T: ?Sized>(parts: &(*const (), DynMetadata<T>)) {
     let vtable = get_vtable(&parts.1);

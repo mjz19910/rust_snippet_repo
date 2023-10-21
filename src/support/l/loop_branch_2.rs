@@ -4,9 +4,12 @@ use crate::support::debug_location_value;
 use std::os::unix::ffi::OsStrExt;
 use std::{ffi::OsStr, slice::from_raw_parts};
 
-use super::{get_type, ptr_iter::PtrIter, ptr_math::add, LoopState};
-
-use LoopState::LoopContinue;
+use super::{
+	get_type,
+	ptr_iter::PtrIter,
+	ptr_math::add,
+	LoopState::{self, LoopContinue},
+};
 
 pub fn loop_branch_2(state: &mut PtrIter) -> LoopState {
     let value: (*const u8, usize, u32, u32) = get_type(state.fns_arr);
