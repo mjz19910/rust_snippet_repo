@@ -45,7 +45,7 @@ pub fn exec_mode() -> Result<(), String> {
                 _ => return Err(format!("Invalid option `{}`", arg)),
             },
             _ => {
-                return Err(format!("Unknown option `{:?}`", arg));
+                return Err(format!("Unknown option `{}`", arg));
             }
         }
     }
