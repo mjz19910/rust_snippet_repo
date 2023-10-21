@@ -10,7 +10,7 @@ pub fn drop_helpers_async_vec() {
     let pin_value = unsafe { Pin::new_unchecked(&mut value) };
     let waker = simple_waker_into_waker(&());
     let res = pin_value.poll(&mut Context::from_waker(&waker));
-    let Poll::Ready(value) =res else {
+    let Poll::Ready(value) = res else {
         panic!("Future not ready");
     };
     println!("{:?}", value);
