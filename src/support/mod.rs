@@ -1,12 +1,11 @@
+use std::ffi::OsStr;
+use std::os::unix::prelude::OsStrExt;
+use std::slice;
+
 mod l;
 pub use l::*;
 mod s;
 pub use s::*;
-use std::cell::{LazyCell, RefCell};
-use std::collections::HashSet;
-use std::ffi::OsStr;
-use std::os::unix::prelude::OsStrExt;
-use std::slice;
 
 use LoopState::LoopContinue;
 
