@@ -1,6 +1,22 @@
-use crate::support::{self, LAZY_OFFSETS_SET};
+use std::{
+    cell::{LazyCell, RefCell},
+    collections::HashSet,
+};
+
+use crate::support;
 
 use super::ptr_iter::PtrIter;
+
+pub struct OffSTy(LazyCell<RefCell<HashSet<isize>>>);
+
+impl OffSTy {
+    const fn new() -> Self {
+        let init = || RefCell::new(HashSet::new());
+        Self(LazyCell::new(init))
+    }
+}
+
+pub static mut LAZY_OFFSETS_SET: OffSTy = OffSTy::new();
 
 pub fn mark_offset_hit(state: &PtrIter, opt: bool) {
     use support::constants::SKIP_CODE_GEN;

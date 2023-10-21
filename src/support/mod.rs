@@ -58,17 +58,6 @@ fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
     false
 }
 
-pub struct OffSTy(LazyCell<RefCell<HashSet<isize>>>);
-
-impl OffSTy {
-    const fn new() -> Self {
-        let init = || RefCell::new(HashSet::new());
-        Self(LazyCell::new(init))
-    }
-}
-
-pub static mut LAZY_OFFSETS_SET: OffSTy = OffSTy::new();
-
 fn is_cached_offset(state: &PtrIter) -> bool {
     matches!(state.cur_offset, 0)
 }
