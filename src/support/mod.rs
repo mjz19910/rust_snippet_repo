@@ -6,9 +6,10 @@ use std::ffi::OsStr;
 use std::os::unix::prelude::OsStrExt;
 use std::slice;
 
-use l::loop_state::LoopState;
 pub use l::*;
 pub use s::*;
+
+use loop_state::LoopState;
 
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct RawLocation(*const u8, usize, u32, u32);
