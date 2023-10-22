@@ -21,6 +21,7 @@
         "Kutepov",
         "MaybeUninit",
         "Methodref",
+        "nostack",
         "Pointee",
         "powf",
         "powi",
