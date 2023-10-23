@@ -85,7 +85,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
     while let LoopContinue = loop_inner_1(&mut state) {}
     if false {
         let mul = if false { 46 } else { 1 };
-        state.fns_arr = iter_type::<*const (), *const ()>(8, &state, &step_count, 8 * mul);
+        state.fns_arr = iter_type::<*const ()>(8, &state, &step_count, 8 * mul);
     }
     disabled!(println!(
         "{} elf_end_base: {:?} + {:#x?} + {:#x?}",

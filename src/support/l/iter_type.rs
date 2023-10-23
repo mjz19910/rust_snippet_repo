@@ -5,16 +5,16 @@ use crate::disabled;
 
 use super::{p_dbg, ptr_iter::PtrIter, ptr_math::add};
 
-pub fn iter_type<T, U>(
+pub fn iter_type<T>(
     per_line: usize,
     state: &PtrIter,
     step_count: &Rc<RefCell<usize>>,
     end: usize,
 ) -> *const *const ()
 where
-    U: Debug + Copy,
+    T: Debug + Copy,
 {
-    let mut fns_arr = state.fns_arr as *const U;
+    let mut fns_arr = state.fns_arr as *const T;
     for x in 0..end {
         if x % per_line == 0 {
             disabled!(print!("{} vtable_next: ", p_dbg(state)));
