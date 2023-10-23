@@ -16,7 +16,7 @@ use crate::{
     },
     support::{
         async_vec,
-        constants::{DEBUG_ENABLED, CODE_GEN_ENABLED},
+        constants::{CODE_GEN_ENABLED, DEBUG_ENABLED},
         get_command_line_arguments, CmdArg,
     },
 };
@@ -29,7 +29,8 @@ pub fn main() -> Result<(), String> {
     let mut is_gdb_mode = false;
     let mut exec_vec = vec![];
     let mut args = args.iter();
-    let mut code_gen_opt = None;
+    let mut code_gen_opt = false;
+    let mut debug_enabled = false;
     loop {
         let arg = args.next();
         let Some(&arg) = arg else {
@@ -48,19 +49,18 @@ pub fn main() -> Result<(), String> {
             }
             CmdArg::LongOpt(value) => match value {
                 "gdb" => is_gdb_mode = true,
-                "code-gen" => code_gen_opt = Some(true),
-                "no-code-gen" => code_gen_opt = Some(false),
-                "debug" => unsafe { DEBUG_ENABLED = true },
-                "no-debug" => unsafe { DEBUG_ENABLED = false },
+                "code-gen" => code_gen_opt = true,
+                "no-code-gen" => code_gen_opt = false,
+                "debug" => debug_enabled = true,
+                "no-debug" => debug_enabled = false,
                 _ => return Err(format!("Invalid option `{}`", arg)),
             },
-            _ => {
-                return Err(format!("Unknown option `{}`", arg));
-            }
+            _ => return Err(format!("Unknown option `{}`", arg)),
         }
     }
-    if let Some(code_gen_opt) = code_gen_opt {
-        unsafe { CODE_GEN_ENABLED = code_gen_opt }
+    unsafe {
+        CODE_GEN_ENABLED = code_gen_opt;
+        DEBUG_ENABLED = debug_enabled;
     }
     for func_name in exec_vec {
         match func_name {
