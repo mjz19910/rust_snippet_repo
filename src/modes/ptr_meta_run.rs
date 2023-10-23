@@ -1,8 +1,8 @@
 use crate::{
     disabled,
     support::{
-        constants::CODE_GEN_ENABLED, elf_base, get_debug_flag_state, get_type, iter_type,
-        metadata::get_vtable, p_dbg, ptr_math::sub, LoopState::LoopContinue, PtrIter,
+        constants::CODE_GEN_ENABLED, elf_base, get_type, iter_type, metadata::get_vtable, p_dbg,
+        ptr_math::sub, LoopState::LoopContinue, PtrIter,
     },
 };
 use std::{any::Any, cell::RefCell, ptr::metadata, rc::Rc};
