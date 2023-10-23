@@ -16,8 +16,9 @@ trait RefAsPtr {
 impl<T> RefAsPtr for T {}
 #[inline(never)]
 pub fn do_asm_get_rip() {
-    let ptr = RefAsPtr::as_ptr(&(asm_get_rip as fn() -> _));
-    println!("fn_ptr  : {:#x}", asm_get_rip as fn() -> _ as usize);
+    let asm_ptr = asm_get_rip as fn() -> _;
+    let ptr = RefAsPtr::as_ptr(&asm_ptr);
+    println!("fn_ptr  : {:#x}", asm_ptr as usize);
     let fn_ = unsafe { *ptr };
     let rip = fn_();
     println!("from_asm: {rip:#x}");
