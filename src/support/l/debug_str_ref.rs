@@ -1,6 +1,6 @@
-use super::{elf_base, p_dbg, PtrIter};
+use super::{elf_base, p_dbg, PtrIter, RawStrRef};
 
-pub fn debug_str_ref(state: &PtrIter, str_v: &str, value: (*const u8, usize)) {
+pub fn debug_str_ref(state: &PtrIter, str_v: &str, value: RawStrRef) {
     println!(
         "{} debug_str_ref: ({:#x}, {:?})",
         p_dbg(state),

@@ -6,7 +6,7 @@ use std::{any::Any, ffi::OsStr};
 use crate::{disabled, main};
 
 use super::{
-    debug_location_value, debug_str_ref, elf_base, get_str_ref, get_type, is_cached_offset,
+    debug_str_ref, elf_base, get_location, get_str_ref, get_type, is_cached_offset,
     iter_find_next_object, mark_offset_hit,
     metadata::{GetX, XVTable},
     p_dbg,
@@ -55,7 +55,7 @@ impl PtrIter {
         }
     }
     pub fn process_one(&mut self) -> LoopState {
-        let value: (*const u8, usize, u32, u32) = get_type(self.fns_arr);
+        let value = get_location(self.fns_arr);
         self.ptr_base = elf_base(self.elf_base_ptr, value.0);
         self.cur_offset = self.ptr_base - self.start_count[0];
         if (value.0 as usize) < (self.elf_base_ptr as usize) {
@@ -92,12 +92,9 @@ impl PtrIter {
             add(&mut self.fns_arr, 6);
             return LoopBreak;
         }
-        if value.3 < 0x1000 {
-            let value: (*const u8, usize, u32, u32) = get_type(self.fns_arr);
-            let slice = unsafe { from_raw_parts(value.0, value.1) };
-            let os_str = OsStr::from_bytes(slice);
-            if let Some(str_v) = os_str.to_str() {
-                disabled!(debug_location_value(self, str_v, value));
+        if value.is_small() {
+            if let Some(str_v) = value.to_str() {
+                disabled!(value.debug(self, str_v));
             }
             add(&mut self.fns_arr, 3);
             return LoopContinue;

@@ -13,7 +13,6 @@ macro_rules! export2 {
 
 export1!(async_vec);
 export1!(check_vtable_size_of);
-export1!(debug_location_value);
 export1!(debug_str_ref);
 export1!(elf_base);
 export1!(find_next_object);
@@ -39,6 +38,7 @@ export2!(loop_state, LoopState);
 export2!(parsed_args, ParsedArgs);
 export2!(ptr_iter, PtrIter);
 export2!(raw_location, RawLocation);
+export2!(raw_str_ref, RawStrRef);
 
 pub mod box_;
 pub mod constants;

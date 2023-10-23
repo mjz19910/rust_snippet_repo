@@ -4,5 +4,5 @@ pub fn is_location_str(state: &PtrIter, value: RawLocation) -> bool {
     if value.0 < state.last_func_ptr {
         return false;
     }
-    value.3 != 0 && value.3 < 0x1000
+    (!value.is_empty()) && value.is_small()
 }
