@@ -26,8 +26,9 @@ pub fn do_asm_get_rip() {
     if v_ptr == &0xe8 {
         println!("asm_code: {:x?}", unsafe { *ptr.cast::<&[u8; 7]>() });
     } else {
-        println!("asm_code: {:x?}", unsafe {
-            *ptr.cast::<&[u8; 17]>()
-        });
+        println!(
+            "asm_code: {:x?}",
+            &unsafe { *ptr.cast::<&[u8; 17 + 15]>() }[0..17]
+        );
     }
 }
