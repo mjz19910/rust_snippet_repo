@@ -1,11 +1,14 @@
-use std::any::Any;
+use std::os::unix::prelude::OsStrExt;
 use std::ptr::addr_of;
+use std::slice::from_raw_parts;
+use std::{any::Any, ffi::OsStr};
 
 use crate::{disabled, main};
 
 use super::{
-    elf_base, get_type, loop_branch_1, loop_branch_2, loop_branch_3,
-    metadata::XVTable,
+    debug_location_value, debug_str_ref, elf_base, get_str_ref, get_type, is_cached_offset,
+    iter_find_next_object, mark_offset_hit,
+    metadata::{GetX, XVTable},
     p_dbg,
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
@@ -65,13 +68,49 @@ impl PtrIter {
             return LoopContinue;
         }
         if value.0 < self.last_func_ptr {
-            return loop_branch_3(self);
+            let opt = is_cached_offset(self);
+            mark_offset_hit(self, opt);
+            const N: usize = 3;
+            let value: XVTable<(), N> = get_type(self.fns_arr);
+            let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(self.elf_base_ptr, x));
+            let _vtable_num: [usize; N] = value.vtable_fns.map(|x| x as usize);
+            let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));
+            let result = iter_find_next_object(self, &mut get_x);
+            disabled!(println!(
+                "{} print_get_x_box: {}",
+                p_dbg(self),
+                get_x.expect("get_x is some").x_value()
+            ));
+            if let LoopContinue = result {
+                return result;
+            }
+            print!("state_check_3: {} {:#x}: ", p_dbg(self), self.cur_offset);
+            print!("({:x?}) ", vtable_rva);
+            print!("@!(3) ");
+            print!("{:x?}", value);
+            println!();
+            add(&mut self.fns_arr, 6);
+            return LoopBreak;
         }
         if value.3 < 0x1000 {
-            return loop_branch_2(self);
+            let value: (*const u8, usize, u32, u32) = get_type(self.fns_arr);
+            let slice = unsafe { from_raw_parts(value.0, value.1) };
+            let os_str = OsStr::from_bytes(slice);
+            if let Some(str_v) = os_str.to_str() {
+                disabled!(debug_location_value(self, str_v, value));
+            }
+            add(&mut self.fns_arr, 3);
+            return LoopContinue;
         }
         if self.cur_offset > 0x1000 {
-            return loop_branch_1(self);
+            let value = get_str_ref(self.fns_arr);
+            add(&mut self.fns_arr, 2);
+            let slice = unsafe { from_raw_parts(value.0, value.1) };
+            let os_str = OsStr::from_bytes(slice);
+            if let Some(str_v) = os_str.to_str() {
+                disabled!(debug_str_ref(self, str_v, value));
+            }
+            return LoopContinue;
         }
         println!("loop_inner_1(break): {} {:x?}", p_dbg(self), value);
         LoopBreak

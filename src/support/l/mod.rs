@@ -28,9 +28,6 @@ export1!(is_location_str);
 export1!(is_str_ref_like);
 export1!(iter_find_next_object);
 export1!(iter_type);
-export1!(loop_branch_1);
-export1!(loop_branch_2);
-export1!(loop_branch_3);
 export1!(mark_offset_hit);
 export1!(p_dbg);
 export1!(print_debug_state);
@@ -42,7 +39,6 @@ export2!(loop_state, LoopState);
 export2!(parsed_args, ParsedArgs);
 export2!(ptr_iter, PtrIter);
 export2!(raw_location, RawLocation);
-export2!(raw_str_ref, RawStrRef);
 
 pub mod box_;
 pub mod constants;
