@@ -41,9 +41,9 @@ pub fn ptr_meta_run() -> Result<(), String> {
     }
     sp!(fns_arr_cur, ptr_count, 7);
     if state.is_debug_build == 1 {
-        sp!(x fns_arr_cur, ptr_count, 0x738);
+        sp!(x fns_arr_cur, ptr_count, 0x490);
     } else {
-        sp!(x fns_arr_cur, ptr_count, 0x6b8);
+        sp!(x fns_arr_cur, ptr_count, 0x5c8);
     }
     let mut loop_count = 0;
     loop {
@@ -63,7 +63,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
         }
         loop_count += 1;
     }
-    if loop_count > 0 || get_debug_flag_state() {
+    if loop_count > 0 {
         println!(
             "{} find_begin_ptrs: sub({:#x}, {:#x?}, {:#x?})",
             p_dbg(&state),
