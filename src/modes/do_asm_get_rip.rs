@@ -24,12 +24,10 @@ pub fn do_asm_get_rip() {
     println!("from_asm: {rip:#x}");
     let v_ptr = unsafe { *ptr.cast::<&u8>() };
     if v_ptr == &0xe8 {
-        println!("asm_code: {:x?}", unsafe {
-            *ptr.cast::<&[u8; 5 + 1 + 1]>()
-        });
+        println!("asm_code: {:x?}", unsafe { *ptr.cast::<&[u8; 7]>() });
     } else {
         println!("asm_code: {:x?}", unsafe {
-            *ptr.cast::<&[u8; 1 + 5 + 1 + 4 + 4 + 1 + 1]>()
+            *ptr.cast::<&[u8; 1 + 6 + 8 + 2]>()
         });
     }
 }
