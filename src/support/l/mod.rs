@@ -1,13 +1,13 @@
 macro_rules! export1 {
     ($body:tt) => {
         mod $body;
-        pub(crate) use $body::$body;
+        pub use $body::$body;
     };
 }
 macro_rules! export2 {
     ($ns:tt, $type:tt) => {
         mod $ns;
-        pub(crate) use $ns::$type;
+        pub use $ns::$type;
     };
 }
 

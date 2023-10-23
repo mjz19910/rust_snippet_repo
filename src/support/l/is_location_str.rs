@@ -1,6 +1,6 @@
 use super::{PtrIter, RawLocation};
 
-pub(crate) fn is_location_str(state: &PtrIter, value: RawLocation) -> bool {
+pub fn is_location_str(state: &PtrIter, value: RawLocation) -> bool {
     if value.0 < state.last_func_ptr {
         return false;
     }

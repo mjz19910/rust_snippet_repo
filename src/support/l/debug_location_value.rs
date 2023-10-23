@@ -1,6 +1,6 @@
 use super::{elf_base, p_dbg, PtrIter};
 
-pub(crate) fn debug_location_value(
+pub fn debug_location_value(
     state: &PtrIter,
     str_v: &str,
     value: (*const u8, usize, u32, u32),

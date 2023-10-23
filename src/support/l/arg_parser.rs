@@ -1,10 +1,10 @@
 use super::{CmdArg, ParsedArgs};
 
-pub(crate) struct ArgParser<'a> {
-    pub(crate) args: Vec<CmdArg<'a>>,
+pub struct ArgParser<'a> {
+    pub args: Vec<CmdArg<'a>>,
 }
 impl<'a> ArgParser<'a> {
-    pub(crate) fn parse_args(&self) -> Result<ParsedArgs<'a>, String> {
+    pub fn parse_args(&self) -> Result<ParsedArgs<'a>, String> {
         let mut args = self.args.iter();
         let mut ret = ParsedArgs::default();
         loop {

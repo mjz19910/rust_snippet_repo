@@ -1308,7 +1308,7 @@ pub struct CodeInfo {
 
 impl CodeInfo {
     // Code_attribute { .. }
-    pub(crate) fn parse(f: &mut dyn Read) -> Self {
+    pub fn parse(f: &mut dyn Read) -> Self {
         // u2 attribute_name_index;
         // u4 attribute_length;
         // u2 max_stack;
