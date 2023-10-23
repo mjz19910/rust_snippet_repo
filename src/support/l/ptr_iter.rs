@@ -1,12 +1,15 @@
 use std::any::Any;
 use std::ptr::addr_of;
 
-use crate::main;
+use crate::{disabled, main};
 
 use super::{
-    elf_base,
+    elf_base, get_type, loop_branch_1, loop_branch_2, loop_branch_3,
     metadata::XVTable,
+    p_dbg,
+    ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
+    LoopState::{self, LoopBreak, LoopContinue},
 };
 
 extern "C" {
@@ -47,5 +50,30 @@ impl PtrIter {
             is_debug_build,
             runtime_code_gen_flag,
         }
+    }
+    pub fn process_one(&mut self) -> LoopState {
+        let value: (*const u8, usize, u32, u32) = get_type(self.fns_arr);
+        self.ptr_base = elf_base(self.elf_base_ptr, value.0);
+        self.cur_offset = self.ptr_base - self.start_count[0];
+        if (value.0 as usize) < (self.elf_base_ptr as usize) {
+            return LoopBreak;
+        }
+        disabled!(println!("{} loop_iter: {:x?}", p_dbg(self), value));
+        if value.0 > self.elf_base_ptr && value.1 > (self.elf_base_ptr as usize) {
+            disabled!(println!("{} str_ptr: {:x?}", p_dbg(self), value.0));
+            add(&mut self.fns_arr, 1);
+            return LoopContinue;
+        }
+        if value.0 < self.last_func_ptr {
+            return loop_branch_3(self);
+        }
+        if value.3 < 0x1000 {
+            return loop_branch_2(self);
+        }
+        if self.cur_offset > 0x1000 {
+            return loop_branch_1(self);
+        }
+        println!("loop_inner_1(break): {} {:x?}", p_dbg(self), value);
+        LoopBreak
     }
 }

@@ -2,7 +2,7 @@ use crate::{
     disabled,
     support::{
         constants::CODE_GEN_ENABLED, elf_base, get_debug_flag_state, get_type, iter_type,
-        loop_inner_1, metadata::get_vtable, p_dbg, ptr_math::sub, LoopState::LoopContinue, PtrIter,
+        metadata::get_vtable, p_dbg, ptr_math::sub, LoopState::LoopContinue, PtrIter,
     },
 };
 use std::{any::Any, cell::RefCell, ptr::metadata, rc::Rc};
@@ -82,7 +82,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
         state.fns_arr
     ));
     let fns_arr_start = state.fns_arr as *const u8;
-    while let LoopContinue = loop_inner_1(&mut state) {}
+    while let LoopContinue = state.process_one() {}
     if false {
         let mul = if false { 46 } else { 1 };
         state.fns_arr = iter_type::<*const ()>(8, &state, &step_count, 8 * mul);

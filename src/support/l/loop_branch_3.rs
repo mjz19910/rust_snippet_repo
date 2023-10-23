@@ -9,7 +9,7 @@ use super::{
     LoopState::{self, LoopBreak, LoopContinue},
 };
 
-pub fn loop_inner_3(state: &mut PtrIter) -> LoopState {
+pub fn loop_branch_3(state: &mut PtrIter) -> LoopState {
     let opt = is_cached_offset(state);
     mark_offset_hit(state, opt);
     const N: usize = 3;
