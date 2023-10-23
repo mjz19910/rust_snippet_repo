@@ -38,8 +38,10 @@ export1!(p_dbg);
 export1!(print_debug_state);
 export1!(ptr_to_str);
 
+export2!(arg_parser, ArgParser);
 export2!(cmd_arg, CmdArg);
 export2!(loop_state, LoopState);
+export2!(parsed_args, ParsedArgs);
 export2!(ptr_iter, PtrIter);
 export2!(raw_location, RawLocation);
 export2!(raw_str_ref, RawStrRef);
