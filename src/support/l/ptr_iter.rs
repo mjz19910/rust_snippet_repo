@@ -1,7 +1,5 @@
-use std::os::unix::prelude::OsStrExt;
+use std::any::Any;
 use std::ptr::addr_of;
-use std::slice::from_raw_parts;
-use std::{any::Any, ffi::OsStr};
 
 use crate::{disabled, main};
 
@@ -56,18 +54,18 @@ impl PtrIter {
     }
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
-        self.ptr_base = elf_base(self.elf_base_ptr, value.0);
+        self.ptr_base = value.elf_base_from(self.elf_base_ptr);
         self.cur_offset = self.ptr_base - self.start_count[0];
-        if (value.0 as usize) < (self.elf_base_ptr as usize) {
+        if value.before(self.elf_base_ptr) {
             return LoopBreak;
         }
         disabled!(println!("{} loop_iter: {:x?}", p_dbg(self), value));
-        if value.0 > self.elf_base_ptr && value.1 > (self.elf_base_ptr as usize) {
-            disabled!(println!("{} str_ptr: {:x?}", p_dbg(self), value.0));
+        if value.after(self.elf_base_ptr) && value.after1(self.elf_base_ptr as usize) {
+            disabled!(println!("{} {}", p_dbg(self), value.str_ptr()));
             add(&mut self.fns_arr, 1);
             return LoopContinue;
         }
-        if value.0 < self.last_func_ptr {
+        if value.before(self.last_func_ptr) {
             let opt = is_cached_offset(self);
             mark_offset_hit(self, opt);
             const N: usize = 3;
@@ -101,12 +99,10 @@ impl PtrIter {
         }
         if self.cur_offset > 0x1000 {
             let value = get_str_ref(self.fns_arr);
-            add(&mut self.fns_arr, 2);
-            let slice = unsafe { from_raw_parts(value.0, value.1) };
-            let os_str = OsStr::from_bytes(slice);
-            if let Some(str_v) = os_str.to_str() {
+            if let Some(str_v) = value.to_str() {
                 disabled!(debug_str_ref(self, str_v, value));
             }
+            add(&mut self.fns_arr, 2);
             return LoopContinue;
         }
         println!("loop_inner_1(break): {} {:x?}", p_dbg(self), value);

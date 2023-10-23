@@ -1,34 +1,40 @@
-use std::{ffi::OsStr, os::unix::prelude::OsStrExt, slice::from_raw_parts};
-
-use super::{elf_base, p_dbg, PtrIter};
+use super::{p_dbg, PtrIter, RawStrRef};
 
 #[derive(Clone, Copy, Debug)]
-pub struct RawLocation(pub *const u8, pub usize, u32, u32);
+pub struct RawLocation(RawStrRef, u32, u32);
 impl RawLocation {
-    pub fn as_os_str(&self) -> &OsStr {
-        let slice = unsafe { from_raw_parts(self.0, self.1) };
-        OsStr::from_bytes(slice)
-    }
-    pub fn to_str(&self) -> Option<&str> {
-        self.as_os_str().to_str()
-    }
-    pub fn elf_base_from(&self, elf_base_ptr: *const u8) -> isize {
-        elf_base(elf_base_ptr, self.0)
-    }
     pub fn debug(&self, state: &PtrIter, str_v: &str) {
         println!(
             "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
             p_dbg(state),
-            self.elf_base_from(state.elf_base_ptr),
+            self.0.elf_base_from(state.elf_base_ptr),
             str_v,
+            self.1,
             self.2,
-            self.3,
         );
     }
     pub fn is_small(&self) -> bool {
-        self.3 < 0x1000
+        self.2 < 0x1000
     }
     pub fn is_empty(&self) -> bool {
-        self.3 == 0
+        self.2 == 0
+    }
+    pub fn before(&self, ptr: *const u8) -> bool {
+        self.0.before(ptr)
+    }
+    pub fn after(&self, ptr: *const u8) -> bool {
+        self.0.after(ptr)
+    }
+    pub fn after1(&self, ptr: usize) -> bool {
+        self.0.after1(ptr)
+    }
+    pub fn to_str(&self) -> Option<&str> {
+        self.0.as_os_str().to_str()
+    }
+    pub fn elf_base_from(&self, ptr: *const u8) -> isize {
+        self.0.elf_base_from(ptr)
+    }
+    pub fn str_ptr(&self) -> String {
+        format!("str_ptr: {:x?}", self.0)
     }
 }
