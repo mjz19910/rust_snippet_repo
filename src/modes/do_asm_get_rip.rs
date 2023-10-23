@@ -27,7 +27,7 @@ pub fn do_asm_get_rip() {
         println!("asm_code: {:x?}", unsafe { *ptr.cast::<&[u8; 7]>() });
     } else {
         println!("asm_code: {:x?}", unsafe {
-            *ptr.cast::<&[u8; 17 + 10 + 5]>()
+            *ptr.cast::<&[u8; 17]>()
         });
     }
 }
