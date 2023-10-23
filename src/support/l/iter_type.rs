@@ -26,7 +26,7 @@ where
         }
     }
     if end % per_line != 0 {
-        println!();
+        disabled!(println!());
     }
     let c = Rc::clone(step_count);
     *c.borrow_mut() += 1;
