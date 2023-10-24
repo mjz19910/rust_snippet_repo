@@ -22,12 +22,12 @@ extern "C" {
 #[derive(Debug)]
 pub struct PtrIter {
     pub fns_arr: *const *const (),
-    pub start_count: isize,
     pub elf_origin: *const u8,
     pub last_func_ptr: *const u8,
     pub main_rva: isize,
     pub cur_offset: isize,
     pub ptr_base: isize,
+    pub start_count: isize,
     pub is_debug_build: u8,
     pub runtime_code_gen_flag: bool,
 }
@@ -49,12 +49,12 @@ impl PtrIter {
         let is_debug_build = (main_rva > 0x18000).into();
         Ok(Self {
             fns_arr,
-            start_count: 0,
             elf_origin,
             last_func_ptr,
             main_rva,
             cur_offset: 0,
             ptr_base: 0,
+            start_count: 0,
             is_debug_build,
             runtime_code_gen_flag: unsafe { CODE_GEN_ENABLED },
         })
