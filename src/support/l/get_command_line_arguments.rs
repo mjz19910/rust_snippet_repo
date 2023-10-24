@@ -5,7 +5,7 @@ pub fn get_command_line_arguments<'a>(
 ) -> Result<Vec<CmdArg<'a>>, &'static str> {
     let mut output_args = vec![];
     output_args.reserve(arguments.len() - 1);
-    if arguments.len() <= 1 {
+    if arguments.len() < 1 {
         return Err("Not enough arguments");
     }
     for value in arguments.iter().skip(1) {
