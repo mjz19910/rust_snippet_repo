@@ -5,7 +5,7 @@ use std::usize;
 use crate::{disabled, main};
 
 use super::{
-    elf_base, get_location, get_type, iter_find_next_object, mark_offset_hit,
+    elf_base, get_location, get_type, iter_find_next_object,
     metadata::{get_vtable, GetX, XVTable},
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
@@ -77,7 +77,6 @@ impl PtrIter {
             return LoopContinue;
         }
         if value.before0(self.last_func_ptr) {
-            mark_offset_hit(self);
             let value: XVTable<(), 3> = get_type(self.fns_arr);
             let vtable_rva = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
             let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));

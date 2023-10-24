@@ -26,7 +26,6 @@ export1!(is_location_str);
 export1!(is_str_ref_like);
 export1!(iter_find_next_object);
 export1!(iter_type);
-export1!(mark_offset_hit);
 export1!(print_debug_state);
 export1!(ptr_to_str);
 
