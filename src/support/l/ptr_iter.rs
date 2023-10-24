@@ -214,7 +214,7 @@ impl PtrIter {
         if self.is_debug_build {
             Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x92);
         } else {
-            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x24);
+            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x28);
         }
         let mut loop_count = 0;
         loop {
