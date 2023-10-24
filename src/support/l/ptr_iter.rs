@@ -126,7 +126,7 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, 1);
             }
-            for _ in 0..49 {
+            for _ in 0..48 {
                 const N: usize = 6;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
@@ -134,8 +134,22 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, N);
             }
-            let v: [u64; 12] = get_type(self.fns_arr);
-            assert_eq!(v, [0; 12]);
+            if self.is_debug_build {
+            } else {
+                const N: usize = 3;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.2: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            let v: [u64; 13] = get_type(self.fns_arr);
+            if self.is_debug_build {
+                assert_eq!(v[0..3], [0x1, 0x1000, 0]);
+            } else {
+                assert_eq!(v[0..3], [0x1, 0x1000, 0]);
+            }
+            assert_eq!(v[2..], [0; 11]);
             return LoopBreak;
         }
         if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
@@ -201,7 +215,7 @@ impl PtrIter {
         if self.is_debug_build {
             Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x92);
         } else {
-            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0xb8);
+            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x24);
         }
         let mut loop_count = 0;
         loop {
