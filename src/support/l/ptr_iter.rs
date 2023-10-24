@@ -37,7 +37,6 @@ impl PtrIter {
         let ptr_metadata = metadata::<dyn Any>(&value);
         let vtable = get_vtable::<dyn Any, 1>(&ptr_metadata);
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
-        println!("drop_in_place: {:x?}", vtable.drop_in_place);
         let info = vtable.drop_in_place.symbol_info();
         let elf_origin = get_dli_fbase(info)
             .ok_or_else(|| "get_dli_fbase on symbol_info is not None")?
@@ -141,7 +140,7 @@ impl PtrIter {
         if self.is_debug_build == 1 {
             sp!(x fns_arr_cur, ptr_count, 0x490);
         } else {
-            sp!(x fns_arr_cur, ptr_count, 0x5c8);
+            sp!(x fns_arr_cur, ptr_count, 0x708);
         }
         let mut loop_count = 0;
         loop {
