@@ -1,5 +1,6 @@
 use std::any::Any;
 use std::ptr::{addr_of, metadata};
+use std::usize;
 
 use crate::{disabled, main};
 
@@ -22,13 +23,6 @@ macro_rules! sp1 {
     ($a:expr, $p:expr, $n:expr) => {
         sub(&mut $a, $n);
         $p += $n;
-    };
-}
-macro_rules! sp2 {
-    ($a:expr, $p:expr, $n:expr) => {
-        let v = $n / 8;
-        sub(&mut $a, v);
-        $p += v;
     };
 }
 
@@ -139,27 +133,31 @@ impl PtrIter {
             self.main_rva
         ));
         let mut ptr_count = 0;
-        let mut fns_arr_cur = self.fns_arr;
-        sp1!(fns_arr_cur, ptr_count, 7);
+        let mut fns_arr = self.fns_arr;
+        fn sp2(ptr: &mut *const *const (), ptr_count: &mut usize, n: usize) {
+            sub(ptr, n);
+            *ptr_count += n;
+        }
+        sp2(&mut fns_arr, &mut ptr_count, 7);
         if self.is_debug_build {
-            sp2!(fns_arr_cur, ptr_count, 0x668);
+            sp1!(fns_arr, ptr_count, 0x668 / 8);
         } else {
-            sp2!(fns_arr_cur, ptr_count, 0x778);
+            sp1!(fns_arr, ptr_count, 0x778 / 8);
         }
         let mut loop_count = 0;
         loop {
-            let value: [u64; 5] = get_type(fns_arr_cur);
+            let value: [u64; 5] = get_type(fns_arr);
             match value {
                 [2, 0, 0, 0, val] if val > 0x1000 => {
                     ptr_count -= 7;
                     break;
                 }
                 [0, 0, 0, 0, 0] => {
-                    fns_arr_cur = self.fns_arr;
+                    fns_arr = self.fns_arr;
                     ptr_count = 0;
                 }
                 _ => {
-                    sp1!(fns_arr_cur, ptr_count, 1);
+                    sp1!(fns_arr, ptr_count, 1);
                 }
             }
             loop_count += 1;
@@ -168,7 +166,7 @@ impl PtrIter {
             println!(
                 "{} find_begin_ptrs: sub({:#x}, {:#x?}, {:#x?})",
                 self.p_dbg(),
-                self.fns_arr as isize - fns_arr_cur as isize - ((ptr_count + 7) * 8) as isize,
+                self.fns_arr as isize - fns_arr as isize - ((ptr_count + 7) * 8) as isize,
                 ptr_count * 8,
                 loop_count * 8,
             )
