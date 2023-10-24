@@ -6,10 +6,11 @@ use super::{elf_base, get_debug_flag_state, PtrIter};
 pub struct RawStrRef(*const u8, usize);
 
 impl RawStrRef {
-    pub fn debug(&self, state: &PtrIter, str_v: &str) {
+    pub fn debug(&self, state: &PtrIter) {
         if !get_debug_flag_state() {
             return;
         }
+        let str_v = self.to_str();
         println!(
             "{} RawStrRef::debug(): ({:#x}, {:?})",
             state.p_dbg(),

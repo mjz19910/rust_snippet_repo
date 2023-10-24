@@ -100,8 +100,7 @@ impl PtrIter {
             return LoopContinue;
         }
         if self.ptr_base > 0 {
-            let str_v = value.to_str();
-            value.str_ref().debug(self, str_v);
+            value.str_ref().debug(self);
             add(&mut self.fns_arr, 2);
             return LoopContinue;
         }
