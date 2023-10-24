@@ -101,7 +101,6 @@ impl PtrIter {
             add(&mut self.fns_arr, 3);
             return LoopContinue;
         }
-        println!("ptr_base: {} {:x?}", self.p_dbg(), self.ptr_base);
         if self.ptr_base > 0 {
             if let Some(str_v) = value.to_str() {
                 disabled!(value.str_ref().debug(self, str_v));
@@ -109,7 +108,7 @@ impl PtrIter {
             add(&mut self.fns_arr, 2);
             return LoopContinue;
         }
-        println!("loop_inner_1(break): {} {:x?}", self.p_dbg(), value);
+        println!("process_one(break): {} {:x?}", self.p_dbg(), value);
         LoopBreak
     }
     fn offset_fns_arr(fns_arr: &mut *const *const (), ptr_count: &mut usize, n: usize) {
