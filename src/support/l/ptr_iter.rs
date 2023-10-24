@@ -18,6 +18,19 @@ extern "C" {
     fn _fini();
 }
 
+macro_rules! sp {
+    ($a:expr, $p:expr, $n:expr) => {
+        sub(&mut $a, $n);
+        $p += $n;
+    };
+    (x $a:expr, $p:expr, $n:expr) => {
+        let n = $n;
+        let v = n / 8;
+        sub(&mut $a, v);
+        $p += v;
+    };
+}
+
 #[derive(Debug)]
 pub struct PtrIter {
     pub fns_arr: *const *const (),
@@ -126,18 +139,6 @@ impl PtrIter {
         ));
         let mut ptr_count = 0;
         let mut fns_arr_cur = self.fns_arr;
-        macro_rules! sp {
-            ($a:expr, $p:expr, $n:expr) => {
-                sub(&mut $a, $n);
-                $p += $n;
-            };
-            (x $a:expr, $p:expr, $n:expr) => {
-                let n = $n;
-                let v = n / 8;
-                sub(&mut $a, v);
-                $p += v;
-            };
-        }
         sp!(fns_arr_cur, ptr_count, 7);
         if self.is_debug_build {
             sp!(x fns_arr_cur, ptr_count, 0x620);
