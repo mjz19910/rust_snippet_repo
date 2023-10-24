@@ -38,6 +38,7 @@ impl PtrIter {
         let ptr_metadata = metadata::<dyn Any>(&value);
         let vtable = get_vtable::<dyn Any, 1>(ptr_metadata);
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
+        println!("drop_in_place: {:x?}", vtable.drop_in_place);
         let info = vtable.drop_in_place.symbol_info();
         let elf_base_ptr = get_dli_fbase(info)
             .expect("get_dli_fbase on symbol_info is not None")
