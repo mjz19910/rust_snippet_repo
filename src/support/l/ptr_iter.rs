@@ -5,8 +5,8 @@ use crate::{disabled, main};
 
 use super::{
     constants::CODE_GEN_ENABLED,
-    debug_str_ref, elf_base, get_location, get_str_ref, get_type, is_cached_offset,
-    iter_find_next_object, mark_offset_hit,
+    debug_str_ref, elf_base, get_location, get_str_ref, get_type, iter_find_next_object,
+    mark_offset_hit,
     metadata::{get_vtable, GetX, XVTable},
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
@@ -59,6 +59,9 @@ impl PtrIter {
             runtime_code_gen_flag: unsafe { CODE_GEN_ENABLED },
         })
     }
+    pub fn is_cached_offset(&self) -> bool {
+        matches!(self.cur_offset, 0)
+    }
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
         self.ptr_base = value.elf_base_from(self.elf_origin);
@@ -73,7 +76,7 @@ impl PtrIter {
             return LoopContinue;
         }
         if value.before0(self.last_func_ptr) {
-            let opt = is_cached_offset(self);
+            let opt = self.is_cached_offset();
             mark_offset_hit(self, opt);
             const N: usize = 3;
             let value: XVTable<(), N> = get_type(self.fns_arr);

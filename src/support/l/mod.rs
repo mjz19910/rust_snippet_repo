@@ -22,7 +22,6 @@ export1!(get_location);
 export1!(get_str_ref);
 export1!(get_type);
 export1!(handle_current_object);
-export1!(is_cached_offset);
 export1!(is_location_str);
 export1!(is_str_ref_like);
 export1!(iter_find_next_object);
