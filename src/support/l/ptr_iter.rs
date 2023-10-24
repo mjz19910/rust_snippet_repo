@@ -101,6 +101,7 @@ impl PtrIter {
             add(&mut self.fns_arr, 3);
             return LoopContinue;
         }
+        println!("ptr_base: {} {:x?}", self.p_dbg(), self.ptr_base);
         if self.ptr_base > 0x1000 {
             if let Some(str_v) = value.to_str() {
                 disabled!(value.str_ref().debug(self, str_v));
