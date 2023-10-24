@@ -18,12 +18,14 @@ extern "C" {
     fn _fini();
 }
 
-macro_rules! sp {
+macro_rules! sp1 {
     ($a:expr, $p:expr, $n:expr) => {
         sub(&mut $a, $n);
         $p += $n;
     };
-    (x $a:expr, $p:expr, $n:expr) => {
+}
+macro_rules! sp2 {
+    ($a:expr, $p:expr, $n:expr) => {
         let n = $n;
         let v = n / 8;
         sub(&mut $a, v);
@@ -139,11 +141,11 @@ impl PtrIter {
         ));
         let mut ptr_count = 0;
         let mut fns_arr_cur = self.fns_arr;
-        sp!(fns_arr_cur, ptr_count, 7);
+        sp1!(fns_arr_cur, ptr_count, 7);
         if self.is_debug_build {
-            sp!(x fns_arr_cur, ptr_count, 0x668);
+            sp2!(fns_arr_cur, ptr_count, 0x668);
         } else {
-            sp!(x fns_arr_cur, ptr_count, 0x778);
+            sp2!(fns_arr_cur, ptr_count, 0x778);
         }
         let mut loop_count = 0;
         loop {
@@ -158,7 +160,7 @@ impl PtrIter {
                     ptr_count = 0;
                 }
                 _ => {
-                    sp!(fns_arr_cur, ptr_count, 1);
+                    sp1!(fns_arr_cur, ptr_count, 1);
                 }
             }
             loop_count += 1;
