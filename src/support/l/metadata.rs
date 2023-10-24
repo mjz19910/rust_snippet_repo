@@ -1,11 +1,10 @@
-use std::fmt;
-use std::fmt::Debug;
-use std::marker::PhantomData;
-use std::marker::Unsize;
-use std::ptr::DynMetadata;
-use std::ptr::Pointee;
+use std::{
+    fmt::{self, Debug},
+    marker::{PhantomData, Unsize},
+    ptr::{DynMetadata, Pointee},
+};
 
-use super::PtrIter;
+use super::{get_debug_flag_state, PtrIter};
 
 pub const fn new_metadata<Dyn: ?Sized, T>() -> DynMetadata<Dyn>
 where
@@ -43,6 +42,9 @@ pub struct XVTable<T: ?Sized, const X: usize> {
 }
 impl<T: ?Sized, const X: usize> XVTable<T, X> {
     pub fn debug(&self, state: &PtrIter, name: &str) {
+        if !get_debug_flag_state() {
+            return;
+        }
         println!(
             "{} p_dbg_ptr: {}({}, {:#x})",
             state.p_dbg(),
