@@ -140,9 +140,9 @@ impl PtrIter {
         }
         sp2(&mut fns_arr, &mut ptr_count, 7);
         if self.is_debug_build {
-            sp2(&mut fns_arr, &mut ptr_count, 0x668 / 8);
+            sp2(&mut fns_arr, &mut ptr_count, 0xcd);
         } else {
-            sp2(&mut fns_arr, &mut ptr_count, 0x778 / 8);
+            sp2(&mut fns_arr, &mut ptr_count, 0xef);
         }
         let mut loop_count = 0;
         loop {
