@@ -19,7 +19,7 @@ impl RawStrRef {
     pub fn before(&self, ptr: *const u8) -> bool {
         self.0 < ptr
     }
-    pub fn after(&self, ptr: *const u8) -> bool {
+    pub fn after0(&self, ptr: *const u8) -> bool {
         self.0 > ptr
     }
     pub fn after1(&self, ptr: usize) -> bool {

@@ -22,8 +22,8 @@ impl RawLocation {
     pub fn before(&self, ptr: *const u8) -> bool {
         self.0.before(ptr)
     }
-    pub fn after(&self, ptr: *const u8) -> bool {
-        self.0.after(ptr)
+    pub fn after0(&self, ptr: *const u8) -> bool {
+        self.0.after0(ptr)
     }
     pub fn after1(&self, ptr: usize) -> bool {
         self.0.after1(ptr)
