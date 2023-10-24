@@ -18,18 +18,15 @@ use support::{
 
 use crate::modes::{do_asm_get_rip, lambda_moved, lambda_ref, print_dl_addr_info, read_main_ptr};
 
-use std::env;
-
 pub fn main() -> Result<(), String> {
-    let env_args = env::args().collect();
-    let args = get_command_line_arguments(&env_args)?;
+    let args = get_command_line_arguments()?;
     let parsed_args = ArgParser { args }.parse_args()?;
     unsafe {
         CODE_GEN_ENABLED = parsed_args.code_gen_enabled;
         DEBUG_ENABLED = parsed_args.debug_enabled;
     }
     for func_name in parsed_args.run_options {
-        match func_name {
+        match func_name.as_str() {
             "async_vec" => async_vec(),
 
             // For modes modules
