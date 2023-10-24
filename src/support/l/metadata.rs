@@ -76,7 +76,7 @@ pub struct XDynMetadata<'a, T: ?Sized, const X: usize> {
     pub vtable_ptr: &'a XVTable<T, X>,
 }
 
-impl<T: ?Sized> fmt::Debug for XDynMetadata<'_, T, 1> {
+impl<T: ?Sized, const X: usize> fmt::Debug for XDynMetadata<'_, T, X> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_tuple("DynMetadata")
             .field(&self.vtable_ptr)
@@ -100,18 +100,22 @@ impl<T: ?Sized, const X: usize> Clone for XVTable<T, X> {
     }
 }
 
-pub const fn get_vtable<T: ?Sized, const X: usize>(meta: DynMetadata<T>) -> XVTable<T, 1> {
-    get_metadata_ext_v(meta).vtable()
+pub const fn get_vtable<T: ?Sized, const X: usize>(meta: DynMetadata<T>) -> XVTable<T, X> {
+    get_metadata_ext(meta).vtable()
 }
 
 pub const fn get_vtable_v<T: ?Sized>(meta: DynMetadata<T>) -> XVTable<T, 1> {
     get_metadata_ext_v(meta).vtable()
 }
 
-pub const fn get_metadata_ext<'a, T: ?Sized>(meta: DynMetadata<T>) -> XDynMetadata<'a, T, 1> {
+pub const fn get_metadata_ext<'a, T: ?Sized, const X: usize>(
+    meta: DynMetadata<T>,
+) -> XDynMetadata<'a, T, X> {
     unsafe { std::mem::transmute(meta) }
 }
 
-pub const fn get_metadata_ext_v<'a, T: ?Sized>(meta: DynMetadata<T>) -> XDynMetadata<'a, T, 1> {
+pub const fn get_metadata_ext_v<'a, T: ?Sized, const X: usize>(
+    meta: DynMetadata<T>,
+) -> XDynMetadata<'a, T, X> {
     unsafe { std::mem::transmute(meta) }
 }
