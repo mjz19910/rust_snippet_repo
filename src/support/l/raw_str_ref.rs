@@ -23,9 +23,14 @@ impl RawStrRef {
         self.0 > origin
     }
     pub fn after1(&self, origin: *const u8) -> bool {
-        self.1 > (origin as usize)
+        self.as_ptr_pair().1 > origin
     }
     pub fn str_ptr(&self) -> String {
         format!("{:x?}", self.0)
+    }
+    pub fn as_ptr_pair(&self) -> &(*const u8, *const u8) {
+        let ptr = self as *const _;
+        let ptr = ptr as *const (*const u8, *const u8);
+        unsafe { &*ptr }
     }
 }
