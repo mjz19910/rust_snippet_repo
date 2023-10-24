@@ -23,12 +23,23 @@ where
 }
 
 pub trait GetX {
-    fn x_value(&self) -> usize;
+    fn x_value(&self) -> isize;
+}
+impl dyn GetX {
+    pub fn default_box() -> Box<Self> {
+        Box::new((|| -1) as fn() -> _)
+    }
 }
 
 impl<T, const X: usize> GetX for XVTable<T, X> {
-    fn x_value(&self) -> usize {
-        X
+    fn x_value(&self) -> isize {
+        X as isize
+    }
+}
+
+impl GetX for fn() -> isize {
+    fn x_value(&self) -> isize {
+        self()
     }
 }
 

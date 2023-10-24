@@ -3,7 +3,7 @@ use super::{
     ptr_iter::PtrIter,
 };
 
-pub fn iter_find_next_object(state: &mut PtrIter, get_x: &mut Option<Box<dyn GetX>>) -> LoopState {
+pub fn iter_find_next_object(state: &mut PtrIter, get_x: &mut Box<dyn GetX>) -> LoopState {
     {
         const N: usize = 1;
         if find_next_object::<N>(state) {

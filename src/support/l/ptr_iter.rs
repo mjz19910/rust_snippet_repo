@@ -162,12 +162,12 @@ impl PtrIter {
         if value.before0(self.last_func_ptr) {
             let value: XVTable<(), 3> = get_type(self.fns_arr);
             let vtable_rva = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
-            let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));
+            let mut get_x: Box<dyn GetX> = <dyn GetX>::default_box();
             let result = iter_find_next_object(self, &mut get_x);
             disabled!(println!(
                 "{} print_get_x_box: {}",
                 self.p_dbg(),
-                get_x.expect("get_x is some").x_value()
+                get_x.x_value()
             ));
             if let LoopContinue = result {
                 return result;
