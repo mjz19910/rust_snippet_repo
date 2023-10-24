@@ -44,4 +44,7 @@ impl RawLocation {
     pub fn str_ref(&self) -> &RawStrRef {
         &self.0
     }
+    pub fn as_ptr(&self) -> *const u8 {
+        self.0.as_ptr()
+    }
 }

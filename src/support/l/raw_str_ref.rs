@@ -43,4 +43,7 @@ impl RawStrRef {
         let v = self as *const _ as *const (*const u8, *const u8);
         unsafe { &*v }
     }
+    pub fn as_ptr(&self) -> *const u8 {
+        self.0
+    }
 }

@@ -67,9 +67,12 @@ impl PtrIter {
         if value.before0(self.elf_origin) {
             return LoopBreak;
         }
-        disabled!(println!("{} loop_iter: {:x?}", self.p_dbg(), value));
         if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
-            disabled!(println!("{} {}", self.p_dbg(), value.str_ptr()));
+            use crate::support::get_debug_flag_state;
+            if get_debug_flag_state() {
+                let v = value.as_ptr();
+                println!("{} str_ptr: {:x?}", self.p_dbg(), v);
+            }
             add(&mut self.fns_arr, 1);
             return LoopContinue;
         }
