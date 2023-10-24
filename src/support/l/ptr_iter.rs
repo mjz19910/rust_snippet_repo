@@ -62,13 +62,81 @@ impl PtrIter {
         })
     }
     pub fn process_one(&mut self) -> LoopState {
+        use crate::support::get_debug_flag_state;
         let value = get_location(self.fns_arr);
         self.ptr_base = value.elf_base_from(self.elf_origin);
         if value.before0(self.elf_origin) {
+            for _ in 0..7 {
+                let v: u64 = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, 1);
+            }
+            {
+                let v: [u64; 2] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, 2);
+            }
+            for _ in 0..5 {
+                let v: [u64; 2] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done3: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, 2);
+            }
+            for _ in 0..2 {
+                let v = get_location(self.fns_arr);
+                let v = v.str_ref();
+                if get_debug_flag_state() {
+                    println!("{} before_done4: {:x?} {}", self.p_dbg(), v, v.to_str());
+                }
+                add(&mut self.fns_arr, 2);
+            }
+            {
+                const N: usize = 6;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done5: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done6: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            for _ in 0..12 {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done7: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                let v: u64 = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done8: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, 1);
+            }
+            for _ in 0..51 {
+                const N: usize = 6;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
             return LoopBreak;
         }
         if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
-            use crate::support::get_debug_flag_state;
             if get_debug_flag_state() {
                 let v = value.as_ptr();
                 println!("{} str_ptr: {:x?}", self.p_dbg(), v);
