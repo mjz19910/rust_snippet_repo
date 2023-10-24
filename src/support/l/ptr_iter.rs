@@ -5,7 +5,6 @@ use std::usize;
 use crate::{disabled, main};
 
 use super::{
-    constants::CODE_GEN_ENABLED,
     elf_base, get_location, get_type, iter_find_next_object, mark_offset_hit,
     metadata::{get_vtable, GetX, XVTable},
     ptr_math::add,
@@ -36,7 +35,6 @@ pub struct PtrIter {
     pub ptr_base: isize,
     pub start_count: isize,
     pub is_debug_build: bool,
-    pub runtime_code_gen_flag: bool,
 }
 impl PtrIter {
     pub fn new() -> Result<Self, String> {
@@ -63,11 +61,7 @@ impl PtrIter {
             ptr_base: 0,
             start_count: 0,
             is_debug_build,
-            runtime_code_gen_flag: unsafe { CODE_GEN_ENABLED },
         })
-    }
-    pub fn is_cached_offset(&self) -> bool {
-        self.cur_offset == 0
     }
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
@@ -83,8 +77,7 @@ impl PtrIter {
             return LoopContinue;
         }
         if value.before0(self.last_func_ptr) {
-            let opt = self.is_cached_offset();
-            mark_offset_hit(self, opt);
+            mark_offset_hit(self);
             let value: XVTable<(), 3> = get_type(self.fns_arr);
             let vtable_rva = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
             let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));

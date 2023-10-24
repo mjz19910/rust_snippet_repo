@@ -12,7 +12,7 @@ pub mod support;
 
 use support::{
     async_vec,
-    constants::{CODE_GEN_ENABLED, DEBUG_ENABLED},
+    constants::DEBUG_ENABLED,
     get_command_line_arguments, ArgParser, PtrIter,
 };
 
@@ -22,7 +22,6 @@ pub fn main() -> Result<(), String> {
     let args = get_command_line_arguments()?;
     let parsed_args = ArgParser { args }.parse_args()?;
     unsafe {
-        CODE_GEN_ENABLED = parsed_args.code_gen_enabled;
         DEBUG_ENABLED = parsed_args.debug_enabled;
     }
     for func_name in parsed_args.run_options {
