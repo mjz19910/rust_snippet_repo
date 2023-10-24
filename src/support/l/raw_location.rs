@@ -19,8 +19,8 @@ impl RawLocation {
     pub fn is_empty(&self) -> bool {
         self.2 == 0
     }
-    pub fn before(&self, ptr: *const u8) -> bool {
-        self.0.before(ptr)
+    pub fn before0(&self, ptr: *const u8) -> bool {
+        self.0.before0(ptr)
     }
     pub fn after0(&self, ptr: *const u8) -> bool {
         self.0.after0(ptr)

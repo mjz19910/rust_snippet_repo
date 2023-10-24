@@ -16,7 +16,7 @@ impl RawStrRef {
     pub fn elf_base_from(&self, ptr: *const u8) -> isize {
         elf_base(ptr, self.0)
     }
-    pub fn before(&self, ptr: *const u8) -> bool {
+    pub fn before0(&self, ptr: *const u8) -> bool {
         self.0 < ptr
     }
     pub fn after0(&self, ptr: *const u8) -> bool {

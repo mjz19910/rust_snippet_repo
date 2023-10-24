@@ -61,7 +61,7 @@ impl PtrIter {
         let value = get_location(self.fns_arr);
         self.ptr_base = value.elf_base_from(self.elf_base_ptr);
         self.cur_offset = self.ptr_base - self.start_count[0];
-        if value.before(self.elf_base_ptr) {
+        if value.before0(self.elf_base_ptr) {
             return LoopBreak;
         }
         disabled!(println!("{} loop_iter: {:x?}", self.p_dbg(), value));
@@ -70,7 +70,7 @@ impl PtrIter {
             add(&mut self.fns_arr, 1);
             return LoopContinue;
         }
-        if value.before(self.last_func_ptr) {
+        if value.before0(self.last_func_ptr) {
             let opt = is_cached_offset(self);
             mark_offset_hit(self, opt);
             const N: usize = 3;
