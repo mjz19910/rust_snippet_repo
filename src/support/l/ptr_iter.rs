@@ -102,7 +102,7 @@ impl PtrIter {
             return LoopContinue;
         }
         println!("ptr_base: {} {:x?}", self.p_dbg(), self.ptr_base);
-        if self.ptr_base > 0x1000 {
+        if self.ptr_base > 0 {
             if let Some(str_v) = value.to_str() {
                 disabled!(value.str_ref().debug(self, str_v));
             }
