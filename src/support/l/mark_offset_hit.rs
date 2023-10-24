@@ -24,7 +24,7 @@ pub fn mark_offset_hit(state: &PtrIter, opt: bool) {
             println!(
                 "        {:#x} => true, //d:{}:{:02x}{ex};",
                 state.cur_offset,
-                Into::<i32>::into(state.is_debug_build == 0),
+                Into::<i32>::into(state.is_debug_build),
                 cur_len
             );
         }

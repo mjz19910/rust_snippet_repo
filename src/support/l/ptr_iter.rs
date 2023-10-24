@@ -28,7 +28,7 @@ pub struct PtrIter {
     pub cur_offset: isize,
     pub ptr_base: isize,
     pub start_count: isize,
-    pub is_debug_build: u8,
+    pub is_debug_build: bool,
     pub runtime_code_gen_flag: bool,
 }
 impl PtrIter {
@@ -46,7 +46,7 @@ impl PtrIter {
             .cast();
         let last_func_ptr = _fini as *const u8;
         let main_rva = elf_base(elf_origin, main as *const u8);
-        let is_debug_build = (main_rva > 0x18000).into();
+        let is_debug_build = main_rva > 0x18000;
         Ok(Self {
             fns_arr,
             elf_origin,
@@ -140,7 +140,7 @@ impl PtrIter {
             };
         }
         sp!(fns_arr_cur, ptr_count, 7);
-        if self.is_debug_build == 1 {
+        if self.is_debug_build {
             sp!(x fns_arr_cur, ptr_count, 0x490);
         } else {
             sp!(x fns_arr_cur, ptr_count, 0x708);
@@ -197,7 +197,7 @@ impl PtrIter {
         Ok(())
     }
     pub fn p_dbg(&self) -> &'static str {
-        if self.is_debug_build == 1 {
+        if self.is_debug_build {
             "D"
         } else {
             "R"
