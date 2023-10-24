@@ -1,5 +1,7 @@
 use std::{ffi::OsStr, os::unix::prelude::OsStrExt, slice::from_raw_parts};
 
+use super::elf_base;
+
 #[derive(Copy, Clone, Debug)]
 pub struct RawStrRef(*const u8, usize);
 
@@ -11,8 +13,8 @@ impl RawStrRef {
     pub fn to_str(&self) -> Option<&str> {
         self.as_os_str().to_str()
     }
-    pub fn elf_base_from(&self, ptr: *const u8) -> isize {
-        unsafe { (self.0 as *const u8).offset_from(ptr) }
+    pub fn elf_base_from(&self, origin: *const u8) -> isize {
+        elf_base(origin, self.0)
     }
     pub fn before0(&self, ptr: *const u8) -> bool {
         self.0 < ptr

@@ -23,7 +23,7 @@ extern "C" {
 pub struct PtrIter {
     pub fns_arr: *const *const (),
     pub start_count: [isize; 8],
-    pub elf_base_ptr: *const u8,
+    pub elf_origin: *const u8,
     pub last_func_ptr: *const u8,
     pub main_rva: isize,
     pub cur_offset: isize,
@@ -32,40 +32,40 @@ pub struct PtrIter {
     pub runtime_code_gen_flag: bool,
 }
 impl PtrIter {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, String> {
         let value = 0;
         let ptr_metadata = metadata::<dyn Any>(&value);
         let vtable = get_vtable::<dyn Any, 1>(&ptr_metadata);
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
         println!("drop_in_place: {:x?}", vtable.drop_in_place);
         let info = vtable.drop_in_place.symbol_info();
-        let elf_base_ptr = get_dli_fbase(info)
-            .expect("get_dli_fbase on symbol_info is not None")
+        let elf_origin = get_dli_fbase(info)
+            .ok_or_else(|| "get_dli_fbase on symbol_info is not None")?
             .cast();
         let last_func_ptr = _fini as *const u8;
-        let main_rva = elf_base(elf_base_ptr, main as *const u8);
+        let main_rva = elf_base(elf_origin, main as *const u8);
         let is_debug_build = (main_rva > 0x18000).into();
-        Self {
+        Ok(Self {
             fns_arr,
             start_count: [0; 8],
-            elf_base_ptr,
+            elf_origin,
             last_func_ptr,
             main_rva,
             cur_offset: 0,
             ptr_base: 0,
             is_debug_build,
             runtime_code_gen_flag: unsafe { CODE_GEN_ENABLED },
-        }
+        })
     }
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
-        self.ptr_base = value.elf_base_from(self.elf_base_ptr);
+        self.ptr_base = value.elf_base_from(self.elf_origin);
         self.cur_offset = self.ptr_base - self.start_count[0];
-        if value.before0(self.elf_base_ptr) {
+        if value.before0(self.elf_origin) {
             return LoopBreak;
         }
         disabled!(println!("{} loop_iter: {:x?}", self.p_dbg(), value));
-        if value.after0(self.elf_base_ptr) && value.after1(self.elf_base_ptr as usize) {
+        if value.after0(self.elf_origin) && value.after1(self.elf_origin as usize) {
             disabled!(println!("{} {}", self.p_dbg(), value.str_ptr()));
             add(&mut self.fns_arr, 1);
             return LoopContinue;
@@ -75,7 +75,7 @@ impl PtrIter {
             mark_offset_hit(self, opt);
             const N: usize = 3;
             let value: XVTable<(), N> = get_type(self.fns_arr);
-            let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(self.elf_base_ptr, x));
+            let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
             let _vtable_num: [usize; N] = value.vtable_fns.map(|x| x as usize);
             let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));
             let result = iter_find_next_object(self, &mut get_x);
@@ -117,7 +117,7 @@ impl PtrIter {
         let step_count = Rc::new(RefCell::new(0));
         let mut pos = self.fns_arr as usize;
         pos -= pos % 0x10;
-        self.start_count[0] = elf_base(self.elf_base_ptr, pos as *const u8) - 0xf100000;
+        self.start_count[0] = elf_base(self.elf_origin, pos as *const u8) - 0xf100000;
         disabled!(println!(
             "{} main_rva_ptr: {:#x?}",
             self.p_dbg(),
@@ -171,11 +171,11 @@ impl PtrIter {
             )
         };
         sub(&mut self.fns_arr, ptr_count);
-        let start_offset = elf_base(self.elf_base_ptr, self.fns_arr);
+        let start_offset = elf_base(self.elf_origin, self.fns_arr);
         disabled!(println!(
             "{} elf_start_base: {:?} + {:#x?} = {:#x?}",
             self.p_dbg(),
-            self.elf_base_ptr,
+            self.elf_origin,
             start_offset,
             self.fns_arr
         ));
@@ -188,7 +188,7 @@ impl PtrIter {
         disabled!(println!(
             "{} elf_end_base: {:?} + {:#x?} + {:#x?}",
             self.p_dbg(),
-            self.elf_base_ptr,
+            self.elf_origin,
             start_offset,
             elf_base(fns_arr_start, self.fns_arr)
         ));

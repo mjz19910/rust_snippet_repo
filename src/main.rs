@@ -37,7 +37,7 @@ pub fn main() -> Result<(), String> {
             "lambda_ref" => lambda_ref(),
             "lambda_moved" => lambda_moved(),
             "print_dl_addr_info" => print_dl_addr_info(),
-            "ptr_iter_run" => PtrIter::new().run()?,
+            "ptr_iter_run" => PtrIter::new()?.run()?,
             "read_main_ptr" => read_main_ptr(),
 
             // None
