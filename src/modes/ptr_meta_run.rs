@@ -7,8 +7,8 @@ use crate::{
 use std::{cell::RefCell, rc::Rc};
 
 pub fn ptr_meta_run() -> Result<(), String> {
-    let step_count = Rc::new(RefCell::new(0));
     let mut state = PtrIter::new();
+    let step_count = Rc::new(RefCell::new(0));
     let mut pos = state.fns_arr as usize;
     pos -= pos % 0x10;
     state.start_count[0] = elf_base(state.elf_base_ptr, pos as *const u8) - 0xf100000;
