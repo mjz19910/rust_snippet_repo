@@ -67,7 +67,7 @@ impl PtrIter {
         })
     }
     pub fn is_cached_offset(&self) -> bool {
-        matches!(self.cur_offset, 0)
+        self.cur_offset == 0
     }
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
