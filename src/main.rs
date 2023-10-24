@@ -10,18 +10,13 @@
 pub mod modes;
 pub mod support;
 
-use support::ArgParser;
-
-use crate::{
-    modes::{
-        do_asm_get_rip, lambda_moved, lambda_ref, print_dl_addr_info, ptr_meta_run, read_main_ptr,
-    },
-    support::{
-        async_vec,
-        constants::{CODE_GEN_ENABLED, DEBUG_ENABLED},
-        get_command_line_arguments,
-    },
+use support::{
+    async_vec,
+    constants::{CODE_GEN_ENABLED, DEBUG_ENABLED},
+    get_command_line_arguments, ArgParser, PtrIter,
 };
+
+use crate::modes::{do_asm_get_rip, lambda_moved, lambda_ref, print_dl_addr_info, read_main_ptr};
 
 use std::env;
 
@@ -42,7 +37,7 @@ pub fn main() -> Result<(), String> {
             "lambda_ref" => lambda_ref(),
             "lambda_moved" => lambda_moved(),
             "print_dl_addr_info" => print_dl_addr_info(),
-            "ptr_meta_run" => ptr_meta_run()?,
+            "ptr_iter_run" => PtrIter::new().run()?,
             "read_main_ptr" => read_main_ptr(),
 
             // None
