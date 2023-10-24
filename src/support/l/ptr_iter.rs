@@ -26,8 +26,7 @@ macro_rules! sp1 {
 }
 macro_rules! sp2 {
     ($a:expr, $p:expr, $n:expr) => {
-        let n = $n;
-        let v = n / 8;
+        let v = $n / 8;
         sub(&mut $a, v);
         $p += v;
     };
