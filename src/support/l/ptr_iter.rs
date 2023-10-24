@@ -5,8 +5,7 @@ use crate::{disabled, main};
 
 use super::{
     constants::CODE_GEN_ENABLED,
-    debug_str_ref, elf_base, get_location, get_str_ref, get_type, iter_find_next_object,
-    mark_offset_hit,
+    elf_base, get_location, get_type, iter_find_next_object, mark_offset_hit,
     metadata::{get_vtable, GetX, XVTable},
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
@@ -78,10 +77,8 @@ impl PtrIter {
         if value.before0(self.last_func_ptr) {
             let opt = self.is_cached_offset();
             mark_offset_hit(self, opt);
-            const N: usize = 3;
-            let value: XVTable<(), N> = get_type(self.fns_arr);
-            let vtable_rva: [isize; N] = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
-            let _vtable_num: [usize; N] = value.vtable_fns.map(|x| x as usize);
+            let value: XVTable<(), 3> = get_type(self.fns_arr);
+            let vtable_rva = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
             let mut get_x: Option<Box<dyn GetX>> = Some(Box::new(value));
             let result = iter_find_next_object(self, &mut get_x);
             disabled!(println!(
@@ -108,9 +105,8 @@ impl PtrIter {
             return LoopContinue;
         }
         if self.cur_offset > 0x1000 {
-            let value = get_str_ref(self.fns_arr);
             if let Some(str_v) = value.to_str() {
-                disabled!(debug_str_ref(self, str_v, value));
+                disabled!(value.str_ref().debug(self, str_v));
             }
             add(&mut self.fns_arr, 2);
             return LoopContinue;

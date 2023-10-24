@@ -1,11 +1,19 @@
 use std::{ffi::OsStr, os::unix::prelude::OsStrExt, slice::from_raw_parts};
 
-use super::elf_base;
+use super::{elf_base, PtrIter};
 
 #[derive(Copy, Clone, Debug)]
 pub struct RawStrRef(*const u8, usize);
 
 impl RawStrRef {
+    pub fn debug(&self, state: &PtrIter, str_v: &str) {
+        println!(
+            "{} debug_str_ref: ({:#x}, {:?})",
+            state.p_dbg(),
+            self.elf_base_from(state.elf_origin),
+            str_v
+        );
+    }
     pub fn as_os_str(&self) -> &OsStr {
         let slice = unsafe { from_raw_parts(self.0, self.1) };
         OsStr::from_bytes(slice)

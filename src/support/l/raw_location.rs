@@ -37,4 +37,7 @@ impl RawLocation {
     pub fn str_ptr(&self) -> String {
         format!("str_ptr: {:x?}", self.0)
     }
+    pub fn str_ref(&self) -> &RawStrRef {
+        &self.0
+    }
 }
