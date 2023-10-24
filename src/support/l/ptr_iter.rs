@@ -127,24 +127,9 @@ impl PtrIter {
         println!("loop_inner_1(break): {} {:x?}", self.p_dbg(), value);
         LoopBreak
     }
-    pub fn run(&mut self) -> Result<(), String> {
-        let step_count = Rc::new(RefCell::new(0));
-        let mut pos = self.fns_arr as usize;
-        pos -= pos % 0x10;
-        self.start_count = elf_base(self.elf_origin, pos as *const u8) - 0xf100000;
-        disabled!(println!(
-            "{} main_rva_ptr: {:#x?}",
-            self.p_dbg(),
-            self.main_rva
-        ));
+    fn do_find_begin_ptrs(&mut self) {
         let mut ptr_count = 0;
         let mut fns_arr_cur = self.fns_arr;
-        sp!(fns_arr_cur, ptr_count, 7);
-        if self.is_debug_build {
-            sp!(x fns_arr_cur, ptr_count, 0x668);
-        } else {
-            sp!(x fns_arr_cur, ptr_count, 0x778);
-        }
         let mut loop_count = 0;
         loop {
             let value: [u64; 5] = get_type(fns_arr_cur);
@@ -163,16 +148,34 @@ impl PtrIter {
             }
             loop_count += 1;
         }
+        sp!(fns_arr_cur, ptr_count, 7);
+        if self.is_debug_build {
+            sp!(x fns_arr_cur, ptr_count, 0x668);
+        } else {
+            sp!(x fns_arr_cur, ptr_count, 0x778);
+        }
         if loop_count > 0 {
             println!(
                 "{} find_begin_ptrs: sub({:#x}, {:#x?}, {:#x?})",
                 self.p_dbg(),
-                self.fns_arr as isize - fns_arr_cur as isize - ((ptr_count + 7) * 8) as isize,
+                unsafe { self.fns_arr.offset_from(fns_arr_cur) } - ((ptr_count + 7) * 8) as isize,
                 ptr_count * 8,
                 loop_count * 8,
             )
         };
         sub(&mut self.fns_arr, ptr_count);
+    }
+    pub fn run(&mut self) -> Result<(), String> {
+        let step_count = Rc::new(RefCell::new(0));
+        let mut pos = self.fns_arr as usize;
+        pos -= pos % 0x10;
+        self.start_count = elf_base(self.elf_origin, pos as *const u8) - 0xf100000;
+        disabled!(println!(
+            "{} main_rva_ptr: {:#x?}",
+            self.p_dbg(),
+            self.main_rva
+        ));
+        self.do_find_begin_ptrs();
         let start_offset = elf_base(self.elf_origin, self.fns_arr);
         disabled!(println!(
             "{} elf_start_base: {:?} + {:#x?} = {:#x?}",
