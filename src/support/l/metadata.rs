@@ -5,6 +5,8 @@ use std::marker::Unsize;
 use std::ptr::DynMetadata;
 use std::ptr::Pointee;
 
+use super::PtrIter;
+
 pub const fn new_metadata<Dyn: ?Sized, T>() -> DynMetadata<Dyn>
 where
     T: Unsize<Dyn>,
@@ -39,6 +41,18 @@ pub struct XVTable<T: ?Sized, const X: usize> {
     pub vtable_fns: [*const (); X],
     pub phantom: PhantomData<T>,
 }
+impl<T: ?Sized, const X: usize> XVTable<T, X> {
+    pub fn debug(&self, state: &PtrIter, name: &str) {
+        println!(
+            "{} p_dbg_ptr: {}({}, {:#x})",
+            state.p_dbg(),
+            name,
+            X,
+            state.ptr_base,
+        );
+        println!("{} p_dbg_vtb: {:x?}", state.p_dbg(), self);
+    }
+}
 
 impl<T: ?Sized, const X: usize> Debug for XVTable<T, X> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -63,7 +77,7 @@ impl<T: ?Sized, const X: usize> Debug for XVTable<T, X> {
     }
 }
 
-impl<'a,T: ?Sized, const N: usize> XDynMetadata<'a, T, N> {
+impl<'a, T: ?Sized, const N: usize> XDynMetadata<'a, T, N> {
     pub const fn vtable(&self) -> &'a XVTable<T, N> {
         self.vtable_ptr
     }
