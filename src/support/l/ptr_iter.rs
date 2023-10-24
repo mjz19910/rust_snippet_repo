@@ -114,6 +114,10 @@ impl PtrIter {
         println!("loop_inner_1(break): {} {:x?}", self.p_dbg(), value);
         LoopBreak
     }
+    fn offset_fns_arr(fns_arr: &mut *const *const (), ptr_count: &mut usize, n: usize) {
+        sub(fns_arr, n);
+        *ptr_count += n;
+    }
     pub fn run(&mut self) -> Result<(), String> {
         let step_count = Rc::new(RefCell::new(0));
         let mut pos = self.fns_arr as usize;
@@ -126,15 +130,11 @@ impl PtrIter {
         ));
         let mut ptr_count = 0;
         let mut fns_arr = self.fns_arr;
-        fn offset_fns_arr(fns_arr: &mut *const *const (), ptr_count: &mut usize, n: usize) {
-            sub(fns_arr, n);
-            *ptr_count += n;
-        }
-        offset_fns_arr(&mut fns_arr, &mut ptr_count, 7);
+        Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 7);
         if self.is_debug_build {
-            offset_fns_arr(&mut fns_arr, &mut ptr_count, 0xa2);
+            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0xa2);
         } else {
-            offset_fns_arr(&mut fns_arr, &mut ptr_count, 0xb6);
+            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0xb6);
         }
         let mut loop_count = 0;
         loop {
