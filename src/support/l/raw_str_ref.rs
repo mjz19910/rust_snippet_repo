@@ -16,14 +16,14 @@ impl RawStrRef {
     pub fn elf_base_from(&self, origin: *const u8) -> isize {
         elf_base(origin, self.0)
     }
-    pub fn before0(&self, ptr: *const u8) -> bool {
-        self.0 < ptr
+    pub fn before0(&self, origin: *const u8) -> bool {
+        self.0 < origin
     }
-    pub fn after0(&self, ptr: *const u8) -> bool {
-        self.0 > ptr
+    pub fn after0(&self, origin: *const u8) -> bool {
+        self.0 > origin
     }
-    pub fn after1(&self, ptr: usize) -> bool {
-        self.1 > ptr
+    pub fn after1(&self, origin: *const u8) -> bool {
+        self.1 > (origin as usize)
     }
     pub fn str_ptr(&self) -> String {
         format!("{:x?}", self.0)

@@ -65,7 +65,7 @@ impl PtrIter {
             return LoopBreak;
         }
         disabled!(println!("{} loop_iter: {:x?}", self.p_dbg(), value));
-        if value.after0(self.elf_origin) && value.after1(self.elf_origin as usize) {
+        if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
             disabled!(println!("{} {}", self.p_dbg(), value.str_ptr()));
             add(&mut self.fns_arr, 1);
             return LoopContinue;
