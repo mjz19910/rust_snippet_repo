@@ -64,8 +64,8 @@ impl<T: ?Sized, const X: usize> Debug for XVTable<T, X> {
 }
 
 impl<T: ?Sized, const N: usize> XDynMetadata<'_, T, N> {
-    pub const fn vtable(&self) -> &XVTable<T, N> {
-        self.vtable_ptr
+    pub const fn vtable(self) -> XVTable<T, N> {
+        *self.vtable_ptr
     }
     pub const fn vtable_copy(&self) -> XVTable<T, N> {
         *self.vtable_ptr
@@ -100,15 +100,15 @@ impl<T: ?Sized, const X: usize> Clone for XVTable<T, X> {
     }
 }
 
-pub const fn get_vtable<T: ?Sized, const X: usize>(meta: &DynMetadata<T>) -> &XVTable<T, 1> {
-    get_metadata_ext(meta).vtable()
+pub const fn get_vtable<T: ?Sized, const X: usize>(meta: DynMetadata<T>) -> XVTable<T, 1> {
+    get_metadata_ext_v(meta).vtable()
 }
 
 pub const fn get_vtable_v<T: ?Sized>(meta: DynMetadata<T>) -> XVTable<T, 1> {
-    *get_metadata_ext_v(meta).vtable_ptr
+    get_metadata_ext_v(meta).vtable()
 }
 
-pub const fn get_metadata_ext<T: ?Sized>(meta: &DynMetadata<T>) -> &XDynMetadata<T, 1> {
+pub const fn get_metadata_ext<'a, T: ?Sized>(meta: DynMetadata<T>) -> XDynMetadata<'a, T, 1> {
     unsafe { std::mem::transmute(meta) }
 }
 

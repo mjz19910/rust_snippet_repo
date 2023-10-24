@@ -31,7 +31,7 @@ pub struct PtrIter {
 }
 
 impl PtrIter {
-    pub fn new(vtable: &XVTable<dyn Any, 1>, runtime_code_gen_flag: bool) -> Self {
+    pub fn new(vtable: XVTable<dyn Any, 1>, runtime_code_gen_flag: bool) -> Self {
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
         let info = vtable.drop_in_place.symbol_info();
         let elf_base_ptr = get_dli_fbase(info)
