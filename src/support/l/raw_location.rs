@@ -3,16 +3,16 @@ use super::{get_debug_flag_state, PtrIter, RawStrRef};
 #[derive(Clone, Copy, Debug)]
 pub struct RawLocation(RawStrRef, u32, u32);
 impl RawLocation {
-    pub fn debug(&self, state: &PtrIter) {
+    pub fn debug(&self, iter: &PtrIter) {
         if !get_debug_flag_state() {
             return;
         }
         let str_v = self.to_str();
         println!(
-            "{} RawLocation::debug(): ({:#x}, {:?}, {:#05x}, {:#04x})",
-            state.p_dbg(),
-            self.elf_base_from(state.elf_origin),
+            "{} RawLocation::debug(): ({:?}@{:#x}, {:#05x}, {:#04x})",
+            iter.p_dbg(),
             str_v,
+            self.elf_base_from(iter.elf_origin),
             self.1,
             self.2,
         );

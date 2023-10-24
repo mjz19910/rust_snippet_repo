@@ -11,10 +11,10 @@ impl RawStrRef {
             return;
         }
         println!(
-            "{} RawStrRef::debug(): ({:#x}, {:?})",
+            "{} RawStrRef::debug(): ({:?}@{:#x})",
             iter.p_dbg(),
+            self.to_str(),
             self.elf_base_from(iter.elf_origin),
-            self.to_str()
         );
     }
     pub fn as_os_str(&self) -> &OsStr {
