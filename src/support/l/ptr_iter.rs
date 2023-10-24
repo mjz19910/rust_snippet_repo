@@ -126,7 +126,7 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, 1);
             }
-            for _ in 0..51 {
+            for _ in 0..49 {
                 const N: usize = 6;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
@@ -134,6 +134,8 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, N);
             }
+            let v: [u64; 12] = get_type(self.fns_arr);
+            assert_eq!(v, [0; 12]);
             return LoopBreak;
         }
         if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
