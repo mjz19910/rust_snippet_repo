@@ -22,7 +22,7 @@ extern "C" {
 #[derive(Debug)]
 pub struct PtrIter {
     pub fns_arr: *const *const (),
-    pub start_count: [isize; 8],
+    pub start_count: isize,
     pub elf_origin: *const u8,
     pub last_func_ptr: *const u8,
     pub main_rva: isize,
@@ -49,7 +49,7 @@ impl PtrIter {
         let is_debug_build = (main_rva > 0x18000).into();
         Ok(Self {
             fns_arr,
-            start_count: [0; 8],
+            start_count: 0,
             elf_origin,
             last_func_ptr,
             main_rva,
@@ -62,7 +62,7 @@ impl PtrIter {
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
         self.ptr_base = value.elf_base_from(self.elf_origin);
-        self.cur_offset = self.ptr_base - self.start_count[0];
+        self.cur_offset = self.ptr_base - self.start_count;
         if value.before0(self.elf_origin) {
             return LoopBreak;
         }
@@ -119,7 +119,7 @@ impl PtrIter {
         let step_count = Rc::new(RefCell::new(0));
         let mut pos = self.fns_arr as usize;
         pos -= pos % 0x10;
-        self.start_count[0] = elf_base(self.elf_origin, pos as *const u8) - 0xf100000;
+        self.start_count = elf_base(self.elf_origin, pos as *const u8) - 0xf100000;
         disabled!(println!(
             "{} main_rva_ptr: {:#x?}",
             self.p_dbg(),
