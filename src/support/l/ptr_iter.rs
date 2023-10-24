@@ -18,13 +18,6 @@ extern "C" {
     fn _fini();
 }
 
-macro_rules! sp1 {
-    ($a:expr, $p:expr, $n:expr) => {
-        sub(&mut $a, $n);
-        $p += $n;
-    };
-}
-
 #[derive(Debug)]
 pub struct PtrIter {
     pub fns_arr: *const *const (),
@@ -229,7 +222,7 @@ impl PtrIter {
                     ptr_count = 0;
                 }
                 _ => {
-                    sp1!(fns_arr, ptr_count, 1);
+                    Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 1);
                 }
             }
             loop_count += 1;
