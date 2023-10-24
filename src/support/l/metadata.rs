@@ -74,6 +74,7 @@ impl<T: ?Sized, const N: usize> XDynMetadata<'_, T, N> {
 
 pub struct XDynMetadata<'a, T: ?Sized, const X: usize> {
     pub vtable_ptr: &'a XVTable<T, X>,
+    phantom: std::marker::PhantomData<T>,
 }
 
 impl<T: ?Sized, const X: usize> fmt::Debug for XDynMetadata<'_, T, X> {
