@@ -36,7 +36,7 @@ impl PtrIter {
     pub fn new() -> Self {
         let value = 0;
         let ptr_metadata = metadata::<dyn Any>(&value);
-        let vtable = get_vtable::<dyn Any, 1>(ptr_metadata);
+        let vtable = get_vtable::<dyn Any, 1>(&ptr_metadata);
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
         println!("drop_in_place: {:x?}", vtable.drop_in_place);
         let info = vtable.drop_in_place.symbol_info();
