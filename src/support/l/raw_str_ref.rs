@@ -29,7 +29,7 @@ impl RawStrRef {
         format!("{:x?}", self.0)
     }
     pub fn as_ptr_pair(&self) -> &(*const u8, *const u8) {
-        let ptr = self as *const _ as *const (*const u8, *const u8);
-        unsafe { &*ptr }
+        let v = self as *const _ as *const (*const u8, *const u8);
+        unsafe { &*v }
     }
 }
