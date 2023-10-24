@@ -1,4 +1,4 @@
-use super::{p_dbg, PtrIter, RawStrRef};
+use super::{PtrIter, RawStrRef};
 
 #[derive(Clone, Copy, Debug)]
 pub struct RawLocation(RawStrRef, u32, u32);
@@ -6,7 +6,7 @@ impl RawLocation {
     pub fn debug(&self, state: &PtrIter, str_v: &str) {
         println!(
             "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
-            p_dbg(state),
+            state.p_dbg(),
             self.0.elf_base_from(state.elf_base_ptr),
             str_v,
             self.1,

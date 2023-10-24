@@ -1,4 +1,4 @@
-use super::{p_dbg, PtrIter};
+use super::PtrIter;
 
 pub fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
     match size_of {
@@ -8,7 +8,7 @@ pub fn check_vtable_size_of(state: &PtrIter, size_of: usize) -> bool {
     if size_of < 0x1000 {
         println!(
             "{} find_next_object(new_size): {:#x}",
-            p_dbg(state),
+            state.p_dbg(),
             size_of
         );
         return true;

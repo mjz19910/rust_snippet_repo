@@ -8,7 +8,6 @@ use super::{
     debug_str_ref, elf_base, get_location, get_str_ref, get_type, is_cached_offset,
     iter_find_next_object, mark_offset_hit,
     metadata::{get_vtable, GetX, XVTable},
-    p_dbg,
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
     LoopState::{self, LoopBreak, LoopContinue},
@@ -65,9 +64,9 @@ impl PtrIter {
         if value.before(self.elf_base_ptr) {
             return LoopBreak;
         }
-        disabled!(println!("{} loop_iter: {:x?}", p_dbg(self), value));
+        disabled!(println!("{} loop_iter: {:x?}", self.p_dbg(), value));
         if value.after(self.elf_base_ptr) && value.after1(self.elf_base_ptr as usize) {
-            disabled!(println!("{} {}", p_dbg(self), value.str_ptr()));
+            disabled!(println!("{} {}", self.p_dbg(), value.str_ptr()));
             add(&mut self.fns_arr, 1);
             return LoopContinue;
         }
@@ -82,13 +81,13 @@ impl PtrIter {
             let result = iter_find_next_object(self, &mut get_x);
             disabled!(println!(
                 "{} print_get_x_box: {}",
-                p_dbg(self),
+                self.p_dbg(),
                 get_x.expect("get_x is some").x_value()
             ));
             if let LoopContinue = result {
                 return result;
             }
-            print!("state_check_3: {} {:#x}: ", p_dbg(self), self.cur_offset);
+            print!("state_check_3: {} {:#x}: ", self.p_dbg(), self.cur_offset);
             print!("({:x?}) ", vtable_rva);
             print!("@!(3) ");
             print!("{:x?}", value);
@@ -111,7 +110,7 @@ impl PtrIter {
             add(&mut self.fns_arr, 2);
             return LoopContinue;
         }
-        println!("loop_inner_1(break): {} {:x?}", p_dbg(self), value);
+        println!("loop_inner_1(break): {} {:x?}", self.p_dbg(), value);
         LoopBreak
     }
     pub fn run(&mut self) -> Result<(), String> {
@@ -121,7 +120,7 @@ impl PtrIter {
         self.start_count[0] = elf_base(self.elf_base_ptr, pos as *const u8) - 0xf100000;
         disabled!(println!(
             "{} main_rva_ptr: {:#x?}",
-            p_dbg(self),
+            self.p_dbg(),
             self.main_rva
         ));
         let mut ptr_count = 0;
@@ -165,7 +164,7 @@ impl PtrIter {
         if loop_count > 0 {
             println!(
                 "{} find_begin_ptrs: sub({:#x}, {:#x?}, {:#x?})",
-                p_dbg(self),
+                self.p_dbg(),
                 self.fns_arr as isize - fns_arr_cur as isize - ((ptr_count + 7) * 8) as isize,
                 ptr_count * 8,
                 loop_count * 8,
@@ -175,7 +174,7 @@ impl PtrIter {
         let start_offset = elf_base(self.elf_base_ptr, self.fns_arr);
         disabled!(println!(
             "{} elf_start_base: {:?} + {:#x?} = {:#x?}",
-            p_dbg(self),
+            self.p_dbg(),
             self.elf_base_ptr,
             start_offset,
             self.fns_arr
@@ -188,11 +187,18 @@ impl PtrIter {
         }
         disabled!(println!(
             "{} elf_end_base: {:?} + {:#x?} + {:#x?}",
-            p_dbg(self),
+            self.p_dbg(),
             self.elf_base_ptr,
             start_offset,
             elf_base(fns_arr_start, self.fns_arr)
         ));
         Ok(())
+    }
+    pub fn p_dbg(&self) -> &'static str {
+        if self.is_debug_build == 1 {
+            "D"
+        } else {
+            "R"
+        }
     }
 }

@@ -3,7 +3,7 @@ use crate::{
     support::{check_vtable_size_of, get_location, get_str_ref, is_location_str, is_str_ref_like},
 };
 
-use super::{get_type, metadata::XVTable, p_dbg, ptr_iter::PtrIter, ptr_math::add};
+use super::{get_type, metadata::XVTable, ptr_iter::PtrIter, ptr_math::add};
 
 pub fn find_next_object<const N: usize>(state: &mut PtrIter) -> bool
 where
@@ -16,7 +16,7 @@ where
     if next_is_location {
         disabled!(println!(
             "{} find_next_object: {:x?}",
-            p_dbg(state),
+            state.p_dbg(),
             get_location(fns_arr_cur)
         ));
         return true;
@@ -26,7 +26,7 @@ where
     if next_is_str_desc {
         disabled!(println!(
             "{} find_next_object(str_ref): {:x?}",
-            p_dbg(state),
+            state.p_dbg(),
             get_str_ref(fns_arr_cur)
         ));
         return true;
@@ -39,7 +39,7 @@ where
     if next_is_vtable {
         disabled!(println!(
             "{} find_next_object: IsTable(value: {:x?})",
-            p_dbg(state),
+            state.p_dbg(),
             val
         ));
         return true;

@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::disabled;
 
-use super::{p_dbg, ptr_iter::PtrIter, ptr_math::add};
+use super::{ptr_iter::PtrIter, ptr_math::add};
 
 pub fn iter_type<T>(
     per_line: usize,
@@ -17,7 +17,7 @@ where
     let mut fns_arr = state.fns_arr as *const T;
     for x in 0..end {
         if x % per_line == 0 {
-            disabled!(print!("{} vtable_next: ", p_dbg(state)));
+            disabled!(print!("{} vtable_next: ", state.p_dbg()));
         }
         disabled!(print!("{:02x?}, ", unsafe { *fns_arr }));
         add(&mut fns_arr, 1);
@@ -32,7 +32,7 @@ where
     *c.borrow_mut() += 1;
     disabled!(println!(
         "{} iter_type: ({}, {})",
-        p_dbg(state),
+        state.p_dbg(),
         c.borrow(),
         end,
     ));
