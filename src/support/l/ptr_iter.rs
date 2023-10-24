@@ -103,7 +103,7 @@ impl PtrIter {
         }
         if self.ptr_base > 0 {
             if let Some(str_v) = value.to_str() {
-                disabled!(value.str_ref().debug(self, str_v));
+                value.str_ref().debug(self, str_v);
             }
             add(&mut self.fns_arr, 2);
             return LoopContinue;

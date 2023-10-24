@@ -13,7 +13,6 @@ macro_rules! export2 {
 
 export1!(async_vec);
 export1!(check_vtable_size_of);
-export1!(debug_str_ref);
 export1!(elf_base);
 export1!(find_next_object);
 export1!(get_command_line_arguments);

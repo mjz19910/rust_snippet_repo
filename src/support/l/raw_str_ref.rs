@@ -1,14 +1,17 @@
 use std::{ffi::OsStr, os::unix::prelude::OsStrExt, slice::from_raw_parts};
 
-use super::{elf_base, PtrIter};
+use super::{elf_base, get_debug_flag_state, PtrIter};
 
 #[derive(Copy, Clone, Debug)]
 pub struct RawStrRef(*const u8, usize);
 
 impl RawStrRef {
     pub fn debug(&self, state: &PtrIter, str_v: &str) {
+        if !get_debug_flag_state() {
+            return;
+        }
         println!(
-            "{} debug_str_ref: ({:#x}, {:?})",
+            "{} RawStrRef::debug(): ({:#x}, {:?})",
             state.p_dbg(),
             self.elf_base_from(state.elf_origin),
             str_v
