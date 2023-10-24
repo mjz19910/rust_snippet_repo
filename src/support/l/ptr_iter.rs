@@ -202,9 +202,10 @@ impl PtrIter {
         ));
         let mut ptr_count = 0;
         let mut fns_arr = self.fns_arr;
+        Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 4);
         // find_begin_ptrs
         if self.is_debug_build {
-            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x92);
+            Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x95);
         } else {
             Self::offset_fns_arr(&mut fns_arr, &mut ptr_count, 0x28);
         }
@@ -213,6 +214,7 @@ impl PtrIter {
             let value: [u64; 5] = get_type(fns_arr);
             match value {
                 [2, 0, 0, 0, val] if val > 0x1000 => {
+                    ptr_count -= 4;
                     break;
                 }
                 [0, 0, 0, 0, 0] => {
@@ -229,7 +231,7 @@ impl PtrIter {
             println!(
                 "{} find_begin_ptrs: sub({:#x}, {:#x?}, {:#x?})",
                 self.p_dbg(),
-                self.fns_arr as isize - fns_arr as isize - ((ptr_count + 7) * 8) as isize,
+                self.fns_arr as isize - fns_arr as isize - ((ptr_count - 4) * 8) as isize,
                 ptr_count,
                 loop_count,
             )
