@@ -167,8 +167,8 @@ impl PtrIter {
                 "{} find_begin_ptrs: sub({:#x}, {:#x?}, {:#x?})",
                 self.p_dbg(),
                 self.fns_arr as isize - fns_arr as isize - ((ptr_count + 7) * 8) as isize,
-                ptr_count * 8,
-                loop_count * 8,
+                ptr_count,
+                loop_count,
             )
         };
         sub(&mut self.fns_arr, ptr_count);
