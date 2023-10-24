@@ -10,7 +10,7 @@ where
         state.p_dbg(),
         name,
         num,
-        state.cur_offset,
+        state.ptr_base,
     );
     println!("{} p_dbg_vtb: {:x?}", state.p_dbg(), value);
 }

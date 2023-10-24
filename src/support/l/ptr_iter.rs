@@ -31,7 +31,6 @@ pub struct PtrIter {
     pub elf_origin: *const u8,
     pub last_func_ptr: *const u8,
     pub main_rva: isize,
-    pub cur_offset: isize,
     pub ptr_base: isize,
     pub start_count: isize,
     pub is_debug_build: bool,
@@ -57,7 +56,6 @@ impl PtrIter {
             elf_origin,
             last_func_ptr,
             main_rva,
-            cur_offset: 0,
             ptr_base: 0,
             start_count: 0,
             is_debug_build,
@@ -66,7 +64,6 @@ impl PtrIter {
     pub fn process_one(&mut self) -> LoopState {
         let value = get_location(self.fns_arr);
         self.ptr_base = value.elf_base_from(self.elf_origin);
-        self.cur_offset = self.ptr_base - self.start_count;
         if value.before0(self.elf_origin) {
             return LoopBreak;
         }
@@ -89,7 +86,7 @@ impl PtrIter {
             if let LoopContinue = result {
                 return result;
             }
-            print!("state_check_3: {} {:#x}: ", self.p_dbg(), self.cur_offset);
+            print!("state_check_3: {} {:#x}: ", self.p_dbg(), self.ptr_base);
             print!("({:x?}) ", vtable_rva);
             print!("@!(3) ");
             print!("{:x?}", value);
@@ -104,7 +101,7 @@ impl PtrIter {
             add(&mut self.fns_arr, 3);
             return LoopContinue;
         }
-        if self.cur_offset > 0x1000 {
+        if self.ptr_base > 0x1000 {
             if let Some(str_v) = value.to_str() {
                 disabled!(value.str_ref().debug(self, str_v));
             }
