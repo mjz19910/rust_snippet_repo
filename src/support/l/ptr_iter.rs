@@ -96,7 +96,7 @@ impl PtrIter {
         }
         if value.is_small() {
             if let Some(str_v) = value.to_str() {
-                disabled!(value.debug(self, str_v));
+                value.debug(self, str_v);
             }
             add(&mut self.fns_arr, 3);
             return LoopContinue;
