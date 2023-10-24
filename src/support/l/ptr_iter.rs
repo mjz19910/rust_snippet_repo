@@ -134,15 +134,15 @@ impl PtrIter {
         ));
         let mut ptr_count = 0;
         let mut fns_arr = self.fns_arr;
-        fn sp2(ptr: &mut *const *const (), ptr_count: &mut usize, n: usize) {
-            sub(ptr, n);
+        fn sp2(fns_arr: &mut *const *const (), ptr_count: &mut usize, n: usize) {
+            sub(fns_arr, n);
             *ptr_count += n;
         }
         sp2(&mut fns_arr, &mut ptr_count, 7);
         if self.is_debug_build {
-            sp1!(fns_arr, ptr_count, 0x668 / 8);
+            sp2(&mut fns_arr, &mut ptr_count, 0x668 / 8);
         } else {
-            sp1!(fns_arr, ptr_count, 0x778 / 8);
+            sp2(&mut fns_arr, &mut ptr_count, 0x778 / 8);
         }
         let mut loop_count = 0;
         loop {
