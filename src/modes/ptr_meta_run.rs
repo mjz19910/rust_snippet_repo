@@ -14,7 +14,7 @@ pub fn ptr_meta_run() -> Result<(), String> {
     }
     let value = 0;
     let ptr_metadata = metadata::<dyn Any>(&value);
-    let vtable = get_vtable(&ptr_metadata);
+    let vtable = get_vtable::<dyn Any, 1>(&ptr_metadata);
     let step_count = Rc::new(RefCell::new(0));
     let mut state = PtrIter::new(vtable, runtime_code_gen_flag);
     let mut pos = state.fns_arr as usize;
