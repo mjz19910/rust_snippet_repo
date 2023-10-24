@@ -8,7 +8,7 @@ impl RawLocation {
             return;
         }
         println!(
-            "{} debug_location_value: ({:#x}, {:?}, {:#05x}, {:#04x})",
+            "{} RawLocation::debug(): ({:#x}, {:?}, {:#05x}, {:#04x})",
             state.p_dbg(),
             self.elf_base_from(state.elf_origin),
             str_v,
