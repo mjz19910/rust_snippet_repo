@@ -64,11 +64,8 @@ impl<T> SymbolInfo for *const T {
 
 /// get the file base from dynamic loader info about the
 /// address queried
-pub fn get_dli_fbase(info: Option<DLInfo>) -> Option<*const ()> {
-    match info {
-        Some(info) => info.dli_fbase,
-        None => None,
-    }
+pub fn get_dli_fbase(info: DLInfo) -> Option<*const ()> {
+    info.dli_fbase
 }
 
 pub fn symbol_info_and_ptr_from_addr<T: ?Sized>(ptr: &T) -> (*const (), *const ()) {
