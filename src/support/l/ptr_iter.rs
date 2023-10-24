@@ -140,9 +140,9 @@ impl PtrIter {
         }
         sp!(fns_arr_cur, ptr_count, 7);
         if self.is_debug_build {
-            sp!(x fns_arr_cur, ptr_count, 0x490);
+            sp!(x fns_arr_cur, ptr_count, 0x620);
         } else {
-            sp!(x fns_arr_cur, ptr_count, 0x708);
+            sp!(x fns_arr_cur, ptr_count, 0x6e8);
         }
         let mut loop_count = 0;
         loop {
