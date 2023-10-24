@@ -95,16 +95,13 @@ impl PtrIter {
             return LoopBreak;
         }
         if value.is_small() {
-            if let Some(str_v) = value.to_str() {
-                value.debug(self, str_v);
-            }
+            value.debug(self);
             add(&mut self.fns_arr, 3);
             return LoopContinue;
         }
         if self.ptr_base > 0 {
-            if let Some(str_v) = value.to_str() {
-                value.str_ref().debug(self, str_v);
-            }
+            let str_v = value.to_str();
+            value.str_ref().debug(self, str_v);
             add(&mut self.fns_arr, 2);
             return LoopContinue;
         }

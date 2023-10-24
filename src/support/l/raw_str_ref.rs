@@ -21,8 +21,8 @@ impl RawStrRef {
         let slice = unsafe { from_raw_parts(self.0, self.1) };
         OsStr::from_bytes(slice)
     }
-    pub fn to_str(&self) -> Option<&str> {
-        self.as_os_str().to_str()
+    pub fn to_str(&self) -> &str {
+        self.as_os_str().to_str().unwrap()
     }
     pub fn elf_base_from(&self, origin: *const u8) -> isize {
         elf_base(origin, self.0)

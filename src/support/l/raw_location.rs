@@ -3,10 +3,11 @@ use super::{get_debug_flag_state, PtrIter, RawStrRef};
 #[derive(Clone, Copy, Debug)]
 pub struct RawLocation(RawStrRef, u32, u32);
 impl RawLocation {
-    pub fn debug(&self, state: &PtrIter, str_v: &str) {
+    pub fn debug(&self, state: &PtrIter) {
         if !get_debug_flag_state() {
             return;
         }
+        let str_v = self.to_str();
         println!(
             "{} RawLocation::debug(): ({:#x}, {:?}, {:#05x}, {:#04x})",
             state.p_dbg(),
@@ -31,8 +32,8 @@ impl RawLocation {
     pub fn after1(&self, origin: *const u8) -> bool {
         self.0.after1(origin)
     }
-    pub fn to_str(&self) -> Option<&str> {
-        self.0.as_os_str().to_str()
+    pub fn to_str(&self) -> &str {
+        self.0.to_str()
     }
     pub fn elf_base_from(&self, origin: *const u8) -> isize {
         self.0.elf_base_from(origin)
