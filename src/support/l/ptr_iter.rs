@@ -148,7 +148,7 @@ impl PtrIter {
             } else {
                 assert_eq!(v[0..3], [0x1, 0x1000, 0]);
             }
-            assert_eq!(v[2..], [0; 11]);
+            assert_eq!(v[3..], [0; 10]);
             return LoopBreak;
         }
         if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
