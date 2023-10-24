@@ -1,16 +1,17 @@
 use std::any::Any;
-use std::ptr::addr_of;
+use std::ptr::{addr_of, metadata};
 
 use crate::{disabled, main};
 
 use super::{
+    constants::CODE_GEN_ENABLED,
     debug_str_ref, elf_base, get_location, get_str_ref, get_type, is_cached_offset,
     iter_find_next_object, mark_offset_hit,
-    metadata::{GetX, XVTable},
+    metadata::{get_vtable, GetX, XVTable},
     p_dbg,
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
-    LoopState::{self, LoopBreak, LoopContinue}, constants::CODE_GEN_ENABLED,
+    LoopState::{self, LoopBreak, LoopContinue},
 };
 
 extern "C" {
@@ -29,9 +30,11 @@ pub struct PtrIter {
     pub is_debug_build: u8,
     pub runtime_code_gen_flag: bool,
 }
-
 impl PtrIter {
-    pub fn new(vtable: XVTable<dyn Any, 1>) -> Self {
+    pub fn new() -> Self {
+        let value = 0;
+        let ptr_metadata = metadata::<dyn Any>(&value);
+        let vtable = get_vtable::<dyn Any, 1>(ptr_metadata);
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
         let info = vtable.drop_in_place.symbol_info();
         let elf_base_ptr = get_dli_fbase(info)
