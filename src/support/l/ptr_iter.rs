@@ -10,7 +10,7 @@ use super::{
     p_dbg,
     ptr_math::add,
     symbol_info::{get_dli_fbase, SymbolInfo},
-    LoopState::{self, LoopBreak, LoopContinue},
+    LoopState::{self, LoopBreak, LoopContinue}, constants::CODE_GEN_ENABLED,
 };
 
 extern "C" {
@@ -31,7 +31,7 @@ pub struct PtrIter {
 }
 
 impl PtrIter {
-    pub fn new(vtable: XVTable<dyn Any, 1>, runtime_code_gen_flag: bool) -> Self {
+    pub fn new(vtable: XVTable<dyn Any, 1>) -> Self {
         let fns_arr: *const *const () = addr_of!(vtable.drop_in_place).cast();
         let info = vtable.drop_in_place.symbol_info();
         let elf_base_ptr = get_dli_fbase(info)
@@ -49,7 +49,7 @@ impl PtrIter {
             cur_offset: 0,
             ptr_base: 0,
             is_debug_build,
-            runtime_code_gen_flag,
+            runtime_code_gen_flag: unsafe { CODE_GEN_ENABLED },
         }
     }
     pub fn process_one(&mut self) -> LoopState {

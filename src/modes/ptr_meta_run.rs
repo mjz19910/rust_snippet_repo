@@ -1,22 +1,18 @@
 use crate::{
     disabled,
     support::{
-        constants::CODE_GEN_ENABLED, elf_base, get_type, iter_type, metadata::get_vtable, p_dbg,
-        ptr_math::sub, LoopState::LoopContinue, PtrIter,
+        elf_base, get_type, iter_type, metadata::get_vtable, p_dbg, ptr_math::sub,
+        LoopState::LoopContinue, PtrIter,
     },
 };
 use std::{any::Any, cell::RefCell, ptr::metadata, rc::Rc};
 
 pub fn ptr_meta_run() -> Result<(), String> {
-    let mut runtime_code_gen_flag = false;
-    if unsafe { CODE_GEN_ENABLED } {
-        runtime_code_gen_flag = true;
-    }
     let value = 0;
     let ptr_metadata = metadata::<dyn Any>(&value);
     let vtable = get_vtable::<dyn Any, 1>(ptr_metadata);
     let step_count = Rc::new(RefCell::new(0));
-    let mut state = PtrIter::new(vtable, runtime_code_gen_flag);
+    let mut state = PtrIter::new(vtable);
     let mut pos = state.fns_arr as usize;
     pos -= pos % 0x10;
     state.start_count[0] = elf_base(state.elf_base_ptr, pos as *const u8) - 0xf100000;
