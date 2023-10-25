@@ -164,11 +164,19 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, N);
             }
-            for _ in 0..2 {
+            for _ in 0..9 {
                 const N: usize = 11;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
                     println!("{} before_done1.5: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.6: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
