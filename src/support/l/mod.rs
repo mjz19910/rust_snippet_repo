@@ -24,7 +24,6 @@ export1!(handle_current_object);
 export1!(is_location_str);
 export1!(is_str_ref_like);
 export1!(iter_find_next_object);
-export1!(iter_type);
 export1!(ptr_to_str);
 
 export2!(arg_parser, ArgParser);
