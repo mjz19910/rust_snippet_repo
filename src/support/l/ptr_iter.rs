@@ -156,8 +156,15 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, N);
             }
-            {
+            if self.is_debug_build {
                 const N: usize = 3;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.4: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            } else {
+                const N: usize = 5;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
                     println!("{} before_done1.4: {:x?}", self.p_dbg(), v);
