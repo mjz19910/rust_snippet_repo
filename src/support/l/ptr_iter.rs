@@ -179,11 +179,18 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, N);
             }
-            {
+            if self.is_debug_build {
                 const N: usize = 2;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
                     println!("{} before_done1.6: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            } else {
+                const N: usize = 3;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.7: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
@@ -191,7 +198,7 @@ impl PtrIter {
                 const N: usize = 11;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
-                    println!("{} before_done1.7: {:x?}", self.p_dbg(), v);
+                    println!("{} before_done1.8: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
@@ -199,7 +206,7 @@ impl PtrIter {
                 const N: usize = 6;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
-                    println!("{} before_done1.8: {:x?}", self.p_dbg(), v);
+                    println!("{} before_done1.9: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
