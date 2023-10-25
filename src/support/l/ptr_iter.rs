@@ -187,6 +187,62 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, N);
             }
+            for _ in 0..2 {
+                const N: usize = 11;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.7: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 6;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.8: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 5;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 4;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
             if true {
                 panic!();
             }
