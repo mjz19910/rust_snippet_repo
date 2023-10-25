@@ -113,11 +113,73 @@ impl PtrIter {
                 }
                 add(&mut self.fns_arr, 1);
             }
-            for _ in 0..48 {
-                const N: usize = 6;
+            {
+                loop {
+                    let v: u64 = get_type(self.fns_arr);
+                    if v != 0 {
+                        break;
+                    }
+                    if get_debug_flag_state() {
+                        println!("{} before_done9: {:x?}", self.p_dbg(), v);
+                    }
+                    add(&mut self.fns_arr, 1);
+                }
+            }
+            {
+                const N: usize = 3;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
                     println!("{} before_done1.1: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            if self.is_debug_build {
+                const N: usize = 24;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.2: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            } else {
+                const N: usize = 25;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.2: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            for _ in 0..8 {
+                const N: usize = 11;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.3: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            {
+                const N: usize = 3;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.4: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            for _ in 0..2 {
+                const N: usize = 11;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.5: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
+            if true {
+                panic!();
+            }
+            for _ in 0..37 {
+                const N: usize = 6;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done2.1: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
@@ -125,7 +187,7 @@ impl PtrIter {
                 const N: usize = 3;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
-                    println!("{} before_done1.2: {:x?}", self.p_dbg(), v);
+                    println!("{} before_done2.2: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
@@ -140,7 +202,7 @@ impl PtrIter {
                 const N: usize = 2;
                 let v: [u64; N] = get_type(self.fns_arr);
                 if get_debug_flag_state() {
-                    println!("{} before_done1.3: {:x?}", self.p_dbg(), v);
+                    println!("{} before_done2.3: {:x?}", self.p_dbg(), v);
                 }
                 add(&mut self.fns_arr, N);
             }
