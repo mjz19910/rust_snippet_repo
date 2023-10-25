@@ -6,8 +6,8 @@ use crate::disabled;
 use super::{ptr_iter::PtrIter, ptr_math::add};
 
 pub fn iter_type<T>(
-    per_line: usize,
     state: &PtrIter,
+    per_line: usize,
     step_count: &Rc<RefCell<usize>>,
     end: usize,
 ) -> *const *const ()

@@ -248,8 +248,7 @@ impl PtrIter {
         let fns_arr_start = self.fns_arr as *const u8;
         while let LoopContinue = self.process_one() {}
         if false {
-            let mul = if false { 46 } else { 1 };
-            self.fns_arr = iter_type::<*const ()>(8, self, &step_count, 8 * mul);
+            self.fns_arr = iter_type::<*const ()>(self, 8, &step_count, 8);
         }
         disabled!(println!(
             "{} elf_end_base: {:?} + {:#x?} + {:#x?}",
