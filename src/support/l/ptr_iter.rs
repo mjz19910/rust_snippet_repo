@@ -247,9 +247,7 @@ impl PtrIter {
         ));
         let fns_arr_start = self.fns_arr as *const u8;
         while let LoopContinue = self.process_one() {}
-        if false {
-            self.fns_arr = iter_type::<*const ()>(self, 8, &step_count, 8);
-        }
+        self.fns_arr = iter_type::<*const ()>(self, 8, &step_count, 8);
         disabled!(println!(
             "{} elf_end_base: {:?} + {:#x?} + {:#x?}",
             self.p_dbg(),
