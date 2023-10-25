@@ -136,7 +136,14 @@ impl PtrIter {
                 assert_eq!(v[0..3], [0x1, 0x1000, 0]);
             }
             assert_eq!(v[3..], [0; 10]);
-            add(&mut self.fns_arr, 2);
+            {
+                const N: usize = 2;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done1.3: {:x?}", self.p_dbg(), v);
+                }
+                add(&mut self.fns_arr, N);
+            }
             return LoopBreak;
         }
         if value.after0(self.elf_origin) && value.after1(self.elf_origin) {
