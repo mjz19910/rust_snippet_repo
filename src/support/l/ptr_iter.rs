@@ -114,16 +114,12 @@ impl PtrIter {
                 add(&mut self.fns_arr, 1);
             }
             {
-                loop {
-                    let v: u64 = get_type(self.fns_arr);
-                    if v != 0 {
-                        break;
-                    }
-                    if get_debug_flag_state() {
-                        println!("{} before_done9: {:x?}", self.p_dbg(), v);
-                    }
-                    add(&mut self.fns_arr, 1);
+                const N: usize = 10;
+                let v: [u64; N] = get_type(self.fns_arr);
+                if get_debug_flag_state() {
+                    println!("{} before_done9: {:x?}", self.p_dbg(), v);
                 }
+                add(&mut self.fns_arr, N);
             }
             {
                 const N: usize = 3;
