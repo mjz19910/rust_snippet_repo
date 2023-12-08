@@ -16,20 +16,20 @@ pub fn read_as_optional<T: Copy>(value: *const T) -> Option<T> {
     }
 }
 
-fn get_size<'a, T: ?Sized>(a: &'a T) -> usize {
+fn get_size<T: ?Sized>(a: &'_ T) -> usize {
     size_of_val(&a) / 8
 }
 
-fn show_val_1<'a, T: ?Sized, U: Clone>(value: &'a T) -> Vec<U> {
+fn show_val_1<T: ?Sized, U: Clone>(value: &'_ T) -> Vec<U> {
     let data = addr_of!(value).cast::<U>();
     let lambda_parts = unsafe { from_raw_parts(data, get_size(value)) };
     lambda_parts.to_vec()
 }
 
-fn show_val_2<'a, T: (FnOnce() -> V) + ?Sized, V: Copy>(
-    value: &'a T,
+fn show_val_2<T: (FnOnce() -> V) + ?Sized, V: Copy>(
+    value: &'_ T,
     mut sizes: VecDeque<usize>,
-) -> (V, Vec<&'a [u64]>) {
+) -> (V, Vec<&'_ [u64]>) {
     let data = addr_of!(value).cast::<*const u64>();
     let lambda_parts = unsafe { from_raw_parts(data, get_size(value)) };
     let mut ret_parts = vec![];
@@ -80,7 +80,7 @@ trait PtrRead {
     type PtrValue;
     fn read2(&self) -> Self::PtrValue;
 }
-impl<'a, T> PtrRead for *const T {
+impl<T> PtrRead for *const T {
     type PtrValue = T;
     fn read2(&self) -> Self::PtrValue {
         unsafe { self.read() }

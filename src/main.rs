@@ -10,6 +10,8 @@
 pub mod modes;
 pub mod support;
 
+use std::time::Duration;
+
 use support::{
     async_vec, constants::DEBUG_ENABLED, get_command_line_arguments, ArgParser, PtrIter,
 };
@@ -30,6 +32,8 @@ fn run_one(function_name: &str) -> Result<(), String> {
         "array_1" => {
             let x = [40, 100];
             println!("{x:?}");
+            let x2 = &mut 1;
+            println!("{x2:?}");
         }
 
         // None
@@ -51,7 +55,9 @@ pub fn main() -> Result<(), String> {
         run_one(func_name.as_str())?;
     }
     if parsed_args.gdb_delay_loop {
-        loop {}
+        loop {
+            std::thread::sleep(Duration::from_nanos(1_000));
+        }
     }
     Ok(())
 }

@@ -12,7 +12,7 @@ impl RawLocation {
             "{} RawLocation::debug(): ({:?}@{:#x}, {:#05x}, {:#04x})",
             iter.p_dbg(),
             str_v,
-            self.elf_base_from(iter.elf_origin),
+            unsafe { self.elf_base_from(iter.elf_origin) },
             self.1,
             self.2,
         );
@@ -35,8 +35,9 @@ impl RawLocation {
     pub fn to_str(&self) -> &str {
         self.0.to_str()
     }
-    pub fn elf_base_from(&self, origin: *const u8) -> isize {
-        self.0.elf_base_from(origin)
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn elf_base_from(&self, origin: *const u8) -> isize {
+        unsafe { self.0.elf_base_from(origin) }
     }
     pub fn str_ptr(&self) -> String {
         format!("str_ptr: {:x?}", self.0)

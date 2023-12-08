@@ -128,7 +128,7 @@ impl<T: ?Sized, const X: usize> Clone for XVTable<T, X> {
     }
 }
 
-pub const fn get_vtable<'a, T: ?Sized, const X: usize>(meta: &'a DynMetadata<T>) -> &XVTable<T, X> {
+pub const fn get_vtable<T: ?Sized, const X: usize>(meta: &'_ DynMetadata<T>) -> &XVTable<T, X> {
     get_metadata_ext(meta).vtable()
 }
 

@@ -14,7 +14,7 @@ impl RawStrRef {
             "{} RawStrRef::debug(): ({:?}@{:#x})",
             iter.p_dbg(),
             self.to_str(),
-            self.elf_base_from(iter.elf_origin),
+            unsafe { self.elf_base_from(iter.elf_origin) },
         );
     }
     pub fn as_os_str(&self) -> &OsStr {
@@ -24,8 +24,9 @@ impl RawStrRef {
     pub fn to_str(&self) -> &str {
         self.as_os_str().to_str().unwrap()
     }
-    pub fn elf_base_from(&self, origin: *const u8) -> isize {
-        elf_base(origin, self.0)
+    #[allow(clippy::missing_safety_doc)]
+    pub unsafe fn elf_base_from(&self, origin: *const u8) -> isize {
+        unsafe { elf_base(origin, self.0) }
     }
     pub fn before0(&self, origin: *const u8) -> bool {
         self.0 < origin

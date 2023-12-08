@@ -17,16 +17,16 @@ impl DLInfo {
     fn new(src_info: RawDLInfo) -> DLInfo {
         if src_info.dli_saddr.is_null() {
             return Self {
-                dli_fname: ptr_to_str(src_info.dli_fname),
+                dli_fname: unsafe { ptr_to_str(src_info.dli_fname) },
                 dli_fbase: Some(src_info.dli_fbase),
-                dli_sname: ptr_to_str(src_info.dli_sname),
+                dli_sname: unsafe { ptr_to_str(src_info.dli_sname) },
                 dli_saddr: None,
             };
         }
         Self {
-            dli_fname: ptr_to_str(src_info.dli_fname),
+            dli_fname: unsafe { ptr_to_str(src_info.dli_fname) },
             dli_fbase: Some(src_info.dli_fbase),
-            dli_sname: ptr_to_str(src_info.dli_sname),
+            dli_sname: unsafe { ptr_to_str(src_info.dli_sname) },
             dli_saddr: Some(src_info.dli_saddr),
         }
     }

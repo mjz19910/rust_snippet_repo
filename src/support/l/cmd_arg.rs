@@ -6,7 +6,7 @@ pub enum CmdArg {
     ShortOpt(String),
     Seq(String),
 }
-impl<'a> fmt::Display for CmdArg {
+impl fmt::Display for CmdArg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Self::LongOpt(v) => {

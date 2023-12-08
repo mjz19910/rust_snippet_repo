@@ -31,12 +31,12 @@ impl PtrIter {
         let symbol_info = vtable
             .drop_in_place
             .symbol_info()
-            .ok_or_else(|| "drop_in_place.symbol_info() is None")?;
+            .ok_or("drop_in_place.symbol_info() is None")?;
         let elf_origin = get_dli_fbase(symbol_info)
-            .ok_or_else(|| "symbol_info.dli_fbase is None")?
+            .ok_or("symbol_info.dli_fbase is None")?
             .cast();
         let last_func_ptr = _fini as *const u8;
-        let main_rva = elf_base(elf_origin, main as *const u8);
+        let main_rva = unsafe { elf_base(elf_origin, main as *const u8) };
         let is_debug_build = main_rva > 0x18000;
         Ok(Self {
             fns_arr,
@@ -51,7 +51,7 @@ impl PtrIter {
     pub fn process_one(&mut self) -> LoopState {
         use crate::support::get_debug_flag_state;
         let value = get_location(self.fns_arr);
-        self.ptr_base = value.elf_base_from(self.elf_origin);
+        self.ptr_base = unsafe { value.elf_base_from(self.elf_origin) };
         if value.before0(self.elf_origin) {
             for _ in 0..7 {
                 let v: u64 = get_type(self.fns_arr);
@@ -279,11 +279,7 @@ impl PtrIter {
                 add(&mut self.fns_arr, N);
             }
             let v: [u64; 13] = get_type(self.fns_arr);
-            if self.is_debug_build {
-                assert_eq!(v[0..3], [0x1, 0x1000, 0]);
-            } else {
-                assert_eq!(v[0..3], [0x1, 0x1000, 0]);
-            }
+            assert_eq!(v[0..3], [0x1, 0x1000, 0]);
             assert_eq!(v[3..], [0; 10]);
             {
                 const N: usize = 2;
@@ -305,7 +301,9 @@ impl PtrIter {
         }
         if value.before0(self.last_func_ptr) {
             let value: XVTable<(), 3> = get_type(self.fns_arr);
-            let vtable_rva = value.vtable_fns.map(|x| elf_base(self.elf_origin, x));
+            let vtable_rva = value
+                .vtable_fns
+                .map(|x| unsafe { elf_base(self.elf_origin, x) });
             let mut get_x: Box<dyn GetX> = <dyn GetX>::default_box();
             let result = iter_find_next_object(self, &mut get_x);
             disabled!(println!(
@@ -344,7 +342,7 @@ impl PtrIter {
     pub fn run(&mut self) -> Result<(), String> {
         let mut pos = self.fns_arr as usize;
         pos -= pos % 0x10;
-        self.start_count = elf_base(self.elf_origin, pos as *const u8) - 0xf100000;
+        self.start_count = unsafe { elf_base(self.elf_origin, pos as *const u8) } - 0xf100000;
         disabled!(println!(
             "{} main_rva_ptr: {:#x?}",
             self.p_dbg(),
@@ -387,7 +385,7 @@ impl PtrIter {
             )
         };
         sub(&mut self.fns_arr, ptr_count);
-        let start_offset = elf_base(self.elf_origin, self.fns_arr);
+        let start_offset = unsafe { elf_base(self.elf_origin, self.fns_arr) };
         disabled!(println!(
             "{} elf_start_base: {:?} + {:#x?} = {:#x?}",
             self.p_dbg(),
@@ -402,7 +400,7 @@ impl PtrIter {
             self.p_dbg(),
             self.elf_origin,
             start_offset,
-            elf_base(fns_arr_start, self.fns_arr)
+            unsafe { elf_base(fns_arr_start, self.fns_arr) }
         ));
         Ok(())
     }

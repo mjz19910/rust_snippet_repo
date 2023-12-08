@@ -1,11 +1,11 @@
 use super::cmd_arg::CmdArg;
 use std::env;
 
-pub fn get_command_line_arguments<'a>() -> Result<Vec<CmdArg>, &'static str> {
+pub fn get_command_line_arguments() -> Result<Vec<CmdArg>, &'static str> {
     let arguments: Vec<String> = env::args().collect();
     let mut output_args = vec![];
     output_args.reserve(arguments.len() - 1);
-    if arguments.len() < 1 {
+    if arguments.is_empty() {
         return Err("Not enough arguments");
     }
     for value in arguments.iter().skip(1) {
