@@ -17,8 +17,8 @@ pub fn run_one(function_name: &str) -> Result<(), String> {
         "array_1" => {
             let x = [40, 100];
             println!("{x:?}");
-            let ref mut x2 = 1;
-            println!("{x2:?}");
+            let ref mut x = 1;
+            println!("{x:?}");
         }
 
         // None
